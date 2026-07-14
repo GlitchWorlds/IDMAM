@@ -1,0 +1,84 @@
+import { memo } from 'react';
+import SpeedGraph from './SpeedGraph';
+
+const NAV_ITEMS = [
+  { key: 'all', label: 'All Downloads', icon: 'M4 6h16M4 10h16M4 14h16M4 18h16' },
+  { key: 'active', label: 'Active', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
+  { key: 'completed', label: 'Completed', icon: 'M5 13l4 4L19 7' },
+  { key: 'paused', label: 'Paused', icon: 'M10 9v6m4-6v6' },
+  { key: 'queue', label: 'Queue', icon: 'M12 8v4l3 3' },
+];
+
+function Sidebar({ filter, onFilterChange, onSettingsClick, speedHistory, stats }) {
+  return (
+    <aside className="w-64 bg-slate-950 border-r border-slate-800 flex flex-col h-full shrink-0">
+      {/* Logo */}
+      <div className="p-6 border-b border-slate-800">
+        <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+          IDMAM
+        </h1>
+        <p className="text-xs text-slate-500 mt-1">Download Manager</p>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 p-3 space-y-1">
+        {NAV_ITEMS.map((item) => (
+          <button
+            key={item.key}
+            onClick={() => onFilterChange(item.key)}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
+              filter === item.key
+                ? 'nav-active text-blue-400 font-medium'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+            }`}
+          >
+            <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
+            </svg>
+            <span>{item.label}</span>
+          </button>
+        ))}
+      </nav>
+
+      {/* Speed Graph Widget */}
+      <div className="p-4 border-t border-slate-800">
+        <p className="text-xs text-slate-500 mb-2">Speed</p>
+        <SpeedGraph data={speedHistory} mini />
+        {stats?.totalSpeed > 0 && (
+          <p className="text-xs text-blue-400 mt-2 text-center">
+            {formatSpeed(stats.totalSpeed)}
+          </p>
+        )}
+      </div>
+
+      {/* Settings */}
+      <div className="p-3 border-t border-slate-800">
+        <button
+          onClick={onSettingsClick}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-all"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round"
+              d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          </svg>
+          <span>Settings</span>
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+function formatSpeed(bytesPerSec) {
+  if (!bytesPerSec) return '0 B/s';
+  const units = ['B/s', 'KB/s', 'MB/s', 'GB/s'];
+  let i = 0;
+  let speed = bytesPerSec;
+  while (speed >= 1024 && i < units.length - 1) {
+    speed /= 1024;
+    i++;
+  }
+  return `${speed.toFixed(1)} ${units[i]}`;
+}
+
+export default memo(Sidebar);

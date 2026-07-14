@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "name": "IDMAM — Download Manager AI Max",
+  "short_name": "IDMAM",
+  "version": "1.0.0",
+  "description": "Free, open-source download manager with multi-threaded acceleration. Intercepts downloads and sends them to IDMAM for maximum speed.",
+
+  "permissions": [
+    "downloads",
+    "downloads.shelf",
+    "activeTab",
+    "storage",
+    "contextMenus"
+  ],
+
+  "host_permissions": [
+    "<all_urls>"
+  ],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "IDMAM Download Manager"
+  },
+
+  "options_page": "options/options.html",
+
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "minimum_chrome_version": "109"
+}

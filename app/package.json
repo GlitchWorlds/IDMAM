@@ -1,0 +1,27 @@
+{
+  "name": "idmam",
+  "version": "1.0.0",
+  "description": "IDMAM - Internet Download Manager AI Max: Free, open-source, multi-threaded download manager",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "test": "node test.js"
+  },
+  "keywords": [
+    "download-manager",
+    "multi-threaded",
+    "idm-alternative"
+  ],
+  "author": "IDMAM",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "helmet": "^8.0.0",
+    "sql.js": "^1.11.0",
+    "undici": "^7.0.0",
+    "uuid": "^11.0.0",
+    "ws": "^8.18.0"
+  },
+  "type": "commonjs"
+}

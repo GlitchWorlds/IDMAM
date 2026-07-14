@@ -1,0 +1,84 @@
+{
+  "name": "idmam-desktop",
+  "version": "1.0.0",
+  "description": "IDMAM - Internet Download Manager AI Max",
+  "author": "IDMAM",
+  "license": "MIT",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "concurrently \"cd ../app && node main.js\" \"electron . --dev\"",
+    "prebuild": "node -e \"const fs=require('fs');fs.rmSync('app-engine',{recursive:true,force:true});fs.cpSync('../app/src','app-engine/src',{recursive:true});fs.copyFileSync('../app/package.json','app-engine/package.json')\"",
+    "build": "npm run prebuild && electron-builder --win",
+    "postbuild": "node -e \"require('fs').rmSync('app-engine',{recursive:true,force:true})\"",
+    "build:portable": "electron-builder --win portable",
+    "dist": "npm run prebuild && electron-builder --win --config"
+  },
+  "build": {
+    "appId": "com.idmam.desktop",
+    "productName": "IDMAM",
+    "copyright": "Copyright © 2026 IDMAM",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "app-engine/**/*",
+      "ui/build/**/*",
+      "node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../extension",
+        "to": "extension"
+      }
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "assets/icon.ico",
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "${productName}-Portable-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "IDMAM",
+      "include": "installer.nsh",
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true
+    }
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^4.22.2",
+    "helmet": "^8.3.0",
+    "sql.js": "^1.14.1",
+    "uuid": "^11.1.1",
+    "ws": "^8.21.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0",
+    "electron": "^35.7.5",
+    "electron-builder": "^25.0.0"
+  }
+}

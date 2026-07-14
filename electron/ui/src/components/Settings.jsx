@@ -1,0 +1,123 @@
+import { useState, useEffect } from 'react';
+import { getSettings, updateSettings } from '../api';
+
+export default function Settings({ onBack }) {
+  const [settings, setSettings] = useState({
+    threads: 4,
+    savePath: '',
+    serverUrl: 'http://127.0.0.1:9977',
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    getSettings()
+      .then((s) => {
+        if (s) setSettings((prev) => ({ ...prev, ...s }));
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setSaved(false);
+    try {
+      await updateSettings(settings);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-2xl mx-auto p-8 animate-fade-in">
+      {/* Back & Title */}
+      <div className="flex items-center gap-4 mb-8">
+        <button
+          onClick={onBack}
+          className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <h2 className="text-2xl font-bold text-slate-100">Settings</h2>
+      </div>
+
+      <div className="space-y-6">
+        {/* Download Threads */}
+        <div className="bg-slate-800/50 rounded-xl p-5">
+          <label className="block text-sm font-medium text-slate-300 mb-2">Download Threads</label>
+          <p className="text-xs text-slate-500 mb-3">Number of parallel download connections</p>
+          <div className="flex items-center gap-4">
+            <input
+              type="range"
+              min={1}
+              max={32}
+              value={settings.threads}
+              onChange={(e) => setSettings({ ...settings, threads: Number(e.target.value) })}
+              className="flex-1 accent-blue-500"
+            />
+            <span className="text-sm font-mono text-blue-400 w-8 text-center">{settings.threads}</span>
+          </div>
+        </div>
+
+        {/* Save Path */}
+        <div className="bg-slate-800/50 rounded-xl p-5">
+          <label className="block text-sm font-medium text-slate-300 mb-2">Save Path</label>
+          <p className="text-xs text-slate-500 mb-3">Default download directory</p>
+          <input
+            type="text"
+            value={settings.savePath}
+            onChange={(e) => setSettings({ ...settings, savePath: e.target.value })}
+            placeholder="C:\Downloads"
+            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+          />
+        </div>
+
+        {/* Server URL */}
+        <div className="bg-slate-800/50 rounded-xl p-5">
+          <label className="block text-sm font-medium text-slate-300 mb-2">Server URL</label>
+          <p className="text-xs text-slate-500 mb-3">Backend API endpoint</p>
+          <input
+            type="text"
+            value={settings.serverUrl}
+            onChange={(e) => setSettings({ ...settings, serverUrl: e.target.value })}
+            placeholder="http://127.0.0.1:9977"
+            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-mono"
+          />
+        </div>
+
+        {/* Save Button */}
+        <div className="flex justify-end gap-3 pt-2">
+          <button
+            onClick={onBack}
+            className="px-4 py-2.5 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="px-6 py-2.5 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50 transition-colors"
+          >
+            {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Settings'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
