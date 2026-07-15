@@ -212,7 +212,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   (async () => {
     switch (message.type) {
       case 'CHECK_STATUS':
-        return { ok: true, online: serverOnline, serverUrl: IDMAM_API._cachedServerUrl || IDMAM_API.BASE_URL };
+        return { ok: true, online: serverOnline };
 
       case 'GET_DOWNLOADS':
         try {
@@ -263,8 +263,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
 
       case 'SETTINGS_UPDATED':
-        // Reload server URL from settings
-        await IDMAM_API.refreshServerUrl();
         return { ok: true };
 
       default:
@@ -280,9 +278,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // ─── Startup ────────────────────────────────────────────────────
 
 (async function init() {
-  // Load server URL from settings
-  await IDMAM_API.refreshServerUrl();
-
   // Initial health check
   await checkServer();
 

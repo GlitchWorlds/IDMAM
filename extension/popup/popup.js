@@ -32,6 +32,7 @@ let refreshTimer = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
+  await restoreLastTab();
   await checkServerStatus();
   await refreshDownloads();
 
@@ -61,7 +62,23 @@ function setupEventListeners() {
       $tabs.forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       currentFilter = tab.dataset.filter;
+      chrome.storage.local.set({ idmam_lastTab: currentFilter });
       renderDownloads();
+    });
+  });
+}
+
+// ─── Tab memory (B4 / T1 / T2) ────────────────────────────────────
+
+async function restoreLastTab() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get('idmam_lastTab', (result) => {
+      const saved = result.idmam_lastTab || 'active';
+      currentFilter = saved;
+      $tabs.forEach(t => {
+        t.classList.toggle('active', t.dataset.filter === saved);
+      });
+      resolve();
     });
   });
 }
@@ -203,7 +220,11 @@ function createDownloadElement(dl) {
       <button class="dl-btn btn-cancel" data-action="cancel" data-id="${dl.id}">✕ Cancel</button>
     `;
   } else if (dl.status === 'completed') {
+    const openBtn = dl.save_to
+      ? `<button class="dl-btn btn-open" data-action="open-folder" data-id="${dl.id}" data-path="${escapeHtml(dl.save_to)}">\u{1F4C2} Open</button>`
+      : '';
     actionsHtml = `
+      ${openBtn}
       <button class="dl-btn btn-delete" data-action="delete" data-id="${dl.id}">\u{1F5D1} Remove</button>
     `;
   } else if (dl.status === 'failed') {
@@ -252,7 +273,10 @@ function createDownloadElement(dl) {
   div.querySelectorAll('.dl-btn[data-action]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
-      handleAction(btn.dataset.action, btn.dataset.id);
+      handleAction(btn.dataset.action, btn.dataset.id, {
+        path: btn.dataset.path,
+        btn,
+      });
     });
   });
 
@@ -261,7 +285,7 @@ function createDownloadElement(dl) {
 
 // ─── Actions ───────────────────────────────────────────────────────
 
-async function handleAction(action, id) {
+async function handleAction(action, id, data = {}) {
   try {
     switch (action) {
       case 'pause':
@@ -276,6 +300,10 @@ async function handleAction(action, id) {
       case 'delete':
         await IDMAM_API.deleteDownload(id);
         break;
+      case 'open-folder':
+        await copyToClipboard(data.path);
+        showTooltip(data.btn, 'Path copied!');
+        return; // No refresh needed
     }
     await refreshDownloads();
   } catch (err) {
@@ -295,13 +323,20 @@ async function addDownload() {
   }
 
   try {
-    await IDMAM_API.startDownload({ url });
+    // B1+B2: Read settings and apply save path + threads
+    const settings = await IDMAM_API.getSettings();
+    await IDMAM_API.startDownload({
+      url,
+      save_to: settings.defaultSavePath || undefined,
+      threads: settings.maxThreads || undefined,
+    });
     $inputUrl.value = '';
 
     // Switch to active tab
     $tabs.forEach(t => t.classList.remove('active'));
     document.querySelector('.tab[data-filter="active"]').classList.add('active');
     currentFilter = 'active';
+    chrome.storage.local.set({ idmam_lastTab: 'active' });
     await refreshDownloads();
   } catch (err) {
     showError(`Failed: ${err.message}`);
@@ -309,6 +344,33 @@ async function addDownload() {
 }
 
 // ─── UI helpers ────────────────────────────────────────────────────
+
+// ─── B5: Open Folder helpers ──────────────────────────────────────
+
+async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    // Fallback for older browsers
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+}
+
+function showTooltip(anchor, text) {
+  const tip = document.createElement('span');
+  tip.className = 'open-folder-tooltip';
+  tip.textContent = text;
+  anchor.style.position = 'relative';
+  anchor.appendChild(tip);
+  setTimeout(() => tip.remove(), 1500);
+}
 
 function showError(message) {
   document.querySelectorAll('.error-toast').forEach(t => t.remove());

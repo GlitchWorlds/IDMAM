@@ -8,7 +8,7 @@ const IDMAM_API = {
   TIMEOUT: 5000,
 
   async _fetch(path, options = {}) {
-    const baseUrl = IDMAM_API._cachedServerUrl || IDMAM_API.BASE_URL;
+    const baseUrl = IDMAM_API.BASE_URL;
 
     try {
       const controller = new AbortController();
@@ -40,19 +40,6 @@ const IDMAM_API = {
       }
       throw err;
     }
-  },
-
-  // Cached server URL (updated when settings change)
-  _cachedServerUrl: null,
-
-  /**
-   * Update the cached server URL from settings.
-   * Call this when settings change.
-   */
-  async refreshServerUrl() {
-    const settings = await IDMAM_API.getSettings();
-    IDMAM_API._cachedServerUrl = settings.serverUrl || IDMAM_API.BASE_URL;
-    return IDMAM_API._cachedServerUrl;
   },
 
   // ─── Downloads ─────────────────────────────────────────────────
@@ -95,7 +82,7 @@ const IDMAM_API = {
 
   async healthCheck() {
     try {
-      const baseUrl = IDMAM_API._cachedServerUrl || IDMAM_API.BASE_URL;
+      const baseUrl = IDMAM_API.BASE_URL;
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 2000);
       const res = await fetch(`${baseUrl}/api/health`, { signal: controller.signal });
@@ -134,7 +121,6 @@ const IDMAM_API = {
    */
   defaultSettings() {
     return {
-      serverUrl: 'http://127.0.0.1:9977',
       enabled: true,
       maxThreads: 8,
       defaultSavePath: '',
