@@ -68,8 +68,9 @@ function parseUrl(urlStr) {
  * Returns a promise that resolves when the chunk is fully downloaded.
  * @param {number} attempt
  * @param {string} currentUrl
+ * @param {number} [redirectCount=0] - Number of redirects followed so far
  */
-function downloadChunk(attempt, currentUrl) {
+function downloadChunk(attempt, currentUrl, redirectCount = 0) {
   return new Promise((resolve, reject) => {
     const parsed = parseUrl(currentUrl);
     const isHttps = parsed.protocol === 'https:';
@@ -115,9 +116,14 @@ function downloadChunk(attempt, currentUrl) {
     const req = transport.request(reqOptions, (res) => {
       // Handle redirects (301, 302, 303, 307, 308)
       if ([301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location) {
+        // R1: Cap redirect chain to prevent infinite loops (max 5)
+        if (redirectCount >= 5) {
+          reject(new Error(`Too many redirects (max 5) for chunk ${chunkIndex}`));
+          return;
+        }
         // Follow redirect — use updated URL
         const newUrl = new URL(res.headers.location, currentUrl).href;
-        resolve(downloadChunk(attempt, newUrl)); // retry with new URL
+        resolve(downloadChunk(attempt, newUrl, redirectCount + 1)); // retry with new URL
         return;
       }
 
@@ -238,15 +244,16 @@ async function main() {
     try {
       report('attempt', { attempt, maxRetries });
       await downloadChunk(attempt, url);
-      // Success — exit cleanly
-      process.exit(0);
+      // Success — R5: Allow final postMessage to flush before exiting
+      setTimeout(() => process.exit(0), 100);
       return;
     } catch (err) {
       lastError = err;
 
       // If server doesn't support Range, don't retry — report immediately
       if (err.message === 'NO_RANGE_SUPPORT') {
-        process.exit(1);
+        // R5: Allow final postMessage to flush before exiting
+        setTimeout(() => process.exit(1), 100);
         return;
       }
 
@@ -264,12 +271,14 @@ async function main() {
     message: `Chunk ${chunkIndex} failed after ${maxRetries} attempts: ${lastError?.message}`,
     exhausted: true,
   });
-  process.exit(1);
+  // R5: Allow final postMessage to flush before exiting
+  setTimeout(() => process.exit(1), 100);
 }
 
 main().catch((err) => {
   console.error(`[chunk-worker] Fatal error for chunk ${chunkIndex} (download ${downloadId}): ${err.message}`);
   console.error(`[chunk-worker] Stack: ${err.stack}`);
   report('error', { message: `Worker fatal: ${err.message} (${err.stack})` });
-  process.exit(1);
+  // R5: Allow final postMessage to flush before exiting
+  setTimeout(() => process.exit(1), 100);
 });

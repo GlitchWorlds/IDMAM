@@ -63,10 +63,15 @@ function mergeChunks({ chunkPaths, outputPath, totalSize, onProgress }) {
       const inputStream = fs.createReadStream(chunkPath);
 
       inputStream.on('data', (chunk) => {
-        outputStream.write(chunk);
+        const canContinue = outputStream.write(chunk);
         bytesWritten += chunk.length;
         if (onProgress) {
           onProgress(bytesWritten, totalSize);
+        }
+        // R2: Backpressure — pause reader until writer drains
+        if (!canContinue) {
+          inputStream.pause();
+          outputStream.once('drain', () => inputStream.resume());
         }
       });
 
@@ -139,6 +144,8 @@ async function mergeAndVerify({
   // Step 2: Verify output size
   const stat = fs.statSync(outputPath);
   if (stat.size !== totalSize) {
+    // R3: Clean up output file on size verification failure
+    try { fs.unlinkSync(outputPath); } catch { /* best effort */ }
     throw new Error(
       `Size mismatch after merge: expected ${totalSize}, got ${stat.size}`
     );
@@ -152,6 +159,8 @@ async function mergeAndVerify({
     checksum = await hashFile(outputPath);
     verified = checksum.toLowerCase() === expectedChecksum.toLowerCase();
     if (!verified) {
+      // R3: Clean up output file on checksum verification failure
+      try { fs.unlinkSync(outputPath); } catch { /* best effort */ }
       throw new Error(
         `Checksum mismatch: expected ${expectedChecksum}, got ${checksum}`
       );

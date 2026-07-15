@@ -500,6 +500,7 @@ class DownloadManager {
       const req = transport.request(reqOptions, (res) => {
         // Handle redirects
         if ([301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location) {
+          res.resume(); // R4: Drain response body to free socket before following redirect
           const newUrl = new URL(res.headers.location, url).href;
           resolve(this._probeUrl(newUrl, headers, redirectCount + 1));
           return;

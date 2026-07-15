@@ -145,7 +145,11 @@ function ensureUniqueFilename(dir, filename, existsFn) {
   let candidate = filename;
   let counter = 1;
 
+  // R6: Upper bound to prevent runaway loop with thousands of files
   while (existsFn(path.join(dir, candidate))) {
+    if (counter > 999) {
+      throw new Error(`Could not find unique filename for "${filename}" after 999 attempts`);
+    }
     candidate = `${base} (${counter})${ext}`;
     counter++;
   }
