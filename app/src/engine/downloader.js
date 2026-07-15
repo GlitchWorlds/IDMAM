@@ -352,6 +352,11 @@ class DownloadManager {
     const state = this.active.get(downloadId);
 
     if (state) {
+      // Mark workers as intentionally terminated before terminating
+      // (same as pauseDownload — prevents exit handler from marking chunks as failed)
+      for (const worker of state.workers) {
+        if (worker) worker.__terminated = true;
+      }
       // Terminate workers
       for (const worker of state.workers) {
         if (worker && !worker.exited) {

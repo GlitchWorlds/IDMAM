@@ -33,6 +33,7 @@ function hashFile(filePath) {
  * @returns {Promise<boolean>} True if hash matches
  */
 async function verifyFile(filePath, expectedHash) {
+  if (!expectedHash || typeof expectedHash !== 'string') return false;
   const actualHash = await hashFile(filePath);
   return actualHash === expectedHash.toLowerCase();
 }
