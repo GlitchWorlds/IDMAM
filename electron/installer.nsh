@@ -1,7 +1,45 @@
 ; IDMAM NSIS Custom Installer Script
-; Provides: auto-start on boot, Chrome extension helper, uninstall cleanup
+; Provides: auto-start on boot, Chrome extension helper, uninstall cleanup,
+;           upgrade/reinstall detection, and user data management
 
 !macro customInstall
+  ; === Close any running IDMAM instance ===
+  nsExec::ExecToStack 'taskkill /F /IM IDMAM.exe'
+  Pop $0 ; exit code (ignore — process may not be running)
+  Pop $1 ; stdout
+  Sleep 1000
+
+  ; === Detect existing installation ===
+  StrCpy $R0 "0" ; flag: 0 = no prior install, 1 = prior install detected
+
+  ; Check 1: auto-start registry entry
+  ReadRegStr $R1 HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "IDMAM"
+  StrCmp $R1 "" +2 0
+    StrCpy $R0 "1"
+
+  ; Check 2: existing executable in install dir
+  IfFileExists "$INSTDIR\IDMAM.exe" 0 +2
+    StrCpy $R0 "1"
+
+  ; === If existing install found, ask upgrade or clean install ===
+  StrCmp $R0 "0" doneUpgradeCheck 0
+    MessageBox MB_YESNO|MB_ICONQUESTION \
+      "IDMAM is already installed.$\r$\n$\r$\n\
+      YES = Upgrade (preserve your downloads and settings)$\r$\n\
+      NO  = Clean install (delete all existing data)" \
+      IDYES doUpgrade IDNO doCleanInstall
+
+  doUpgrade:
+    ; Upgrade: install over existing, preserve %USERPROFILE%\.idmam
+    Goto doneUpgradeCheck
+
+  doCleanInstall:
+    ; Clean install: delete all user data before installing
+    RMDir /r "$PROFILE\.idmam"
+    Goto doneUpgradeCheck
+
+  doneUpgradeCheck:
+
   ; === Auto-start IDMAM on Windows boot ===
   ; Write to HKCU so it works without admin elevation
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "IDMAM" '"$INSTDIR\IDMAM.exe" --hidden'
@@ -28,7 +66,7 @@
   ; === Install Chrome extension via registry (enterprise policy) ===
   ; This registers the extension for auto-install in Chrome
   WriteRegStr HKCU "Software\Google\Chrome\Extensions\idmam-extension" "path" "$INSTDIR\resources\extension"
-  WriteRegStr HKCU "Software\Google\Chrome\Extensions\idmam-extension" "version" "1.0.0"
+  WriteRegStr HKCU "Software\Google\Chrome\Extensions\idmam-extension" "version" "1.1.0"
 
   ; === Write IDMAM protocol handler ===
   WriteRegStr HKCU "Software\Classes\idmam" "" "URL:IDMAM Download Protocol"
@@ -44,6 +82,12 @@
 !macroend
 
 !macro customUnInstall
+  ; === Close any running IDMAM instance ===
+  nsExec::ExecToStack 'taskkill /F /IM IDMAM.exe'
+  Pop $0
+  Pop $1
+  Sleep 1000
+
   ; === Remove auto-start registry entry ===
   DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "IDMAM"
 
@@ -60,6 +104,21 @@
   ; === Remove launch helper ===
   Delete "$INSTDIR\launch-chrome.bat"
 
-  ; === Note: User data in ~/.idmam is preserved ===
-  ; To fully clean, user can manually delete: %USERPROFILE%\.idmam
+  ; === Offer to remove user data ===
+  MessageBox MB_YESNO|MB_ICONQUESTION \
+    "Do you want to remove download history and settings?$\r$\n$\r$\n\
+    YES = Delete all user data ($PROFILE\.idmam)$\r$\n\
+    NO  = Keep your data for a future reinstall" \
+    IDYES removeUserData IDNO keepUserData
+
+  removeUserData:
+    RMDir /r "$PROFILE\.idmam"
+    Goto doneUserData
+
+  keepUserData:
+    ; User data preserved at %USERPROFILE%\.idmam
+    Goto doneUserData
+
+  doneUserData:
+
 !macroend

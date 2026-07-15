@@ -67,7 +67,8 @@
       "shortcutName": "IDMAM",
       "include": "installer.nsh",
       "deleteAppDataOnUninstall": false,
-      "runAfterFinish": true
+      "runAfterFinish": true,
+      "warningsAsErrors": false
     }
   },
   "dependencies": {
