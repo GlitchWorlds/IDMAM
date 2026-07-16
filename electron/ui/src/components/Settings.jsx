@@ -5,7 +5,6 @@ export default function Settings({ onBack }) {
   const [settings, setSettings] = useState({
     threads: 4,
     savePath: '',
-    serverUrl: 'http://127.0.0.1:9977',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -14,7 +13,14 @@ export default function Settings({ onBack }) {
   useEffect(() => {
     getSettings()
       .then((s) => {
-        if (s) setSettings((prev) => ({ ...prev, ...s }));
+        if (s) {
+          // Map server snake_case keys to frontend camelCase
+          setSettings((prev) => ({
+            ...prev,
+            threads: Number(s.default_threads ?? s.threads ?? prev.threads),
+            savePath: s.default_save_path ?? s.savePath ?? prev.savePath,
+          }));
+        }
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -24,7 +30,12 @@ export default function Settings({ onBack }) {
     setSaving(true);
     setSaved(false);
     try {
-      await updateSettings(settings);
+      // Map frontend camelCase to server snake_case keys
+      const payload = {
+        default_threads: String(settings.threads),
+        default_save_path: settings.savePath || '',
+      };
+      await updateSettings(payload);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
@@ -85,19 +96,6 @@ export default function Settings({ onBack }) {
             onChange={(e) => setSettings({ ...settings, savePath: e.target.value })}
             placeholder="C:\Downloads"
             className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
-          />
-        </div>
-
-        {/* Server URL */}
-        <div className="bg-slate-800/50 rounded-xl p-5">
-          <label className="block text-sm font-medium text-slate-300 mb-2">Server URL</label>
-          <p className="text-xs text-slate-500 mb-3">Backend API endpoint</p>
-          <input
-            type="text"
-            value={settings.serverUrl}
-            onChange={(e) => setSettings({ ...settings, serverUrl: e.target.value })}
-            placeholder="http://127.0.0.1:9977"
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-mono"
           />
         </div>
 

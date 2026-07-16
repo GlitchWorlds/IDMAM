@@ -155,8 +155,9 @@ class IDRAMServer {
 
     // POST /api/download — Start a new download
     this.app.post('/api/download', async (req, res) => {
+      const url = req.body && req.body.url; // F10: Extract URL early for catch block
       try {
-        const { url, filename, save_to, threads, cookies, referrer, headers, checksum } = req.body;
+        const { filename, save_to, threads, cookies, referrer, headers, checksum } = req.body;
 
         if (!url) {
           return res.status(400).json({ error: 'URL is required' });
@@ -295,7 +296,9 @@ class IDRAMServer {
         const result = this.downloader.pauseDownload(req.params.id);
         res.json(result);
       } catch (err) {
-        const status = err.message.includes('not active') ? 400 : 500;
+        const status = err.message.includes('not found') ? 404
+          : err.message.includes('not active') ? 400
+          : err.message.includes('already') ? 409 : 500;
         res.status(status).json({ error: sanitizeError(err) });
       }
     });

@@ -224,10 +224,11 @@ async function run() {
   warning('1.4 SSRF test mode', `status=${r4.s} (SSRF bypassed in test mode)`);
 
   // 1.5 Duplicate URL
-  const r5a = await req('POST', '/api/download', { url: `http://127.0.0.1:${TEST_PORT}/dup.bin`, threads: 1 });
-  await sleep(500);
+  const r5a = await req('POST', '/api/download', { url: `http://127.0.0.1:${TEST_PORT}/dup.bin`, threads: 4 });
+  check('1.5 First dup starts', r5a.s === 200 || r5a.s === 201);
+  // Send duplicate immediately (no sleep) — URL should be in activeUrls
   const r5b = await req('POST', '/api/download', { url: `http://127.0.0.1:${TEST_PORT}/dup.bin`, threads: 1 });
-  check('1.5 Duplicate URL rejected', r5b.s >= 400, `status=${r5b.s}`);
+  check('1.5 Duplicate URL rejected', r5b.s === 409, `status=${r5b.s}`);
   // Cancel first one
   if (r5a.d && r5a.d.id) await req('POST', '/api/download/' + r5a.d.id + '/cancel');
 
@@ -297,11 +298,13 @@ async function run() {
 
   // 4.1 Cancel active
   const r41 = await req('POST', '/api/download', { url: `http://127.0.0.1:${TEST_PORT}/slow.bin`, threads: 2 });
-  await sleep(1000);
+  await sleep(2000);
   const r41c = await req('POST', '/api/download/' + r41.d.id + '/cancel');
   check('4.1 Cancel active download', r41c.s === 200, `status=${r41c.s}`);
+  check('4.1 Cancel response has status', r41c.d.status === 'cancelled', `response=${JSON.stringify(r41c.d)}`);
+  await sleep(500);
   const s41 = await req('GET', '/api/download/' + r41.d.id);
-  check('4.1 Status is cancelled', s41.d.status === 'cancelled', `status=${s41.d.status}`);
+  check('4.1 GET after cancel shows cancelled', s41.d.status === 'cancelled', `status=${s41.d.status}`);
 
   // 4.2 Cancel non-existent
   const r42 = await req('POST', '/api/download/nonexistent/cancel');
