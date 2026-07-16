@@ -45,6 +45,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
   await loadSettings();
   checkStatus();
+
+  // Listen for settings changes from other sources (desktop app, other extension instances)
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message.type === 'SETTINGS_CHANGED') {
+      loadSettings(); // Reload all fields
+    }
+  });
 });
 
 // ─── Event listeners ───────────────────────────────────────────────

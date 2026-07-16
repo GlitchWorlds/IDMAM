@@ -93,24 +93,129 @@ const IDMAM_API = {
     }
   },
 
-  // ─── Settings (chrome.storage.local) ────────────────────────────
+  // ─── Settings (Server SSOT + local cache) ──────────────────────
 
   /**
-   * Get extension settings from chrome.storage.local.
-   * All settings are stored flat under the 'idmam_settings' key.
+   * Key mapping: extension camelCase ↔ server snake_case.
    */
-  async getSettings() {
-    return new Promise((resolve) => {
-      chrome.storage.local.get('idmam_settings', (result) => {
-        resolve(result.idmam_settings || IDMAM_API.defaultSettings());
-      });
-    });
+  _LOCAL_TO_SERVER: {
+    maxThreads: 'default_threads',
+    defaultSavePath: 'default_save_path',
+    interceptMinSize: 'intercept_min_size',
+    interceptVideo: 'intercept_video',
+    interceptAudio: 'intercept_audio',
+    interceptArchive: 'intercept_archive',
+    interceptSoftware: 'intercept_software',
+    interceptDocument: 'intercept_document',
+  },
+
+  _SERVER_TO_LOCAL: {
+    default_threads: 'maxThreads',
+    default_save_path: 'defaultSavePath',
+    intercept_min_size: 'interceptMinSize',
+    intercept_video: 'interceptVideo',
+    intercept_audio: 'interceptAudio',
+    intercept_archive: 'interceptArchive',
+    intercept_software: 'interceptSoftware',
+    intercept_document: 'interceptDocument',
   },
 
   /**
-   * Save extension settings to chrome.storage.local.
+   * Map server snake_case settings to extension camelCase.
+   */
+  _mapServerToLocal(serverSettings) {
+    const local = {};
+    for (const [serverKey, localKey] of Object.entries(IDMAM_API._SERVER_TO_LOCAL)) {
+      const val = serverSettings[serverKey];
+      if (val !== undefined) {
+        // Boolean-ish values from SQLite
+        if (typeof val === 'string' && (val === 'true' || val === 'false')) {
+          local[localKey] = val === 'true';
+        } else {
+          local[localKey] = val;
+        }
+      }
+    }
+    return local;
+  },
+
+  /**
+   * Map extension camelCase settings to server snake_case.
+   */
+  _mapLocalToServer(localSettings) {
+    const server = {};
+    for (const [localKey, serverKey] of Object.entries(IDMAM_API._LOCAL_TO_SERVER)) {
+      const val = localSettings[localKey];
+      if (val !== undefined) {
+        server[serverKey] = typeof val === 'boolean' ? String(val) : val;
+      }
+    }
+    return server;
+  },
+
+  /**
+   * Get settings: server-first with local cache fallback.
+   * Extension-only settings (enabled) always from local.
+   */
+  async getSettings() {
+    const defaults = IDMAM_API.defaultSettings();
+
+    // Get extension-only settings from local
+    const localOnly = await new Promise((resolve) => {
+      chrome.storage.local.get('idmam_settings', (result) => {
+        const s = result.idmam_settings || {};
+        resolve({
+          enabled: s.enabled !== undefined ? s.enabled : defaults.enabled,
+        });
+      });
+    });
+
+    try {
+      // Fetch shared settings from server (SSOT)
+      const serverSettings = await IDMAM_API._fetch('/api/settings');
+      const mapped = IDMAM_API._mapServerToLocal(serverSettings);
+
+      // Merge: server shared + local-only
+      const merged = { ...defaults, ...mapped, ...localOnly };
+
+      // Cache to local for offline fallback
+      await IDMAM_API._cacheLocal(merged);
+
+      return merged;
+    } catch {
+      // Server offline → use full local cache
+      return new Promise((resolve) => {
+        chrome.storage.local.get('idmam_settings', (result) => {
+          resolve({ ...defaults, ...result.idmam_settings, ...localOnly });
+        });
+      });
+    }
+  },
+
+  /**
+   * Save settings: dual-write to server + local cache.
    */
   async saveSettings(settings) {
+    // Always cache locally (offline resilience)
+    await IDMAM_API._cacheLocal(settings);
+
+    // Map to server keys and push
+    const serverPayload = IDMAM_API._mapLocalToServer(settings);
+    try {
+      await IDMAM_API._fetch('/api/settings', {
+        method: 'PUT',
+        body: JSON.stringify(serverPayload),
+      });
+    } catch {
+      // Server offline — local cache saved, will sync on next save
+      console.warn('[IDMAM] Server offline, settings cached locally only');
+    }
+  },
+
+  /**
+   * Cache settings to chrome.storage.local.
+   */
+  async _cacheLocal(settings) {
     return new Promise((resolve) => {
       chrome.storage.local.set({ idmam_settings: settings }, resolve);
     });

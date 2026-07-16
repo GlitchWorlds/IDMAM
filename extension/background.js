@@ -68,6 +68,21 @@ function connectWebSocket() {
   ws.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
+
+      // Settings changed (from another client or desktop app) → update local cache
+      if (data.type === 'SETTINGS_CHANGED' && data.settings) {
+        const mapped = IDMAM_API._mapServerToLocal(data.settings);
+        // Preserve extension-only settings (enabled)
+        chrome.storage.local.get('idmam_settings', (result) => {
+          const localOnly = result.idmam_settings || {};
+          const merged = { ...IDMAM_API.defaultSettings(), ...mapped, enabled: localOnly.enabled ?? true };
+          chrome.storage.local.set({ idmam_settings: merged });
+        });
+        // Notify popup(s)
+        chrome.runtime.sendMessage({ type: 'SETTINGS_CHANGED' }).catch(() => {});
+        return;
+      }
+
       // Broadcast download update to popup(s)
       chrome.runtime.sendMessage({
         type: 'DOWNLOAD_UPDATE',

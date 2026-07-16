@@ -359,6 +359,9 @@ class IDRAMServer {
           'default_threads', 'max_concurrent_downloads', 'max_threads_per_download',
           'default_save_path', 'temp_dir', 'retry_count', 'timeout_ms',
           'speed_limit_global', 'auto_resume', 'auto_categorize',
+          // Extension sync: intercept rules
+          'intercept_min_size', 'intercept_video', 'intercept_audio',
+          'intercept_archive', 'intercept_software', 'intercept_document',
         ];
 
         const filtered = {};
@@ -372,6 +375,14 @@ class IDRAMServer {
 
         // Update downloader settings
         Object.assign(this.downloader.settings, filtered);
+
+        // Broadcast settings change to all connected clients (extension sync)
+        if (Object.keys(filtered).length > 0) {
+          this.broadcast({
+            type: 'SETTINGS_CHANGED',
+            settings: this.db.getAllSettings(),
+          });
+        }
 
         res.json({ updated: Object.keys(filtered) });
       } catch (err) {
