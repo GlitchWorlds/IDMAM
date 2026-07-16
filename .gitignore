@@ -11,6 +11,7 @@ out/
 # Electron
 electron/dist/
 electron/ui/build/
+electron/app-engine/
 
 # Database
 *.db
