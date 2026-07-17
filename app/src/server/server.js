@@ -399,25 +399,31 @@ class IDMMServer {
           return res.status(400).json({ error: 'path is required' });
         }
 
-        const { execSync } = require('node:child_process');
+        const { exec } = require('node:child_process');
+        const fs = require('node:fs');
 
-        // On Windows: use explorer.exe /select to highlight the file
-        // On macOS: use open -R
-        // On Linux: use xdg-open on the parent directory
+        // Determine if path is a file or directory
+        let isDir = false;
+        try { isDir = fs.statSync(filePath).isDirectory(); } catch { /* assume file */ }
+
         const platform = process.platform;
         if (platform === 'win32') {
-          // explorer /select opens folder and highlights the file
-          execSync(`explorer /select,"${filePath}"`, { timeout: 5000 });
+          if (isDir) {
+            // Just open the directory directly
+            exec(`explorer "${filePath}"`);
+          } else {
+            // explorer /select highlights the file in its parent folder
+            exec(`explorer /select,"${filePath}"`);
+          }
         } else if (platform === 'darwin') {
-          execSync(`open -R "${filePath}"`, { timeout: 5000 });
+          exec(isDir ? `open "${filePath}"` : `open -R "${filePath}"`);
         } else {
-          const dir = require('node:path').dirname(filePath);
-          execSync(`xdg-open "${dir}"`, { timeout: 5000 });
+          const dir = isDir ? filePath : require('node:path').dirname(filePath);
+          exec(`xdg-open "${dir}"`);
         }
 
         res.json({ ok: true });
       } catch (err) {
-        // Don't leak internal errors to client
         res.status(500).json({ error: 'Failed to open folder' });
       }
     });
