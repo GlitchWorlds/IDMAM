@@ -51,7 +51,7 @@ export default function Settings({ onBack }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -79,7 +79,7 @@ export default function Settings({ onBack }) {
           <select
             value={settings.threadMode}
             onChange={(e) => setSettings({ ...settings, threadMode: e.target.value })}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all"
           >
             <option value="auto">Auto (recommended)</option>
             <option value="manual">Manual</option>
@@ -98,9 +98,9 @@ export default function Settings({ onBack }) {
                 max={128}
                 value={settings.threads}
                 onChange={(e) => setSettings({ ...settings, threads: Number(e.target.value) })}
-                className="flex-1 accent-blue-500"
+                className="flex-1 accent-accent"
               />
-              <span className="text-sm font-mono text-blue-400 w-10 text-center">{settings.threads}</span>
+              <span className="text-sm font-mono text-accent w-10 text-center">{settings.threads}</span>
             </div>
           </div>
         ) : (
@@ -130,7 +130,7 @@ export default function Settings({ onBack }) {
             value={settings.savePath}
             onChange={(e) => setSettings({ ...settings, savePath: e.target.value })}
             placeholder="C:\Downloads"
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all"
           />
         </div>
 
@@ -145,7 +145,7 @@ export default function Settings({ onBack }) {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-6 py-2.5 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50 transition-colors"
+            className="px-6 py-2.5 rounded-lg text-sm font-medium bg-accent-dim text-white hover:bg-accent disabled:opacity-50 transition-colors"
           >
             {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Settings'}
           </button>

@@ -33,15 +33,15 @@ function Header({ search, onSearchChange, totalSpeed, onAddClick, activeCount, c
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search downloads..."
-            className="w-full bg-slate-800 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+            className="w-full bg-slate-800 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all"
           />
         </div>
 
         {/* Speed Indicator */}
         {totalSpeed > 0 && (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-            <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-            <span className="text-sm font-medium text-blue-400">{formatSpeed(totalSpeed)}</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-accent/10 border border-accent/20 rounded-lg">
+            <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+            <span className="text-sm font-medium text-accent">{formatSpeed(totalSpeed)}</span>
           </div>
         )}
 
@@ -54,7 +54,7 @@ function Header({ search, onSearchChange, totalSpeed, onAddClick, activeCount, c
         {/* Add Button */}
         <button
           onClick={onAddClick}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-500 transition-colors glow-blue"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-accent-dim text-white text-sm font-medium hover:bg-accent transition-colors glow-green"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />

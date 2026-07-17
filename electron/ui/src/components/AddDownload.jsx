@@ -69,7 +69,7 @@ export default function AddDownload({ onClose, onAdded }) {
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://example.com/file.zip"
-                className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+                className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all"
               />
               <button
                 type="button"
@@ -92,7 +92,7 @@ export default function AddDownload({ onClose, onAdded }) {
               value={filename}
               onChange={(e) => setFilename(e.target.value)}
               placeholder="file.zip"
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all"
             />
           </div>
 
@@ -108,7 +108,7 @@ export default function AddDownload({ onClose, onAdded }) {
             <button
               type="submit"
               disabled={!url.trim() || loading}
-              className="px-6 py-2.5 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-6 py-2.5 rounded-lg text-sm font-medium bg-accent-dim text-white hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {loading ? 'Adding...' : 'Download'}
             </button>

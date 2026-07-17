@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { pauseDownload, resumeDownload, cancelDownload, deleteDownload } from '../api';
+import { pauseDownload, resumeDownload, cancelDownload, deleteDownload, openFolder } from '../api';
 
 function formatSize(bytes) {
   if (!bytes) return '0 B';
@@ -35,7 +35,7 @@ function formatEta(seconds) {
 function getStatusColor(status) {
   switch (status) {
     case 'downloading':
-    case 'active': return 'text-blue-400';
+    case 'active': return 'text-accent';
     case 'completed': return 'text-emerald-400';
     case 'paused': return 'text-amber-400';
     case 'error': return 'text-red-400';
@@ -45,8 +45,8 @@ function getStatusColor(status) {
 
 function getStatusBadge(status) {
   const colors = {
-    downloading: 'bg-blue-500/20 text-blue-400',
-    active: 'bg-blue-500/20 text-blue-400',
+    downloading: 'bg-accent/20 text-accent',
+    active: 'bg-accent/20 text-accent',
     completed: 'bg-emerald-500/20 text-emerald-400',
     paused: 'bg-amber-500/20 text-amber-400',
     queued: 'bg-slate-500/20 text-slate-400',
@@ -111,7 +111,7 @@ function DownloadItem({ download, onRefresh }) {
               <span>{formatSize(downloaded)} / {formatSize(size)}</span>
             )}
             {isActive && speed > 0 && (
-              <span className="text-blue-400">{formatSpeed(speed)}</span>
+              <span className="text-accent">{formatSpeed(speed)}</span>
             )}
             {isActive && <span>ETA: {formatEta(eta)}</span>}
           </div>
@@ -127,7 +127,7 @@ function DownloadItem({ download, onRefresh }) {
             </button>
           )}
           {isPaused && (
-            <button onClick={handleResume} className="p-2 rounded-lg text-slate-400 hover:text-blue-400 hover:bg-slate-700 transition-colors" title="Resume">
+            <button onClick={handleResume} className="p-2 rounded-lg text-slate-400 hover:text-accent hover:bg-slate-700 transition-colors" title="Resume">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 3l14 9-14 9V3z" />
               </svg>
@@ -141,11 +141,18 @@ function DownloadItem({ download, onRefresh }) {
             </button>
           )}
           {isCompleted && (
-            <button onClick={handleDelete} className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-slate-700 transition-colors" title="Delete">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </button>
+            <>
+              <button onClick={() => openFolder(download.save_to)} className="p-2 rounded-lg text-slate-400 hover:text-emerald-400 hover:bg-slate-700 transition-colors" title="Open Folder">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                </svg>
+              </button>
+              <button onClick={handleDelete} className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-slate-700 transition-colors" title="Delete">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </>
           )}
         </div>
       </div>

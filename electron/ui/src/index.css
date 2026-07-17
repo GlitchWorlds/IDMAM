@@ -4,6 +4,9 @@
 @theme {
   --color-slate-850: #172033;
   --color-slate-950: #0a0f1a;
+  --color-accent: #22c55e;
+  --color-accent-dim: #16a34a;
+  --color-accent-glow: rgba(34, 197, 94, 0.15);
 }
 
 /* Custom scrollbar */
@@ -20,6 +23,39 @@
 
 .progress-active {
   animation: progress-pulse 2s ease-in-out infinite;
+}
+
+/* Progress bar color */
+.progress-bar {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
+/* Glow effect */
+.glow-green {
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.3);
+}
+
+/* Card hover effect */
+.card-hover {
+  transition: all 0.2s ease;
+}
+.card-hover:hover {
+  background: rgba(30, 41, 59, 0.8);
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Nav active state */
+.nav-active {
+  background: rgba(34, 197, 94, 0.1);
+  border-left: 3px solid #22c55e;
 }
 
 body {

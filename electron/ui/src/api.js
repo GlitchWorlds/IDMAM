@@ -46,6 +46,13 @@ export function deleteDownload(id) {
   return request(`/api/download/${id}`, { method: 'DELETE' });
 }
 
+export function openFolder(path) {
+  return request('/api/open-folder', {
+    method: 'POST',
+    body: JSON.stringify({ path }),
+  });
+}
+
 export function getSettings() {
   return request('/api/settings');
 }

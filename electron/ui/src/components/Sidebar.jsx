@@ -14,7 +14,7 @@ function Sidebar({ filter, onFilterChange, onSettingsClick, speedHistory, stats 
     <aside className="w-64 bg-slate-950 border-r border-slate-800 flex flex-col h-full shrink-0">
       {/* Logo */}
       <div className="p-6 border-b border-slate-800">
-        <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+        <h1 className="text-xl font-bold bg-gradient-to-r from-accent to-purple-500 bg-clip-text text-transparent">
           IDMM
         </h1>
         <p className="text-xs text-slate-500 mt-1">Download Manager</p>
@@ -28,7 +28,7 @@ function Sidebar({ filter, onFilterChange, onSettingsClick, speedHistory, stats 
             onClick={() => onFilterChange(item.key)}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
               filter === item.key
-                ? 'nav-active text-blue-400 font-medium'
+                ? 'nav-active text-accent font-medium'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
             }`}
           >
@@ -45,7 +45,7 @@ function Sidebar({ filter, onFilterChange, onSettingsClick, speedHistory, stats 
         <p className="text-xs text-slate-500 mb-2">Speed</p>
         <SpeedGraph data={speedHistory} mini />
         {stats?.totalSpeed > 0 && (
-          <p className="text-xs text-blue-400 mt-2 text-center">
+          <p className="text-xs text-accent mt-2 text-center">
             {formatSpeed(stats.totalSpeed)}
           </p>
         )}
