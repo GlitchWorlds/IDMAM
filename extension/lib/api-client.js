@@ -1,18 +1,18 @@
 /**
- * IDMAM API Client — shared between popup, background, and options.
- * Handles all communication with the IDMAM desktop app server.
+ * IDMM API Client — shared between popup, background, and options.
+ * Handles all communication with the IDMM desktop app server.
  */
 
-const IDMAM_API = {
+const IDMM_API = {
   BASE_URL: 'http://127.0.0.1:9977',
   TIMEOUT: 5000,
 
   async _fetch(path, options = {}) {
-    const baseUrl = IDMAM_API.BASE_URL;
+    const baseUrl = IDMM_API.BASE_URL;
 
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), IDMAM_API.TIMEOUT);
+      const timeout = setTimeout(() => controller.abort(), IDMM_API.TIMEOUT);
 
       const response = await fetch(`${baseUrl}${path}`, {
         ...options,
@@ -33,10 +33,10 @@ const IDMAM_API = {
       return response.json();
     } catch (err) {
       if (err.name === 'AbortError') {
-        throw new Error('IDMAM server timeout');
+        throw new Error('IDMM server timeout');
       }
       if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
-        throw new Error('IDMAM server offline');
+        throw new Error('IDMM server offline');
       }
       throw err;
     }
@@ -45,7 +45,7 @@ const IDMAM_API = {
   // ─── Downloads ─────────────────────────────────────────────────
 
   async startDownload({ url, filename, cookies, referrer, threads, save_to, headers }) {
-    return IDMAM_API._fetch('/api/download', {
+    return IDMM_API._fetch('/api/download', {
       method: 'POST',
       body: JSON.stringify({ url, filename, cookies, referrer, threads, save_to, headers }),
     });
@@ -53,35 +53,35 @@ const IDMAM_API = {
 
   async listDownloads(status) {
     const query = status ? `?status=${status}` : '';
-    return IDMAM_API._fetch(`/api/downloads${query}`);
+    return IDMM_API._fetch(`/api/downloads${query}`);
   },
 
   async getDownload(id) {
-    return IDMAM_API._fetch(`/api/download/${id}`);
+    return IDMM_API._fetch(`/api/download/${id}`);
   },
 
   async pauseDownload(id) {
-    return IDMAM_API._fetch(`/api/download/${id}/pause`, { method: 'POST' });
+    return IDMM_API._fetch(`/api/download/${id}/pause`, { method: 'POST' });
   },
 
   async resumeDownload(id) {
-    return IDMAM_API._fetch(`/api/download/${id}/resume`, { method: 'POST' });
+    return IDMM_API._fetch(`/api/download/${id}/resume`, { method: 'POST' });
   },
 
   async cancelDownload(id) {
-    return IDMAM_API._fetch(`/api/download/${id}/cancel`, { method: 'POST' });
+    return IDMM_API._fetch(`/api/download/${id}/cancel`, { method: 'POST' });
   },
 
   async deleteDownload(id) {
-    return IDMAM_API._fetch(`/api/download/${id}`, { method: 'DELETE' });
+    return IDMM_API._fetch(`/api/download/${id}`, { method: 'DELETE' });
   },
 
   async getServerStats() {
-    return IDMAM_API._fetch('/api/stats');
+    return IDMM_API._fetch('/api/stats');
   },
 
   async openFolder(filePath) {
-    return IDMAM_API._fetch('/api/open-folder', {
+    return IDMM_API._fetch('/api/open-folder', {
       method: 'POST',
       body: JSON.stringify({ path: filePath }),
     });
@@ -89,7 +89,7 @@ const IDMAM_API = {
 
   async healthCheck() {
     try {
-      const baseUrl = IDMAM_API.BASE_URL;
+      const baseUrl = IDMM_API.BASE_URL;
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 2000);
       const res = await fetch(`${baseUrl}/api/health`, { signal: controller.signal });
@@ -132,7 +132,7 @@ const IDMAM_API = {
    */
   _mapServerToLocal(serverSettings) {
     const local = {};
-    for (const [serverKey, localKey] of Object.entries(IDMAM_API._SERVER_TO_LOCAL)) {
+    for (const [serverKey, localKey] of Object.entries(IDMM_API._SERVER_TO_LOCAL)) {
       const val = serverSettings[serverKey];
       if (val !== undefined) {
         // Boolean-ish values from SQLite
@@ -151,7 +151,7 @@ const IDMAM_API = {
    */
   _mapLocalToServer(localSettings) {
     const server = {};
-    for (const [localKey, serverKey] of Object.entries(IDMAM_API._LOCAL_TO_SERVER)) {
+    for (const [localKey, serverKey] of Object.entries(IDMM_API._LOCAL_TO_SERVER)) {
       const val = localSettings[localKey];
       if (val !== undefined) {
         server[serverKey] = typeof val === 'boolean' ? String(val) : val;
@@ -165,12 +165,12 @@ const IDMAM_API = {
    * Extension-only settings (enabled) always from local.
    */
   async getSettings() {
-    const defaults = IDMAM_API.defaultSettings();
+    const defaults = IDMM_API.defaultSettings();
 
     // Get extension-only settings from local
     const localOnly = await new Promise((resolve) => {
-      chrome.storage.local.get('idmam_settings', (result) => {
-        const s = result.idmam_settings || {};
+      chrome.storage.local.get('idmm_settings', (result) => {
+        const s = result.idmm_settings || {};
         resolve({
           enabled: s.enabled !== undefined ? s.enabled : defaults.enabled,
         });
@@ -179,21 +179,21 @@ const IDMAM_API = {
 
     try {
       // Fetch shared settings from server (SSOT)
-      const serverSettings = await IDMAM_API._fetch('/api/settings');
-      const mapped = IDMAM_API._mapServerToLocal(serverSettings);
+      const serverSettings = await IDMM_API._fetch('/api/settings');
+      const mapped = IDMM_API._mapServerToLocal(serverSettings);
 
       // Merge: server shared + local-only
       const merged = { ...defaults, ...mapped, ...localOnly };
 
       // Cache to local for offline fallback
-      await IDMAM_API._cacheLocal(merged);
+      await IDMM_API._cacheLocal(merged);
 
       return merged;
     } catch {
       // Server offline → use full local cache
       return new Promise((resolve) => {
-        chrome.storage.local.get('idmam_settings', (result) => {
-          resolve({ ...defaults, ...result.idmam_settings, ...localOnly });
+        chrome.storage.local.get('idmm_settings', (result) => {
+          resolve({ ...defaults, ...result.idmm_settings, ...localOnly });
         });
       });
     }
@@ -204,18 +204,18 @@ const IDMAM_API = {
    */
   async saveSettings(settings) {
     // Always cache locally (offline resilience)
-    await IDMAM_API._cacheLocal(settings);
+    await IDMM_API._cacheLocal(settings);
 
     // Map to server keys and push
-    const serverPayload = IDMAM_API._mapLocalToServer(settings);
+    const serverPayload = IDMM_API._mapLocalToServer(settings);
     try {
-      await IDMAM_API._fetch('/api/settings', {
+      await IDMM_API._fetch('/api/settings', {
         method: 'PUT',
         body: JSON.stringify(serverPayload),
       });
     } catch {
       // Server offline — local cache saved, will sync on next save
-      console.warn('[IDMAM] Server offline, settings cached locally only');
+      console.warn('[IDMM] Server offline, settings cached locally only');
     }
   },
 
@@ -224,7 +224,7 @@ const IDMAM_API = {
    */
   async _cacheLocal(settings) {
     return new Promise((resolve) => {
-      chrome.storage.local.set({ idmam_settings: settings }, resolve);
+      chrome.storage.local.set({ idmm_settings: settings }, resolve);
     });
   },
 
@@ -282,7 +282,7 @@ const IDMAM_API = {
 
     for (const [category, enabled] of Object.entries(categories)) {
       if (!enabled) continue;
-      const exts = IDMAM_API.INTERCEPT_EXTENSIONS[category];
+      const exts = IDMM_API.INTERCEPT_EXTENSIONS[category];
       if (exts && exts.some(ext => lower.endsWith(ext))) return true;
     }
 
@@ -300,7 +300,7 @@ const IDMAM_API = {
 
   formatSpeed(bytesPerSec) {
     if (!bytesPerSec) return '0 B/s';
-    return `${IDMAM_API.formatBytes(bytesPerSec)}/s`;
+    return `${IDMM_API.formatBytes(bytesPerSec)}/s`;
   },
 
   formatETA(seconds) {
@@ -313,4 +313,4 @@ const IDMAM_API = {
   },
 };
 
-if (typeof module !== 'undefined') module.exports = IDMAM_API;
+if (typeof module !== 'undefined') module.exports = IDMM_API;

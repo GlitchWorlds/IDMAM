@@ -1,4 +1,4 @@
-# IDMAM — FINAL QC REPORT
+# IDMM — FINAL QC REPORT
 
 > **Date:** 2026-07-15 13:35 WIB  
 > **Auditor:** Manager + 5 Sub-agents (CODE-001, KNOWLEDGE-001)  
@@ -140,9 +140,9 @@ Result: 9/9 PASSED
 
 ### Nice to Have
 8. Extract inline routes to separate methods (testability)
-9. Add authentication (X-IDMAM-Token)
+9. Add authentication (X-IDMM-Token)
 10. Implement `getCategories()` query
 
 ---
 
-**Overall Assessment:** IDMAM core engine is **solid and production-ready** for a localhost application. The critical resume bug has been fixed. Remaining issues are edge-case hardening and code hygiene. The download lifecycle (start → pause → resume → verify) works correctly end-to-end.
+**Overall Assessment:** IDMM core engine is **solid and production-ready** for a localhost application. The critical resume bug has been fixed. Remaining issues are edge-case hardening and code hygiene. The download lifecycle (start → pause → resume → verify) works correctly end-to-end.

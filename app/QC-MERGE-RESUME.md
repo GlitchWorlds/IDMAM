@@ -1,4 +1,4 @@
-# QC Audit — IDMAM Engine: merge.js & resume.js
+# QC Audit — IDMM Engine: merge.js & resume.js
 
 **Date:** 2026-07-15 | **Auditor:** AGENT-001 (subagent) | **Scope:** Correctness, edge cases, error handling
 

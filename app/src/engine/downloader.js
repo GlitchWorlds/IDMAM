@@ -14,7 +14,7 @@ const { hashString } = require('../utils/hash');
 const { validateRedirect } = require('../utils/ssrf');
 
 /**
- * IDMAM Core Download Manager.
+ * IDMM Core Download Manager.
  *
  * Orchestrates multi-threaded chunk downloads via worker threads.
  * Handles the full lifecycle: probe → split → download → merge → verify.
@@ -44,7 +44,7 @@ const _globalWorkerSemaphore = {
 class DownloadManager {
   /**
    * @param {Object} options
-   * @param {Object} options.db - IDMAMDatabase instance
+   * @param {Object} options.db - IDMMDatabase instance
    * @param {string} options.tempDir - Temp directory for chunk files
    * @param {Object} [options.settings] - Runtime settings
    * @param {Function} [options.onProgress] - Global progress callback (downloadId, state)
@@ -113,7 +113,7 @@ class DownloadManager {
       // Placeholder — actual value set after HEAD probe returns contentLength
       threads = null;
     }
-    const savePath = saveTo || this.settings.default_save_path || path.join(require('node:os').homedir(), 'Downloads', 'IDMAM');
+    const savePath = saveTo || this.settings.default_save_path || path.join(require('node:os').homedir(), 'Downloads', 'IDMM');
     const retryCount = parseInt(this.settings.retry_count, 10) || 3;
     const timeoutMs = parseInt(this.settings.timeout_ms, 10) || 30000;
 
@@ -556,7 +556,7 @@ class DownloadManager {
         path: parsed.pathname + parsed.search,
         method: 'HEAD',
         headers: {
-          'User-Agent': 'IDMAM/1.0',
+          'User-Agent': 'IDMM/1.0',
           ...headers,
         },
         timeout: 15000,
@@ -728,7 +728,7 @@ class DownloadManager {
 
     worker.on('error', (err) => {
       // Worker crashed (not just a download error)
-      console.error(`[IDMAM] Worker error for chunk ${chunk.index}: ${err.message}`);
+      console.error(`[IDMM] Worker error for chunk ${chunk.index}: ${err.message}`);
       chunk.status = 'failed';
       this._checkCompletion(state);
     });
@@ -745,7 +745,7 @@ class DownloadManager {
       if (worker.__terminated) return;
 
       if (code !== 0 && chunk.status !== 'done' && chunk.status !== 'paused') {
-        console.error(`[IDMAM] Worker exited with code ${code} for chunk ${chunk.index}`);
+        console.error(`[IDMM] Worker exited with code ${code} for chunk ${chunk.index}`);
         chunk.status = 'failed';
       }
       this._checkCompletion(state);
@@ -871,7 +871,7 @@ class DownloadManager {
    */
   _handleThrottle(state) {
     state._throttleCount = (state._throttleCount || 0) + 1;
-    console.log(`[IDMAM] Throttle #${state._throttleCount} for download ${state.id}`);
+    console.log(`[IDMM] Throttle #${state._throttleCount} for download ${state.id}`);
 
     let newThreads;
     if (state._throttleCount >= 3) {
@@ -884,7 +884,7 @@ class DownloadManager {
 
     if (newThreads >= state.threads) return; // No reduction needed
 
-    console.log(`[IDMAM] Reducing threads for ${state.id}: ${state.threads} → ${newThreads}`);
+    console.log(`[IDMM] Reducing threads for ${state.id}: ${state.threads} → ${newThreads}`);
     state.threads = newThreads;
     this.db.updateDownload(state.id, { threads: newThreads });
 
@@ -1084,7 +1084,7 @@ class DownloadManager {
       path: parsed.pathname + parsed.search,
       method: 'GET',
       headers: {
-        'User-Agent': 'IDMAM/1.0',
+        'User-Agent': 'IDMM/1.0',
         ...(opts.requestHeaders || {}),
       },
       timeout: opts.timeoutMs,

@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "IDMAM — Download Manager AI Max",
-  "short_name": "IDMAM",
+  "name": "IDMM — Download Manager Max",
+  "short_name": "IDMM",
   "version": "1.1.0",
-  "description": "Free, open-source download manager with multi-threaded acceleration. Intercepts downloads and sends them to IDMAM for maximum speed.",
+  "description": "Free, open-source download manager with multi-threaded acceleration. Intercepts downloads and sends them to IDMM for maximum speed.",
 
   "permissions": [
     "downloads",
@@ -35,7 +35,7 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     },
-    "default_title": "IDMAM Download Manager"
+    "default_title": "IDMM Download Manager"
   },
 
   "options_page": "options/options.html",

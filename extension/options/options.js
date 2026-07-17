@@ -1,10 +1,10 @@
 'use strict';
 
 /**
- * IDMAM Extension — Options Page Script.
+ * IDMM Extension — Options Page Script.
  *
- * Uses IDMAM_API from lib/api-client.js for settings persistence.
- * Settings are stored under the 'idmam_settings' key in chrome.storage.local.
+ * Uses IDMM_API from lib/api-client.js for settings persistence.
+ * Settings are stored under the 'idmm_settings' key in chrome.storage.local.
  * Backend URL is hidden from users — only shows Connected/Not Running.
  */
 
@@ -85,7 +85,7 @@ function setupEventListeners() {
 // ─── Load settings from storage ────────────────────────────────────
 
 async function loadSettings() {
-  const settings = await IDMAM_API.getSettings();
+  const settings = await IDMM_API.getSettings();
 
   $extEnabled.checked = settings.enabled !== false;
   $maxThreads.value = settings.maxThreads || 8;
@@ -118,7 +118,7 @@ async function saveSettings() {
     }
   }
 
-  await IDMAM_API.saveSettings(settings);
+  await IDMM_API.saveSettings(settings);
 
   // Notify background to reload settings
   try {
@@ -135,8 +135,8 @@ async function saveSettings() {
 async function resetSettings() {
   if (!confirm('Reset all settings to defaults?')) return;
 
-  const defaults = IDMAM_API.defaultSettings();
-  await IDMAM_API.saveSettings(defaults);
+  const defaults = IDMM_API.defaultSettings();
+  await IDMM_API.saveSettings(defaults);
   await loadSettings();
 
   try {
@@ -155,7 +155,7 @@ async function checkStatus() {
   $serverStatus.className = 'status-indicator checking';
 
   try {
-    const ok = await IDMAM_API.healthCheck();
+    const ok = await IDMM_API.healthCheck();
     if (ok) {
       $serverStatus.textContent = 'Connected \u2713';
       $serverStatus.className = 'status-indicator online';

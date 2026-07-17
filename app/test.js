@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * IDMAM Test Script.
+ * IDMM Test Script.
  *
  * Demonstrates the complete download lifecycle using a local test server:
  * 1. Start a download
@@ -176,7 +176,7 @@ function apiRequest(method, apiPath, body = null) {
 
 async function runTests() {
   console.log('╔══════════════════════════════════════════════════════╗');
-  console.log('║  IDMAM Core Engine — Integration Test               ║');
+  console.log('║  IDMM Core Engine — Integration Test               ║');
   console.log('╚══════════════════════════════════════════════════════╝');
   console.log('');
 
@@ -189,13 +189,13 @@ async function runTests() {
 
   console.log('▸ Step 0: Setting up test environment...');
 
-  const IDMAMDatabase = require('./src/db/sqlite');
+  const IDMMDatabase = require('./src/db/sqlite');
   const DownloadManager = require('./src/engine/downloader');
-  process.env.IDMAM_TEST = '1'; // Enable test mode (allows localhost downloads)
+  process.env.IDMM_TEST = '1'; // Enable test mode (allows localhost downloads)
   const IDRAMServer = require('./src/server/server');
 
   // Create temp directories
-  const DATA_DIR = path.join(os.homedir(), '.idmam', 'test-run');
+  const DATA_DIR = path.join(os.homedir(), '.IDMM', 'test-run');
   const TEMP_DIR = path.join(DATA_DIR, 'temp');
   const SAVE_DIR = path.join(DATA_DIR, 'downloads');
 
@@ -208,8 +208,8 @@ async function runTests() {
   await new Promise(r => testServer.listen(TEST_PORT, '127.0.0.1', r));
   console.log(`  ✅ Test file server on http://127.0.0.1:${TEST_PORT} (${formatBytes(TEST_FILE_SIZE)})`);
 
-  // Initialize IDMAM
-  const db = await IDMAMDatabase.create(path.join(DATA_DIR, 'test.db'));
+  // Initialize IDMM
+  const db = await IDMMDatabase.create(path.join(DATA_DIR, 'test.db'));
   db.setSetting('default_save_path', SAVE_DIR);
   const settings = db.getAllSettings();
   console.log('  ✅ Database initialized');
@@ -231,7 +231,7 @@ async function runTests() {
 
   const server = new IDRAMServer({ db, downloader });
   await server.start();
-  console.log('  ✅ IDMAM server started on http://127.0.0.1:9977');
+  console.log('  ✅ IDMM server started on http://127.0.0.1:9977');
   console.log('');
 
   // ─── Test 1: Health Check ────────────────────────────────────────

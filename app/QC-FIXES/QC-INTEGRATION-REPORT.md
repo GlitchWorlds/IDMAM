@@ -1,4 +1,4 @@
-# IDMAM QC Integration Report
+# IDMM QC Integration Report
 
 > **Date:** 2026-07-15 | **Auditor:** QC Team | **Test Suite:** `test.js` + Code Walkthrough
 

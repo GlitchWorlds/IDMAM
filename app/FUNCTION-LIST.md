@@ -1,6 +1,6 @@
-# IDMAM — Complete Function List
+# IDMM — Complete Function List
 
-> Generated: 2026-07-15 | Source: `D:\IDMAM\app\src\`, `main.js`, `test.js`
+> Generated: 2026-07-15 | Source: `D:\IDMM\app\src\`, `main.js`, `test.js`
 
 ---
 
@@ -108,12 +108,12 @@
 
 ---
 
-## 6. db/sqlite.js — `IDMAMDatabase` Class
+## 6. db/sqlite.js — `IDMMDatabase` Class
 
 | # | Function | Line | Signature | Description | Dependencies |
 |---|----------|------|-----------|-------------|--------------|
 | 1 | `constructor` | 20 | `constructor(db: Object, dbPath: string)` → void | Initialize database instance, create tables, insert default settings, start auto-save interval. | `_initTables`, `_initSettings`, `save` |
-| 2 | `create` (static) | 36 | `static async create(dbPath: string)` → `Promise<IDMAMDatabase>` | Async factory — load sql.js WASM, read or create database file, return instance. | `initSqlJs` |
+| 2 | `create` (static) | 36 | `static async create(dbPath: string)` → `Promise<IDMMDatabase>` | Async factory — load sql.js WASM, read or create database file, return instance. | `initSqlJs` |
 | 3 | `save` | 55 | `save()` → void | Persist in-memory database to disk file. | — |
 | 4 | `_markDirty` | 64 | `_markDirty()` → void | Flag database as having unsaved changes. | — |
 | 5 | `_query` | 68 | `_query(sql: string, params?: any[])` → `Object[]` | Execute SELECT query and return array of row objects. | — |
@@ -176,8 +176,8 @@
 
 | # | Function | Line | Signature | Description | Dependencies |
 |---|----------|------|-----------|-------------|--------------|
-| 1 | `printBanner` | 33 | `printBanner()` → void | Print ASCII art IDMAM banner and version info to console. | — |
-| 2 | `main` | 47 | `async main()` → `Promise<void>` | Application entry point: init DB → load settings → init DownloadManager → auto-resume → start server → register shutdown handlers. | `IDMAMDatabase.create`, `DownloadManager`, `IDRAMServer`, `formatBytes` |
+| 1 | `printBanner` | 33 | `printBanner()` → void | Print ASCII art IDMM banner and version info to console. | — |
+| 2 | `main` | 47 | `async main()` → `Promise<void>` | Application entry point: init DB → load settings → init DownloadManager → auto-resume → start server → register shutdown handlers. | `IDMMDatabase.create`, `DownloadManager`, `IDRAMServer`, `formatBytes` |
 | 3 | `formatBytes` | 111 | `formatBytes(bytes: number)` → `string` | Format bytes to human-readable string (B/KB/MB/GB/TB). | — |
 | 4 | `shutdown` (closure) | 93 | `async shutdown(signal: string)` → `Promise<void>` | Graceful shutdown handler: pause all active downloads, stop server, close DB. | `downloader.getActiveStates`, `downloader.pauseDownload`, `server.stop`, `db.close` |
 
@@ -190,10 +190,10 @@
 | 1 | `formatBytes` | 30 | `formatBytes(bytes: number)` → `string` | Format bytes to human-readable string (B/KB/MB/GB). | — |
 | 2 | `formatSpeed` | 36 | `formatSpeed(bytesPerSec: number)` → `string` | Format bytes/sec to human-readable speed string (MB/s). | — |
 | 3 | `sleep` | 41 | `sleep(ms: number)` → `Promise<void>` | Promise-based delay utility. | — |
-| 4 | `testWebSocket` | 46 | `testWebSocket()` → `Promise<boolean>` | Test WebSocket connection to IDMAM server — connect, wait for message, close. | `ws.WebSocket` |
+| 4 | `testWebSocket` | 46 | `testWebSocket()` → `Promise<boolean>` | Test WebSocket connection to IDMM server — connect, wait for message, close. | `ws.WebSocket` |
 | 5 | `createTestFileServer` | 68 | `createTestFileServer()` → `{ server: http.Server, expectedHash: string, testData: Buffer }` | Create a local HTTP file server with a 10MB deterministic test file supporting Range requests and throttled delivery. | `crypto.createHash` |
-| 6 | `apiRequest` | 113 | `apiRequest(method: string, apiPath: string, body?: Object)` → `Promise<{ status: number, data: any }>` | HTTP client for IDMAM REST API — sends JSON request and parses response. | — |
-| 7 | `runTests` | 138 | `async runTests()` → `Promise<void>` | Run full integration test suite: health check → start download → monitor → pause → resume → verify → WebSocket → list → stats. | `createTestFileServer`, `IDMAMDatabase`, `DownloadManager`, `IDRAMServer`, `apiRequest`, `testWebSocket`, `formatBytes`, `formatSpeed`, `sleep`, `cleanup` |
+| 6 | `apiRequest` | 113 | `apiRequest(method: string, apiPath: string, body?: Object)` → `Promise<{ status: number, data: any }>` | HTTP client for IDMM REST API — sends JSON request and parses response. | — |
+| 7 | `runTests` | 138 | `async runTests()` → `Promise<void>` | Run full integration test suite: health check → start download → monitor → pause → resume → verify → WebSocket → list → stats. | `createTestFileServer`, `IDMMDatabase`, `DownloadManager`, `IDRAMServer`, `apiRequest`, `testWebSocket`, `formatBytes`, `formatSpeed`, `sleep`, `cleanup` |
 | 8 | `cleanup` | 360 | `async cleanup(server: Object, db: Object, testServer: Object, dataDir: string)` → `Promise<void>` | Stop server, close test server, close DB, delete test data directory. | — |
 
 ---
@@ -207,7 +207,7 @@
 | engine/merge.js | 0 | 3 | 3 |
 | engine/resume.js | 1 (`ResumeManager`) | 12 | 12 |
 | server/server.js | 1 (`IDRAMServer`) | 8 + 11 routes | 8 |
-| db/sqlite.js | 1 (`IDMAMDatabase`) | 26 | 26 |
+| db/sqlite.js | 1 (`IDMMDatabase`) | 26 | 26 |
 | utils/filename.js | 0 | 5 | 5 |
 | utils/hash.js | 0 | 5 | 5 |
 | utils/mime.js | 0 | 4 | 4 |

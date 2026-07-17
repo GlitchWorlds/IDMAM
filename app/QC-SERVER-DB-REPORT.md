@@ -1,8 +1,8 @@
-# IDMAM QC Report — Server & Database Modules
+# IDMM QC Report — Server & Database Modules
 
 > **Audit Date:** 2026-07-15 13:26 WIB  
 > **Auditor:** CODE-001 (automated)  
-> **Scope:** `server/server.js` (IDRAMServer) + `db/sqlite.js` (IDMAMDatabase)  
+> **Scope:** `server/server.js` (IDRAMServer) + `db/sqlite.js` (IDMMDatabase)  
 > **Source:** FUNCTION-LIST.md vs actual source code  
 > **Severity Legend:** ✅ PASS | ⚠️ WARNING | ❌ FAIL
 
@@ -149,7 +149,7 @@ This is either a design expectation that was never implemented, or the task's fu
 
 ---
 
-## db/sqlite.js — `IDMAMDatabase` Class
+## db/sqlite.js — `IDMMDatabase` Class
 
 ### 1. `constructor(db, dbPath)`
 | Check | Result | Detail |
@@ -165,7 +165,7 @@ This is either a design expectation that was never implemented, or the task's fu
 ### 2. `static async create(dbPath)` 
 | Check | Result | Detail |
 |-------|--------|--------|
-| Signature Match | ✅ PASS | `static async create(dbPath: string)` → `Promise<IDMAMDatabase>` |
+| Signature Match | ✅ PASS | `static async create(dbPath: string)` → `Promise<IDMMDatabase>` |
 | Logic Correct | ✅ PASS | Creates directory, loads sql.js WASM, reads existing file or creates new DB |
 | Edge Cases | ✅ PASS | Handles missing directory (`mkdirSync recursive`), missing DB file (creates fresh) |
 

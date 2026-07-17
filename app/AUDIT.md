@@ -1,8 +1,8 @@
-# IDMAM Project Comprehensive Audit
+# IDMM Project Comprehensive Audit
 
 ## Executive Summary
 
-IDMAM (Internet Download Manager AI Max) is a multi-threaded download manager with:
+IDMM (Internet Download Manager Max) is a multi-threaded download manager with:
 - **Core Engine**: Chunk-based parallel downloads with resume support
 - **API Server**: RESTful API on localhost:9977 with WebSocket for real-time progress
 - **Database**: SQLite via sql.js for persistence
@@ -107,7 +107,7 @@ IDMAM (Internet Download Manager AI Max) is a multi-threaded download manager wi
 | 59 | Rate limiting | 100 requests/minute per IP |
 | 60 | CORS whitelist | localhost + browser extensions |
 
-### 1.6 src/db/sqlite.js — IDMAMDatabase (Class)
+### 1.6 src/db/sqlite.js — IDMMDatabase (Class)
 
 | # | Export | Type | Description |
 |---|--------|------|-------------|
@@ -166,7 +166,7 @@ IDMAM (Internet Download Manager AI Max) is a multi-threaded download manager wi
 
 | # | Function | Description |
 |---|----------|-------------|
-| 96 | `printBanner()` | Print IDMAM ASCII art banner |
+| 96 | `printBanner()` | Print IDMM ASCII art banner |
 | 97 | `main()` | Async entry: init DB → load settings → create downloader → auto-resume (if flag) → start server → setup graceful shutdown |
 | 98 | `formatBytes(bytes)` | Format bytes to human-readable string (B, KB, MB, GB, TB) |
 
@@ -175,7 +175,7 @@ IDMAM (Internet Download Manager AI Max) is a multi-threaded download manager wi
 | # | Function | Description |
 |---|----------|-------------|
 | 99 | `createTestFileServer()` | Create local HTTP server serving 2MB deterministic test file with Range support |
-| 100 | `apiRequest(method, apiPath, body?)` | HTTP client for IDMAM API |
+| 100 | `apiRequest(method, apiPath, body?)` | HTTP client for IDMM API |
 | 101 | `runTests()` | Full integration test: health → start → monitor → pause → resume → verify → list → stats |
 | 102 | `cleanup(server, db, testServer, dataDir)` | Clean up test resources |
 
@@ -323,8 +323,8 @@ IDMAM (Internet Download Manager AI Max) is a multi-threaded download manager wi
 
 | # | Function | Test Scenario |
 |---|----------|---------------|
-| T90 | `IDMAMDatabase.create()` | **New DB**: Create with non-existent path → verify creates file + tables |
-| T91 | `IDMAMDatabase.create()` | **Existing DB**: Create with existing path → verify loads data |
+| T90 | `IDMMDatabase.create()` | **New DB**: Create with non-existent path → verify creates file + tables |
+| T91 | `IDMMDatabase.create()` | **Existing DB**: Create with existing path → verify loads data |
 | T92 | `save()` | **Persistence**: Create record → save → read file → verify data present |
 | T93 | `createDownload()` | **Full fields**: Create with all fields → verify inserted correctly |
 | T94 | `createDownload()` | **Minimal fields**: Create with only required fields → verify defaults applied |
@@ -427,7 +427,7 @@ IDMAM (Internet Download Manager AI Max) is a multi-threaded download manager wi
 | T171 | `formatBytes()` | **KB**: 1024 → verify returns "1.00 KB" |
 | T172 | `formatBytes()` | **MB**: 1048576 → verify returns "1.00 MB" |
 | T173 | `formatBytes()` | **GB**: 1073741824 → verify returns "1.00 GB" |
-| T174 | `printBanner()` | Verify outputs IDMAM ASCII art to console |
+| T174 | `printBanner()` | Verify outputs IDMM ASCII art to console |
 
 ### 3.11 test.js — Integration Tests
 

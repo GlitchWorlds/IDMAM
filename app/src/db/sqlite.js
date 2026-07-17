@@ -5,13 +5,13 @@ const path = require('node:path');
 const fs = require('node:fs');
 
 /**
- * IDMAM SQLite Database Layer.
+ * IDMM SQLite Database Layer.
  * Uses sql.js (WASM-based SQLite) — no native compilation required.
  *
- * Since sql.js init is async, use IDMAMDatabase.create(dbPath) factory.
+ * Since sql.js init is async, use IDMMDatabase.create(dbPath) factory.
  */
 
-class IDMAMDatabase {
+class IDMMDatabase {
   /**
    * @param {Object} db - sql.js Database instance
    * @param {string} dbPath - File path for persistence
@@ -36,7 +36,7 @@ class IDMAMDatabase {
   /**
    * Async factory — creates and initializes the database.
    * @param {string} dbPath - Path to the SQLite database file
-   * @returns {Promise<IDMAMDatabase>}
+   * @returns {Promise<IDMMDatabase>}
    */
   static async create(dbPath) {
     const dir = path.dirname(dbPath);
@@ -54,7 +54,7 @@ class IDMAMDatabase {
       db = new SQL.Database();
     }
 
-    return new IDMAMDatabase(db, dbPath);
+    return new IDMMDatabase(db, dbPath);
   }
 
   /**
@@ -179,8 +179,8 @@ class IDMAMDatabase {
       default_thread_mode: 'auto',
       max_concurrent_downloads: '5',
       max_threads_per_download: '128',
-      default_save_path: path.join(require('node:os').homedir(), 'Downloads', 'IDMAM'),
-      temp_dir: path.join(require('node:os').homedir(), '.idmam', 'temp'),
+      default_save_path: path.join(require('node:os').homedir(), 'Downloads', 'IDMM'),
+      temp_dir: path.join(require('node:os').homedir(), '.idmm', 'temp'),
       retry_count: '3',
       timeout_ms: '30000',
       speed_limit_global: '0',
@@ -398,4 +398,4 @@ class IDMAMDatabase {
   }
 }
 
-module.exports = IDMAMDatabase;
+module.exports = IDMMDatabase;

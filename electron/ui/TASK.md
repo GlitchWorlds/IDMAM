@@ -1,7 +1,7 @@
-# IDMAM Phase 3 - Complete React UI Components
+# IDMM Phase 3 - Complete React UI Components
 
 ## Context
-IDMAM download engine is running at http://127.0.0.1:9977. Electron wrapper is at D:\IDMAM\electron\main.js. React UI project is at D:\IDMAM\electron\ui\ with Vite + React 19 + Tailwind v4 + Recharts.
+IDMM download engine is running at http://127.0.0.1:9977. Electron wrapper is at D:\IDMM\electron\main.js. React UI project is at D:\IDMM\electron\ui\ with Vite + React 19 + Tailwind v4 + Recharts.
 
 Already created:
 - package.json, vite.config.js, index.html, src/main.jsx, src/index.css, src/api.js
@@ -13,7 +13,7 @@ Create these 6 component files, then npm install + npm run build.
 
 ### 1. src/components/Sidebar.jsx
 Fixed left sidebar (w-56), dark bg-slate-950. Shows:
-- IDMAM logo (h1 gradient blue-to-purple text)
+- IDMM logo (h1 gradient blue-to-purple text)
 - Nav buttons: All, Active, Completed, Paused, Failed (each with count badge)
 - Mini speed indicator at bottom
 - Settings gear icon button
@@ -70,5 +70,5 @@ Modal overlay. Dark card with settings form:
 - All components use Tailwind v4 classes (bg-slate-800, text-slate-100, rounded-xl, etc.)
 - Import formatBytes, formatSpeed, formatETA from '../api'
 - Dark theme: bg-slate-900 base, bg-slate-800 cards, blue-500 accent
-- After creating files: cd D:\IDMAM\electron\ui && npm install && npm run build
+- After creating files: cd D:\IDMM\electron\ui && npm install && npm run build
 - Report: files created, build success/failure, any errors

@@ -1,7 +1,7 @@
-# IDMAM Security & Quality Audit Report
+# IDMM Security & Quality Audit Report
 
 > **Date:** 2026-07-15 | **Auditor:** OPS-001 (automated subagent)
-> **Scope:** Full source audit of IDMAM v1.0.0 — engine, server, DB, utils, extension, deps
+> **Scope:** Full source audit of IDMM v1.0.0 — engine, server, DB, utils, extension, deps
 
 ---
 

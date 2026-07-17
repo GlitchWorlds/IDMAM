@@ -8,7 +8,7 @@ const { WebSocketServer } = require('ws');
 const path = require('node:path');
 
 /**
- * IDMAM API Server.
+ * IDMM API Server.
  *
  * Express REST API on localhost:9977 with WebSocket for real-time progress.
  * Security: 127.0.0.1 only, CORS whitelist, rate limiting.
@@ -17,7 +17,7 @@ const path = require('node:path');
 const PORT = 9977;
 const HOST = '127.0.0.1';
 const WS_BROADCAST_INTERVAL = 500; // ms
-const DEBUG = process.env.IDMAM_DEBUG === '1' || process.env.DEBUG === 'idmam';
+const DEBUG = process.env.IDMM_DEBUG === '1' || process.env.DEBUG === 'idmm';
 const debugLog = DEBUG ? console.log.bind(console) : () => {};
 
 /**
@@ -44,10 +44,10 @@ function sanitizeError(err) {
   return 'Internal server error';
 }
 
-class IDRAMServer {
+class IDMMServer {
   /**
    * @param {Object} options
-   * @param {Object} options.db - IDMAMDatabase instance
+   * @param {Object} options.db - IDMMDatabase instance
    * @param {Object} options.downloader - DownloadManager instance
    */
   constructor({ db, downloader }) {
@@ -95,7 +95,7 @@ class IDRAMServer {
         callback(new Error('CORS not allowed'));
       },
       methods: ['GET', 'POST', 'PUT', 'DELETE'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-IDMAM-Token'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-IDMM-Token'],
     }));
 
     // JSON body parsing
@@ -172,7 +172,7 @@ class IDRAMServer {
         }
 
         // SSRF protection — block localhost/private IPs (skip in test mode)
-        const isTestMode = process.env.IDMAM_TEST === '1' || process.env.NODE_ENV === 'test';
+        const isTestMode = process.env.IDMM_TEST === '1' || process.env.NODE_ENV === 'test';
         if (!isTestMode) {
           const hostname = parsedUrl.hostname.toLowerCase();
           const BLOCKED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0', '::1', '[::1]'];
@@ -586,14 +586,14 @@ class IDRAMServer {
       };
 
       this.server.listen(PORT, HOST, () => {
-        debugLog(`[IDMAM] API Server running at http://${HOST}:${PORT}`);
-        debugLog(`[IDMAM] WebSocket at ws://${HOST}:${PORT}/ws`);
+        debugLog(`[IDMM] API Server running at http://${HOST}:${PORT}`);
+        debugLog(`[IDMM] WebSocket at ws://${HOST}:${PORT}/ws`);
         resolve();
       });
 
       this.server.on('error', (err) => {
         if (err.code === 'EADDRINUSE') {
-          console.error(`[IDMAM] Port ${PORT} is already in use`);
+          console.error(`[IDMM] Port ${PORT} is already in use`);
         }
         reject(err);
       });
@@ -639,7 +639,7 @@ class IDRAMServer {
       if (this.server) {
         this.server.close(() => {
           this.server = null;
-          debugLog('[IDMAM] Server stopped');
+          debugLog('[IDMM] Server stopped');
           resolve();
         });
       } else {
@@ -651,4 +651,4 @@ class IDRAMServer {
   }
 }
 
-module.exports = IDRAMServer;
+module.exports = IDMMServer;

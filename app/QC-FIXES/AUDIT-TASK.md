@@ -1,9 +1,9 @@
-# IDMAM Security & Quality Audit Task
+# IDMM Security & Quality Audit Task
 
 > **Date:** 2026-07-15 | **Auditor:** OPS-001
 
 ## Mission
-Security audit + code quality review of IDMAM download manager at D:\IDMAM\app\
+Security audit + code quality review of IDMM download manager at D:\IDMM\app\
 
 ## Scope
 - Source: app/src/engine/*.js, app/src/server/server.js, app/src/db/*.js, app/src/utils/*.js
@@ -75,4 +75,4 @@ Security audit + code quality review of IDMAM download manager at D:\IDMAM\app\
 ## Output Contract
 - One line per check: ✅ PASS / ❌ FAIL / ⚠️ WARNING
 - Severity rating for each finding
-- Save to D:\IDMAM\app\QC-FIXES\AUDIT-REPORT.md
+- Save to D:\IDMM\app\QC-FIXES\AUDIT-REPORT.md

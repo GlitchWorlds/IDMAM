@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 /**
- * IDMAM Chunk Merger.
+ * IDMM Chunk Merger.
  *
  * Merges all chunk .part files into the final output file.
  * Optionally verifies SHA-256 checksum after merge.

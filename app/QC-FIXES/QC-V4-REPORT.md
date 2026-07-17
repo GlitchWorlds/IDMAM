@@ -1,4 +1,4 @@
-# IDMAM QC V4 Report — Production Audit
+# IDMM QC V4 Report — Production Audit
 
 **Date:** 2026-07-15 16:56 GMT+7  
 **Auditor:** MANAGER-001 Subagent  
@@ -59,9 +59,9 @@
 | SSRF check blocks 192.168.*.* | ✅ PASS |
 | SSRF check blocks 10.*.*.* | ✅ PASS |
 | SSRF check blocks 172.16-31.*.* | ✅ PASS |
-| Test mode bypass: IDMAM_TEST=1 | ✅ PASS |
+| Test mode bypass: IDMM_TEST=1 | ✅ PASS |
 | Test mode bypass: NODE_ENV=test | ✅ PASS |
-| test.js sets process.env.IDMAM_TEST='1' | ✅ PASS |
+| test.js sets process.env.IDMM_TEST='1' | ✅ PASS |
 | SSRF check runs BEFORE _probeUrl() | ✅ PASS |
 | **SSRF protection does NOT cover redirects** | ⚠️ **WARNING** — _probeUrl() and chunk-worker follow redirects without re-checking SSRF. A redirect from allowed domain to 127.0.0.1 would bypass SSRF. Medium severity. |
 
@@ -90,10 +90,10 @@
 
 | Check | Result |
 |-------|--------|
-| IDMAM_TEST env var checked in SSRF guard | ✅ PASS |
+| IDMM_TEST env var checked in SSRF guard | ✅ PASS |
 | NODE_ENV=test checked in SSRF guard | ✅ PASS |
 | Test mode only bypasses SSRF, not other protections | ✅ PASS — rate limit, CORS, path traversal still active |
-| test.js properly sets IDMAM_TEST=1 | ✅ PASS |
+| test.js properly sets IDMM_TEST=1 | ✅ PASS |
 
 ---
 

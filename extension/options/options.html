@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IDMAM — Settings</title>
+  <title>IDMM — Settings</title>
   <link rel="stylesheet" href="options.css">
 </head>
 <body>
   <div class="container">
     <header class="page-header">
-      <h1>⚡ IDMAM Settings</h1>
+      <h1>⚡ IDMM Settings</h1>
       <p class="subtitle">Configure download interception</p>
     </header>
 
-    <!-- IDMAM Status -->
+    <!-- IDMM Status -->
     <section class="section">
-      <h2 class="section-title">📡 IDMAM Status</h2>
+      <h2 class="section-title">📡 IDMM Status</h2>
       <div class="setting-row">
         <label>Status</label>
         <div class="setting-control">
@@ -28,7 +28,7 @@
     <section class="section">
       <h2 class="section-title">🔧 Extension</h2>
       <div class="setting-row">
-        <label for="ext-enabled">Enable IDMAM Integration</label>
+        <label for="ext-enabled">Enable IDMM Integration</label>
         <div class="setting-control">
           <label class="toggle">
             <input type="checkbox" id="ext-enabled" checked>
@@ -42,7 +42,7 @@
     <!-- Auto-intercept rules -->
     <section class="section">
       <h2 class="section-title">📥 Auto-Intercept Rules</h2>
-      <p class="section-desc">Choose which file types are automatically sent to IDMAM. Small files (&lt; 5MB) are never intercepted.</p>
+      <p class="section-desc">Choose which file types are automatically sent to IDMM. Small files (&lt; 5MB) are never intercepted.</p>
 
       <div class="intercept-grid">
         <div class="intercept-card">
@@ -122,11 +122,11 @@
         <label for="default-save-path">Default Save Path</label>
         <div class="setting-control">
           <div class="save-path-row">
-            <input type="text" id="default-save-path" placeholder="Leave empty for IDMAM default" value="">
+            <input type="text" id="default-save-path" placeholder="Leave empty for IDMM default" value="">
             <button type="button" id="btn-browse" class="btn btn-secondary btn-browse">Browse…</button>
           </div>
           <input type="file" id="folder-picker" webkitdirectory style="display:none">
-          <span class="setting-hint">Override IDMAM's default save directory</span>
+          <span class="setting-hint">Override IDMM's default save directory</span>
         </div>
       </div>
       <div class="setting-row">

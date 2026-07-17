@@ -1,14 +1,14 @@
-# IDMAM QC Task — Full Integration Test
+# IDMM QC Task — Full Integration Test
 
 > **Date:** 2026-07-15 | **Auditor:** QC Team
 
 ## Mission
-Verify IDMAM works end-to-end. Test every workflow path. Report bugs.
+Verify IDMM works end-to-end. Test every workflow path. Report bugs.
 
 ## Test Plan
 
 ### T1 — Server Health
-- Start IDMAM server: cd D:\IDMAM\app && node src/server/server.js
+- Start IDMM server: cd D:\IDMM\app && node src/server/server.js
 - GET http://localhost:9977/api/health → expect 200
 - Verify JSON response with uptime
 
@@ -67,4 +67,4 @@ Verify IDMAM works end-to-end. Test every workflow path. Report bugs.
 ## Output Contract
 - One line per test: ✅ PASS / ❌ FAIL / ⚠️ WARNING
 - Detail for failures
-- Save to D:\IDMAM\app\QC-FIXES\QC-INTEGRATION-REPORT.md
+- Save to D:\IDMM\app\QC-FIXES\QC-INTEGRATION-REPORT.md

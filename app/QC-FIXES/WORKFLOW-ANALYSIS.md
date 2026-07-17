@@ -1,4 +1,4 @@
-# IDMAM — Workflow Analysis
+# IDMM — Workflow Analysis
 
 > **Date:** 2026-07-15 | **Analyst:** MANAGER-001
 
@@ -157,7 +157,7 @@ RESUME:
 ## File System Layout
 
 ```
-D:\IDMAM\app\
+D:\IDMM\app\
 ├── downloads/                    # Completed files land here
 │   ├── Videos/                   # Auto-categorized by MIME
 │   ├── Music/
@@ -173,7 +173,7 @@ D:\IDMAM\app\
 │       └── download.json         # Resume state
 │
 └── data/
-    └── idmam.db                  # SQLite database (sql.js WASM)
+    └── IDMM.db                  # SQLite database (sql.js WASM)
 ```
 
 ## Key Architectural Decisions

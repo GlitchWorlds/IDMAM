@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 /**
- * SHA-256 checksum utilities for IDMAM.
+ * SHA-256 checksum utilities for IDMM.
  * Used for file integrity verification after download.
  */
 

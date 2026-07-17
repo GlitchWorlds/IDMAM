@@ -1,4 +1,4 @@
-# IDMAM Full QC Report
+# IDMM Full QC Report
 **Date:** 2026-07-14 20:50 WIB
 **Auditor:** MANAGER-001 (direct — sub-agents failed due to context timeout)
 
@@ -33,7 +33,7 @@
 ## Issues Requiring Fix
 
 ### ISSUE 1: `undici` dependency in app/package.json (MEDIUM)
-- **File:** `D:\IDMAM\app\package.json`
+- **File:** `D:\IDMM\app\package.json`
 - **Problem:** `undici: ^7.0.0` listed as dependency but NOT used anywhere in source code (0 matches in all .js files)
 - **Impact:** Dead dependency — increases package size unnecessarily
 - **Fix:** Remove `undici` from app/package.json dependencies
@@ -51,7 +51,7 @@
 - **Fix:** Pin helmet version or add explicit CJS resolution
 
 ### ISSUE 4: Extension host_permissions too broad (LOW)
-- **File:** `D:\IDMAM\extension\manifest.json`
+- **File:** `D:\IDMM\extension\manifest.json`
 - **Problem:** `"host_permissions": ["<all_urls>"]` — extension can access all URLs
 - **Impact:** Chrome Web Store review may flag this; users may be wary
 - **Fix:** Document why it's needed (download intercept requires access to all URLs) or narrow to specific patterns

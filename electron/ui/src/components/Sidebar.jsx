@@ -15,7 +15,7 @@ function Sidebar({ filter, onFilterChange, onSettingsClick, speedHistory, stats 
       {/* Logo */}
       <div className="p-6 border-b border-slate-800">
         <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-          IDMAM
+          IDMM
         </h1>
         <p className="text-xs text-slate-500 mt-1">Download Manager</p>
       </div>

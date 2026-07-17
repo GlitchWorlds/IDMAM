@@ -1,4 +1,4 @@
-# IDMAM Security Audit V2 — Full Report
+# IDMM Security Audit V2 — Full Report
 
 **Date:** 2026-07-15  
 **Auditor:** MANAGER-001 (automated)  
@@ -38,7 +38,7 @@ No critical security vulnerabilities found. All warnings are medium/low severity
 | **CORS** | ✅ | Whitelist: `localhost`, `127.0.0.1`, `chrome-extension://`, `moz-extension://`. Rejects all other origins. |
 | **Rate limiter** | ✅ | In-memory 100 req/min per IP with 429 response + `retry_after`. TTL-based eviction every 5 min prevents memory leak. |
 | **WebSocket security** | ✅ | `maxPayload: 64KB` prevents memory abuse. Origin verification on connection. Heartbeat ping/pong terminates dead clients every 30s. |
-| **Auth** | ✅ | Binds to `127.0.0.1:9977` only — not exposed to network. Accepts `X-IDMAM-Token` header (ready for future auth). No open relay. |
+| **Auth** | ✅ | Binds to `127.0.0.1:9977` only — not exposed to network. Accepts `X-IDMM-Token` header (ready for future auth). No open relay. |
 | **Input validation** | ✅ | URL validated via `new URL()`. Settings updates whitelisted against `allowedKeys` array. JSON body limit `1mb`. |
 | **Resource cleanup** | ✅ | `stop()` is idempotent (guards against double-call). Clears all timers, closes all WS clients, closes HTTP server. |
 

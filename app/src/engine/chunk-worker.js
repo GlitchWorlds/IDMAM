@@ -8,7 +8,7 @@ const path = require('node:path');
 const { validateRedirect } = require('../utils/ssrf');
 
 /**
- * IDMAM Chunk Worker Thread.
+ * IDMM Chunk Worker Thread.
  *
  * Downloads a specific byte range of a file using HTTP Range requests.
  * Communicates progress back to the main thread via parentPort.
@@ -107,7 +107,7 @@ function downloadChunk(attempt, currentUrl, redirectCount = 0) {
       method: 'GET',
       headers: {
         'Range': rangeHeader,
-        'User-Agent': 'IDMAM/1.0',
+        'User-Agent': 'IDMM/1.0',
         'Accept': '*/*',
         ...extraHeaders,
       },

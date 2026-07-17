@@ -51,7 +51,7 @@ Date: 2026-07-15 | Audited by: Manager Agent (subagent)
 
 | Issue | Severity | Detail |
 |-------|----------|--------|
-| ❌ **No authentication** | Critical | Anyone on localhost (other processes, malicious extensions, other users on multi-user machine) has full control. Add a token header check (`X-IDMAM-Token`) — the header is already in CORS `allowedHeaders` but never validated. |
+| ❌ **No authentication** | Critical | Anyone on localhost (other processes, malicious extensions, other users on multi-user machine) has full control. Add a token header check (`X-IDMM-Token`) — the header is already in CORS `allowedHeaders` but never validated. |
 | Rate limiter memory leak | Medium | Unbounded Map; replace with LRU or add periodic sweep. |
 | WS no ping/pong | Low | Stale connections accumulate; add `ws.isAlive` heartbeat. |
 | `DELETE` is destructive with no auth | Medium | Acceptable for localhost-only, but combine with auth token above. |
@@ -61,7 +61,7 @@ Date: 2026-07-15 | Audited by: Manager Agent (subagent)
 
 ## Recommendations (Priority Order)
 
-1. **Add token auth** — Generate a random token at startup, require `X-IDMAM-Token` header on all API routes. Pass it to the frontend via env/config. This is the single highest-impact security fix.
+1. **Add token auth** — Generate a random token at startup, require `X-IDMM-Token` header on all API routes. Pass it to the frontend via env/config. This is the single highest-impact security fix.
 2. **Extract shared origin validator** — Deduplicate CORS origin logic into `_isAllowedOrigin()` and call it from both the CORS middleware and WS connection handler.
 3. **Add WS ping/pong** — `setInterval` ping every 30s, terminate clients that don't pong back.
 4. **Sweep rate limiter** — Add a 60s interval to delete entries older than the window from `rateLimitMap`.

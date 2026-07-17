@@ -1,8 +1,8 @@
 /**
- * IDMAM Chrome Extension — Background Service Worker (Manifest V3)
+ * IDMM Chrome Extension — Background Service Worker (Manifest V3)
  *
- * 1. Intercepts browser downloads → sends to IDMAM via REST API
- * 2. Context menu: "Download with IDMAM" for links/images/video/audio
+ * 1. Intercepts browser downloads → sends to IDMM via REST API
+ * 2. Context menu: "Download with IDMM" for links/images/video/audio
  * 3. Badge showing active download count (poll every 2s)
  * 4. Handles messages from popup and options pages
  */
@@ -24,7 +24,7 @@ const WS_URL = 'ws://127.0.0.1:9977';
 // ─── Health Check ───────────────────────────────────────────────
 
 async function checkServer() {
-  serverOnline = await IDMAM_API.healthCheck();
+  serverOnline = await IDMM_API.healthCheck();
   updateBadge();
   return serverOnline;
 }
@@ -61,7 +61,7 @@ function connectWebSocket() {
   }
 
   ws.onopen = () => {
-    console.log('[IDMAM] WebSocket connected');
+    console.log('[IDMM] WebSocket connected');
     wsReconnectDelay = 1000; // Reset backoff on successful connection
   };
 
@@ -71,12 +71,12 @@ function connectWebSocket() {
 
       // Settings changed (from another client or desktop app) → update local cache
       if (data.type === 'SETTINGS_CHANGED' && data.settings) {
-        const mapped = IDMAM_API._mapServerToLocal(data.settings);
+        const mapped = IDMM_API._mapServerToLocal(data.settings);
         // Preserve extension-only settings (enabled)
-        chrome.storage.local.get('idmam_settings', (result) => {
-          const localOnly = result.idmam_settings || {};
-          const merged = { ...IDMAM_API.defaultSettings(), ...mapped, enabled: localOnly.enabled ?? true };
-          chrome.storage.local.set({ idmam_settings: merged });
+        chrome.storage.local.get('idmm_settings', (result) => {
+          const localOnly = result.idmm_settings || {};
+          const merged = { ...IDMM_API.defaultSettings(), ...mapped, enabled: localOnly.enabled ?? true };
+          chrome.storage.local.set({ idmm_settings: merged });
         });
         // Notify popup(s)
         chrome.runtime.sendMessage({ type: 'SETTINGS_CHANGED' }).catch(() => {});
@@ -91,12 +91,12 @@ function connectWebSocket() {
         // No listeners (popup closed) — not an error
       });
     } catch (err) {
-      console.warn('[IDMAM] WebSocket message parse error:', err.message);
+      console.warn('[IDMM] WebSocket message parse error:', err.message);
     }
   };
 
   ws.onclose = () => {
-    console.log('[IDMAM] WebSocket closed, reconnecting...');
+    console.log('[IDMM] WebSocket closed, reconnecting...');
     ws = null;
     scheduleReconnect();
   };
@@ -112,19 +112,19 @@ function scheduleReconnect() {
   setTimeout(connectWebSocket, delay);
 }
 
-// ─── Send Download to IDMAM ─────────────────────────────────────
+// ─── Send Download to IDMM ─────────────────────────────────────
 
-async function sendToIDMAM({ url, filename, filesize, cookies, referrer }) {
+async function sendToIDMM({ url, filename, filesize, cookies, referrer }) {
   if (!serverOnline) {
-    console.log('[IDMAM] Server offline, skipping intercept');
+    console.log('[IDMM] Server offline, skipping intercept');
     return false;
   }
 
   try {
     // Get extension settings for defaults
-    const settings = await IDMAM_API.getSettings();
+    const settings = await IDMM_API.getSettings();
 
-    const result = await IDMAM_API.startDownload({
+    const result = await IDMM_API.startDownload({
       url,
       filename: filename || undefined,
       cookies: cookies || undefined,
@@ -133,12 +133,12 @@ async function sendToIDMAM({ url, filename, filesize, cookies, referrer }) {
       save_to: settings.defaultSavePath || undefined,
     });
 
-    console.log(`[IDMAM] Download sent: ${result.filename} (${result.id})`);
+    console.log(`[IDMM] Download sent: ${result.filename} (${result.id})`);
     activeDownloadCount++;
     updateBadge();
     return true;
   } catch (err) {
-    console.error('[IDMAM] Failed to send download:', err.message);
+    console.error('[IDMM] Failed to send download:', err.message);
     return false;
   }
 }
@@ -153,11 +153,11 @@ chrome.downloads.onDeterminingFilename.addListener(async (item, suggest) => {
   }
 
   // Check settings
-  const settings = await IDMAM_API.getSettings();
+  const settings = await IDMM_API.getSettings();
   if (!settings.enabled) return;
 
   // Check if file should be intercepted
-  const should = IDMAM_API.shouldIntercept(
+  const should = IDMM_API.shouldIntercept(
     item.filename,
     item.totalBytes,
     settings
@@ -165,8 +165,8 @@ chrome.downloads.onDeterminingFilename.addListener(async (item, suggest) => {
 
   if (!should) return;
 
-  // Send to IDMAM
-  const sent = await sendToIDMAM({
+  // Send to IDMM
+  const sent = await sendToIDMM({
     url: item.finalUrl || item.url,
     filename: item.filename,
     filesize: item.totalBytes,
@@ -190,20 +190,20 @@ chrome.downloads.onDeterminingFilename.addListener(async (item, suggest) => {
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
-    id: 'idmam-download-link',
-    title: 'Download with IDMAM',
+    id: 'idmm-download-link',
+    title: 'Download with IDMM',
     contexts: ['link'],
   });
 
   chrome.contextMenus.create({
-    id: 'idmam-download-media',
-    title: 'Download with IDMAM',
+    id: 'idmm-download-media',
+    title: 'Download with IDMM',
     contexts: ['image', 'video', 'audio'],
   });
 
   chrome.contextMenus.create({
-    id: 'idmam-download-selection',
-    title: 'Download selected URL with IDMAM',
+    id: 'idmm-download-selection',
+    title: 'Download selected URL with IDMM',
     contexts: ['selection'],
   });
 });
@@ -212,19 +212,19 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   let url = null;
 
   switch (info.menuItemId) {
-    case 'idmam-download-link':
+    case 'idmm-download-link':
       url = info.linkUrl;
       break;
-    case 'idmam-download-media':
+    case 'idmm-download-media':
       url = info.srcUrl || info.linkUrl;
       break;
-    case 'idmam-download-selection': {
+    case 'idmm-download-selection': {
       const text = (info.selectionText || '').trim();
       try {
         new URL(text);
         url = text;
       } catch {
-        console.log('[IDMAM] Selection is not a valid URL');
+        console.log('[IDMM] Selection is not a valid URL');
       }
       break;
     }
@@ -241,7 +241,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     // Cookies API may not be available without permission
   }
 
-  const sent = await sendToIDMAM({
+  const sent = await sendToIDMM({
     url,
     cookies,
     referrer: tab?.url || '',
@@ -252,8 +252,8 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       chrome.notifications?.create({
         type: 'basic',
         iconUrl: 'icons/icon128.png',
-        title: 'IDMAM',
-        message: 'Download sent to IDMAM',
+        title: 'IDMM',
+        message: 'Download sent to IDMM',
       });
     } catch { /* notifications may not be available */ }
   }
@@ -265,7 +265,7 @@ async function pollDownloads() {
   if (!serverOnline) return;
 
   try {
-    const downloads = await IDMAM_API.listDownloads();
+    const downloads = await IDMM_API.listDownloads();
     const active = downloads.filter(d =>
       d.status === 'downloading' || d.status === 'merging'
     );
@@ -288,7 +288,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
       case 'GET_DOWNLOADS':
         try {
-          const downloads = await IDMAM_API.listDownloads();
+          const downloads = await IDMM_API.listDownloads();
           return { ok: true, downloads };
         } catch (err) {
           return { ok: false, error: err.message, downloads: [] };
@@ -296,7 +296,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
       case 'PAUSE_DOWNLOAD':
         try {
-          const result = await IDMAM_API.pauseDownload(message.id);
+          const result = await IDMM_API.pauseDownload(message.id);
           return { ok: true, result };
         } catch (err) {
           return { ok: false, error: err.message };
@@ -304,7 +304,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
       case 'RESUME_DOWNLOAD':
         try {
-          const result = await IDMAM_API.resumeDownload(message.id);
+          const result = await IDMM_API.resumeDownload(message.id);
           return { ok: true, result };
         } catch (err) {
           return { ok: false, error: err.message };
@@ -312,7 +312,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
       case 'CANCEL_DOWNLOAD':
         try {
-          const result = await IDMAM_API.cancelDownload(message.id);
+          const result = await IDMM_API.cancelDownload(message.id);
           return { ok: true, result };
         } catch (err) {
           return { ok: false, error: err.message };
@@ -320,7 +320,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
       case 'DELETE_DOWNLOAD':
         try {
-          const result = await IDMAM_API.deleteDownload(message.id);
+          const result = await IDMM_API.deleteDownload(message.id);
           return { ok: true, result };
         } catch (err) {
           return { ok: false, error: err.message };
@@ -328,7 +328,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
       case 'ADD_DOWNLOAD':
         try {
-          const result = await IDMAM_API.startDownload(message.downloadInfo);
+          const result = await IDMM_API.startDownload(message.downloadInfo);
           return { ok: true, result };
         } catch (err) {
           return { ok: false, error: err.message };
@@ -362,5 +362,5 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   setInterval(checkServer, 10000); // Health check every 10s
   setInterval(pollDownloads, 5000); // E5: Poll downloads every 5s (reduced from 2s)
 
-  console.log('[IDMAM] Extension service worker started');
+  console.log('[IDMM] Extension service worker started');
 })();

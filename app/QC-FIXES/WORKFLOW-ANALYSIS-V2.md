@@ -1,4 +1,4 @@
-# IDMAM — Workflow Analysis v2 (Post-Fix)
+# IDMM — Workflow Analysis v2 (Post-Fix)
 
 > **Date:** 2026-07-15 15:15 WIB | **Analyst:** MANAGER-001
 > **Status:** Updated after 13 QC/Audit fixes (commit f8ec27c)

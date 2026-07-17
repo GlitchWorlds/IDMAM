@@ -5,7 +5,7 @@ const path = require('node:path');
 const os = require('node:os');
 const fs = require('node:fs');
 
-// ─── IDMAM Core ─────────────────────────────────────────────────
+// ─── IDMM Core ─────────────────────────────────────────────────
 // Resolve engine paths — works in both dev and packaged mode
 function resolveEngine() {
   // Try multiple candidate paths (covers dev, asar, no-asar, portable)
@@ -22,19 +22,19 @@ function resolveEngine() {
     } catch {}
   }
   // Fallback: let it fail with a clear error
-  throw new Error(`[IDMAM] Cannot find engine. Tried: ${candidates.join(', ')}`);
+  throw new Error(`[IDMM] Cannot find engine. Tried: ${candidates.join(', ')}`);
 }
 
 const APP_DIR = resolveEngine();
 
-const IDMAMDatabase = require(path.join(APP_DIR, 'src', 'db', 'sqlite'));
+const IDMMDatabase = require(path.join(APP_DIR, 'src', 'db', 'sqlite'));
 const DownloadManager = require(path.join(APP_DIR, 'src', 'engine', 'downloader'));
-const IDRAMServer = require(path.join(APP_DIR, 'src', 'server', 'server'));
+const IDMMServer = require(path.join(APP_DIR, 'src', 'server', 'server'));
 
-const DATA_DIR = path.join(os.homedir(), '.idmam');
-const DB_PATH = path.join(DATA_DIR, 'idmam.db');
+const DATA_DIR = path.join(os.homedir(), '.idmm');
+const DB_PATH = path.join(DATA_DIR, 'idmm.db');
 const TEMP_DIR = path.join(DATA_DIR, 'temp');
-const DEFAULT_SAVE_PATH = path.join(os.homedir(), 'Downloads', 'IDMAM');
+const DEFAULT_SAVE_PATH = path.join(os.homedir(), 'Downloads', 'IDMM');
 const UI_DEV_URL = 'http://localhost:5174';
 const UI_PROD_PATH = path.join(__dirname, 'ui', 'build', 'index.html');
 
@@ -52,16 +52,16 @@ let downloader = null;
 // ─── Server Start ───────────────────────────────────────────────
 
 async function startServer() {
-  console.log('[IDMAM] Starting server...');
-  db = await IDMAMDatabase.create(DB_PATH);
+  console.log('[IDMM] Starting server...');
+  db = await IDMMDatabase.create(DB_PATH);
   downloader = new DownloadManager({
     db,
     tempDir: TEMP_DIR,
     settings: db.getAllSettings(),
   });
-  server = new IDRAMServer({ db, downloader });
+  server = new IDMMServer({ db, downloader });
   await server.start();
-  console.log('[IDMAM] Server ready on http://127.0.0.1:9977');
+  console.log('[IDMM] Server ready on http://127.0.0.1:9977');
 }
 
 // ─── Window ─────────────────────────────────────────────────────
@@ -72,7 +72,7 @@ function createWindow() {
     height: 700,
     minWidth: 600,
     minHeight: 400,
-    title: 'IDMAM - Internet Download Manager AI Max',
+    title: 'IDMM - Internet Download Manager Max',
     icon: path.join(__dirname, 'assets', 'icon.png'),
     backgroundColor: '#0f172a',
     show: false, // Show when ready
@@ -126,11 +126,11 @@ function createTray() {
   }
 
   tray = new Tray(trayIcon.resize({ width: 16, height: 16 }));
-  tray.setToolTip('IDMAM - Download Manager');
+  tray.setToolTip('IDMM - Download Manager');
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: 'Show IDMAM',
+      label: 'Show IDMM',
       click: () => {
         if (mainWindow) {
           mainWindow.show();
@@ -155,7 +155,7 @@ function createTray() {
     },
     { type: 'separator' },
     {
-      label: 'Quit IDMAM',
+      label: 'Quit IDMM',
       click: () => {
         app.isQuitting = true;
         app.quit();
@@ -194,7 +194,7 @@ app.whenReady().then(async () => {
       }
     }, 5000);
   } catch (err) {
-    console.error('[IDMAM] Fatal:', err);
+    console.error('[IDMM] Fatal:', err);
     app.quit();
   }
 });

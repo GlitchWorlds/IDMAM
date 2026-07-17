@@ -1,8 +1,8 @@
-# IDMAM v2 — QC Audit Report (Post-Fix)
+# IDMM v2 — QC Audit Report (Post-Fix)
 
 **Date:** 2026-07-15 15:15 GMT+7
-**Auditor:** QC Subagent (idmam-qc-v2)
-**Codebase:** D:\IDMAM\app (13 security/quality fixes applied)
+**Auditor:** QC Subagent (IDMM-qc-v2)
+**Codebase:** D:\IDMM\app (13 security/quality fixes applied)
 **Test Result:** ✅ **9/9 PASS** — `node test.js` all green
 
 ---
@@ -189,7 +189,7 @@ On redirect (301/302/303/307/308), the method recursively calls `_doSingleStream
 
 **Severity:** Warning | **File:** server.js, lines 83–101
 
-Rate limiting uses `req.ip`, which by default is `127.0.0.1` when behind no proxy. Since IDMAM binds to localhost only, this is fine. But if a reverse proxy is ever added, all clients would share one rate limit bucket.
+Rate limiting uses `req.ip`, which by default is `127.0.0.1` when behind no proxy. Since IDMM binds to localhost only, this is fine. But if a reverse proxy is ever added, all clients would share one rate limit bucket.
 
 **Impact:** N/A for current architecture (localhost-only). Just a forward-looking note.
 

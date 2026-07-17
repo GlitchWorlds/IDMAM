@@ -1,4 +1,4 @@
-# IDMAM QC Report — Utilities, Main & Test
+# IDMM QC Report — Utilities, Main & Test
 
 > **Audit Date:** 2026-07-15 | **Auditor:** Manager (manual)
 

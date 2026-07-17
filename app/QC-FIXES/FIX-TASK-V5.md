@@ -1,4 +1,4 @@
-# IDMAM v5 — User Bug Fixes
+# IDMM v5 — User Bug Fixes
 
 > Bob reported: 2026-07-15 22:00 WIB
 > Source: QC-V5-REPORT.md + manual code inspection
@@ -6,7 +6,7 @@
 ## BUG LIST
 
 ### B1: Save Path not applied during download ❌
-Root cause: `popup.js:addDownload()` calls `IDMAM_API.startDownload({ url })` without `save_to`.
+Root cause: `popup.js:addDownload()` calls `IDMM_API.startDownload({ url })` without `save_to`.
 Settings save correctly in chrome.storage.local but are NEVER READ when starting downloads.
 Fix: In addDownload(), read settings, pass `save_to: settings.defaultSavePath` to startDownload().
 
@@ -28,8 +28,8 @@ Fix: Add "📁 Open Folder" button for completed downloads. Use chrome.downloads
 Note: chrome.downloads API can open folder with chrome.downloads.show(id) — but we need the Chrome download ID. Alternative: use shell.openPath() via native messaging. Simplest: copy path to clipboard.
 
 ### B6: Extension intercept behavior (Chrome download then transfer)
-Root cause: This is by design — chrome.downloads API intercepts, cancels browser download, sends to IDMAM server. The "disappear and transfer" is expected.
-Fix: No code fix needed. But improve UX: show notification "Download intercepted by IDMAM" when transfer happens.
+Root cause: This is by design — chrome.downloads API intercepts, cancels browser download, sends to IDMM server. The "disappear and transfer" is expected.
+Fix: No code fix needed. But improve UX: show notification "Download intercepted by IDMM" when transfer happens.
 
 ## THEME / VISUAL FIXES
 

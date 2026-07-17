@@ -1,5 +1,5 @@
 /**
- * IDMAM Content Script — Page context for extracting download links.
+ * IDMM Content Script — Page context for extracting download links.
  * Minimal footprint: only responds to messages from background.js.
  */
 

@@ -1,8 +1,8 @@
 {
-  "name": "idmam-desktop",
+  "name": "idmm-desktop",
   "version": "1.1.0",
-  "description": "IDMAM - Internet Download Manager AI Max",
-  "author": "IDMAM",
+  "description": "IDMM - Internet Download Manager Max",
+  "author": "IDMM",
   "license": "MIT",
   "main": "main.js",
   "scripts": {
@@ -15,9 +15,9 @@
     "dist": "npm run prebuild && electron-builder --win --config"
   },
   "build": {
-    "appId": "com.idmam.desktop",
-    "productName": "IDMAM",
-    "copyright": "Copyright © 2026 IDMAM",
+    "appId": "com.idmm.desktop",
+    "productName": "IDMM",
+    "copyright": "Copyright © 2026 IDMM",
     "directories": {
       "output": "dist"
     },
@@ -64,7 +64,7 @@
       "installerHeaderIcon": "assets/icon.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "IDMAM",
+      "shortcutName": "IDMM",
       "include": "installer.nsh",
       "deleteAppDataOnUninstall": false,
       "runAfterFinish": true,

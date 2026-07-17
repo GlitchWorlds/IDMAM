@@ -1,4 +1,4 @@
-# IDMAM v4 — REMAINING FIX TASK
+# IDMM v4 — REMAINING FIX TASK
 
 > Generated: 2026-07-15
 > Sources: QC-V4-REPORT.md + AUDIT-V4-REPORT.md
@@ -11,7 +11,7 @@ Problem: SSRF check runs only on initial URL. All 3 redirect-following paths do 
 Attack: POST { url: "https://evil.com/r" } → evil.com 302 → http://192.168.1.1/admin → follows without check.
 
 Fix:
-1. Create shared utility: D:\IDMAM\app\src\utils\ssrf.js
+1. Create shared utility: D:\IDMM\app\src\utils\ssrf.js
    - export function isBlockedHost(hostname) — checks localhost, private IPs, link-local
    - export function validateRedirect(redirectUrl, baseUrl) — resolves redirect URL, checks host, throws if blocked
 
@@ -25,14 +25,14 @@ Fix:
 ## P1 — SHOULD FIX
 
 ### R2: sanitizeError pattern mismatches
-File: D:\IDMAM\app\src\server\server.js
+File: D:\IDMM\app\src\server\server.js
 Problem: SAFE_ERROR_PATTERNS don't match actual error strings:
 - Pattern: /^Concurrent download limit reached/i → Actual: "Maximum concurrent downloads reached (5)"
 - Pattern: /^URL already being downloaded$/i → Actual: "URL is already being downloaded"
 Fix: Update patterns to match actual strings. Make patterns more flexible (partial match OK for hardcoded strings).
 
 ### R3: Add link-local to SSRF blocklist
-File: D:\IDMAM\app\src\utils\ssrf.js (from R1)
+File: D:\IDMM\app\src\utils\ssrf.js (from R1)
 Problem: 169.254.x.x addresses not blocked.
 Fix: Add hostname.startsWith('169.254.') check.
 
@@ -51,5 +51,5 @@ Not blocking. Document as known limitation.
 1. Fix R1 (shared ssrf.js + all 3 redirect paths)
 2. Fix R2 (sanitizeError patterns)
 3. Fix R3 (link-local in ssrf.js)
-4. After fixes: cd D:\IDMAM\app && node test.js — all 9 must pass
+4. After fixes: cd D:\IDMM\app && node test.js — all 9 must pass
 5. Report: files changed, what was fixed per item

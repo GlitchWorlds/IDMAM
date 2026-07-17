@@ -1,4 +1,4 @@
-# IDMAM v1.1.0 — Security Hardened Release
+# IDMM v1.1.0 — Security Hardened Release
 
 **Release Date:** 2026-07-15
 **Status:** Production Ready ✅
@@ -97,16 +97,16 @@
 
 ## 📦 Installation
 
-1. Download IDMAM-Setup-1.1.0.exe from releases
+1. Download IDMM-Setup-1.1.0.exe from releases
 2. Run installer
 3. Load extension from `extension/` folder in Chrome (chrome://extensions → Load unpacked)
-4. IDMAM will auto-connect when running
+4. IDMM will auto-connect when running
 
 ---
 
 ## 🔄 Upgrade from v1.0.0
 
-1. Close IDMAM if running
+1. Close IDMM if running
 2. Install v1.1.0 (will replace v1.0.0)
 3. Extension auto-updates if loaded unpacked
 4. All download history preserved (SQLite DB unchanged)
@@ -136,4 +136,4 @@ e3da4bb fix: pause/resume crash - parseInt timeout/retry from DB
 
 ---
 
-**Full Changelog:** https://github.com/GlitchWorlds/IDMAM/compare/v1.0.0...v1.1.0
+**Full Changelog:** https://github.com/GlitchWorlds/IDMM/compare/v1.0.0...v1.1.0

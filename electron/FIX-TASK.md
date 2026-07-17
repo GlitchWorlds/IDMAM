@@ -1,9 +1,9 @@
-# CRITICAL BUG FIX: IDMAM Packaged App Crash
+# CRITICAL BUG FIX: IDMM Packaged App Crash
 
 ## Error (on user's PC after install)
 ```
 Error: Cannot find module
-'D:\Users\B\AppData\Local\Programs\IDMAM\resources\app.asar\app-engine\src\db\sqlite'
+'D:\Users\B\AppData\Local\Programs\IDMM\resources\app.asar\app-engine\src\db\sqlite'
 ```
 
 ## Root Cause Analysis
@@ -16,7 +16,7 @@ When Electron packages the app with `asar: true`, `require()` fails to resolve p
 ## Required Fix (COMPREHENSIVE)
 
 ### Option A: Disable asar (SIMPLE, RECOMMENDED)
-In `D:\IDMAM\electron\package.json` build config:
+In `D:\IDMM\electron\package.json` build config:
 - Set `"asar": false`
 - Remove `"asarUnpack"` if present
 - This makes the app slightly larger but 100% reliable
@@ -68,12 +68,12 @@ After building, test that ALL these resolve correctly:
 For NSIS: `extraResources` copies to `process.resourcesPath`, not `__dirname`.
 
 ## Steps
-1. Read current `D:\IDMAM\electron\package.json` and `D:\IDMAM\electron\main.js`
+1. Read current `D:\IDMM\electron\package.json` and `D:\IDMM\electron\main.js`
 2. Fix package.json: set `"asar": false`, ensure all files included
 3. Fix main.js: robust path resolution for both dev and packaged
-4. Run `cd D:\IDMAM\electron && npm run build` to rebuild
+4. Run `cd D:\IDMM\electron && npm run build` to rebuild
 5. Verify `dist/win-unpacked/resources/` contains all needed files
-6. Verify `dist/IDMAM-Setup-1.0.0.exe` is generated
+6. Verify `dist/IDMM-Setup-1.0.0.exe` is generated
 7. Report: what was changed, what files are in the packaged app
 
 ## CRITICAL

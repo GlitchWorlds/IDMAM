@@ -4,7 +4,7 @@ const path = require('node:path');
 const { URL } = require('node:url');
 
 /**
- * Smart filename resolver for IDMAM.
+ * Smart filename resolver for IDMM.
  * Extracts filename from Content-Disposition header or URL, sanitizes it,
  * and handles collision by appending (1), (2), etc.
  */

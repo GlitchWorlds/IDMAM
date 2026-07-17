@@ -1,4 +1,4 @@
-# IDMAM Extension — Full QC Report v5
+# IDMM Extension — Full QC Report v5
 
 > Auditor: Manager (manual deep inspection)
 > Date: 2026-07-15 22:35 WIB
@@ -22,10 +22,10 @@ Status: ✅ FIXED (bumped to 1.1.0)
 File: options.html, options.js
 Problem: User must manually type save path. No "Browse" button. Bad UX.
 Root cause: Chrome extensions can't use native folder picker directly.
-Fix: Add a "Browse" button that uses `<input type="file" webkitdirectory>` to pick a folder, then extract the path. Or at minimum, show the current IDMAM default path as placeholder.
+Fix: Add a "Browse" button that uses `<input type="file" webkitdirectory>` to pick a folder, then extract the path. Or at minimum, show the current IDMM default path as placeholder.
 
 ### E4: Save Path not sent to server on intercept ❌
-File: background.js → sendToIDMAM()
+File: background.js → sendToIDMM()
 Problem: When background intercepts a download (auto-intercept), it DOES pass `save_to` from settings. ✅ CORRECT.
 BUT: When user downloads via Chrome's download bar (not intercepted), the save path from settings is NOT applied because the download goes to Chrome's default location first.
 Fix: This is by design — intercepted downloads use settings, non-intercepted go to Chrome.
@@ -86,11 +86,11 @@ Not critical for v1.1.0.
 | Tab memory (last selected tab) | ✅ PASS |
 | Server URL hidden from UI | ✅ PASS |
 | Download intercept (auto) | ✅ PASS |
-| Context menu "Download with IDMAM" | ✅ PASS |
+| Context menu "Download with IDMM" | ✅ PASS |
 | Pause/Resume/Cancel/Delete | ✅ PASS |
 | Badge showing active count | ✅ PASS |
 | Health check (Connected/Not Running) | ✅ PASS |
-| Settings applied in sendToIDMAM() | ✅ PASS |
+| Settings applied in sendToIDMM() | ✅ PASS |
 | Settings applied in addDownload() | ✅ PASS |
 | CSP locked to :9977 | ✅ PASS |
 | No serverUrl in api-client.js | ✅ PASS |

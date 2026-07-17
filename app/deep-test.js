@@ -1,6 +1,6 @@
 'use strict';
 /**
- * IDMAM Deep Function Test Suite
+ * IDMM Deep Function Test Suite
  * Tests edge cases, error handling, concurrent ops, boundary conditions
  */
 const http = require('node:http');
@@ -10,7 +10,7 @@ const fs = require('node:fs');
 const crypto = require('node:crypto');
 
 const TEST_PORT = 19895;
-const testDir = path.join(os.tmpdir(), 'idmam_deep_' + Date.now());
+const testDir = path.join(os.tmpdir(), 'IDMM_deep_' + Date.now());
 fs.mkdirSync(testDir, { recursive: true });
 fs.mkdirSync(path.join(testDir, 'temp'), { recursive: true });
 fs.mkdirSync(path.join(testDir, 'downloads'), { recursive: true });
@@ -148,18 +148,18 @@ const testServer = http.createServer((req, res) => {
 
 async function run() {
   console.log('╔══════════════════════════════════════════════════════╗');
-  console.log('║  IDMAM Deep Function Test Suite                     ║');
+  console.log('║  IDMM Deep Function Test Suite                     ║');
   console.log('╚══════════════════════════════════════════════════════╝\n');
 
   await new Promise(r => testServer.listen(TEST_PORT, '127.0.0.1', r));
   console.log(`  Test server on port ${TEST_PORT}\n`);
 
-  const IDMAMDatabase = require('./src/db/sqlite');
+  const IDMMDatabase = require('./src/db/sqlite');
   const DownloadEngine = require('./src/engine/downloader');
-  process.env.IDMAM_TEST = '1';
-  const IDMAMServer = require('./src/server/server');
+  process.env.IDMM_TEST = '1';
+  const IDMMServer = require('./src/server/server');
 
-  const db = await IDMAMDatabase.create(path.join(testDir, 'test.db'));
+  const db = await IDMMDatabase.create(path.join(testDir, 'test.db'));
   db.setSetting('default_save_path', path.join(testDir, 'downloads'));
   const settings = db.getAllSettings();
 
@@ -172,7 +172,7 @@ async function run() {
     onComplete: (id, r) => completedResults.push({ id, ...r }),
     onError: (id, err) => errorResults.push({ id, error: err.message }),
   });
-  const server = new IDMAMServer({ db, downloader });
+  const server = new IDMMServer({ db, downloader });
   await server.start();
 
   function req(method, urlPath, body) {
@@ -220,7 +220,7 @@ async function run() {
 
   // 1.4 Blocked URL (localhost SSRF — test mode bypassed, but still test the path)
   const r4 = await req('POST', '/api/download', { url: 'http://127.0.0.1:1/secret' });
-  // In test mode (IDMAM_TEST=1), SSRF is bypassed so this may succeed or fail for other reasons
+  // In test mode (IDMM_TEST=1), SSRF is bypassed so this may succeed or fail for other reasons
   warning('1.4 SSRF test mode', `status=${r4.s} (SSRF bypassed in test mode)`);
 
   // 1.5 Duplicate URL

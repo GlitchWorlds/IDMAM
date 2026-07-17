@@ -1,6 +1,6 @@
 # QC Audit — chunk-worker.js
 
-**File:** `D:\IDMAM\app\src\engine\chunk-worker.js`
+**File:** `D:\IDMM\app\src\engine\chunk-worker.js`
 **Date:** 2026-07-15
 **Scope:** Worker thread, 4 functions
 

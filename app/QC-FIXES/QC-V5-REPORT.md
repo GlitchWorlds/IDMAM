@@ -1,4 +1,4 @@
-# IDMAM QC v5 — Bug Report
+# IDMM QC v5 — Bug Report
 
 **Date:** 2026-07-15  
 **Tester:** Agent (automated code review)  
@@ -34,14 +34,14 @@ const settings = {
     defaultSavePath: $defaultSavePath.value.trim(),
     ...
 };
-await IDMAM_API.saveSettings(settings);
+await IDMM_API.saveSettings(settings);
 ```
 
 `api-client.js` saveSettings() persists to chrome.storage.local:
 ```js
 async saveSettings(settings) {
     return new Promise((resolve) => {
-      chrome.storage.local.set({ idmam_settings: settings }, resolve);
+      chrome.storage.local.set({ idmm_settings: settings }, resolve);
     });
 },
 ```
@@ -50,8 +50,8 @@ async saveSettings(settings) {
 ```js
 async getSettings() {
     return new Promise((resolve) => {
-      chrome.storage.local.get('idmam_settings', (result) => {
-        resolve(result.idmam_settings || IDMAM_API.defaultSettings());
+      chrome.storage.local.get('idmm_settings', (result) => {
+        resolve(result.idmm_settings || IDMM_API.defaultSettings());
       });
     });
 },
@@ -95,7 +95,7 @@ The `maxThreads` property is included in the saved settings object and read back
 **Evidence:**
 
 `options.html` section titles are:
-- `📡 IDMAM Status`
+- `📡 IDMM Status`
 - `🔧 Extension`
 - `📥 Auto-Intercept Rules`
 - `⚙️ Download Defaults`
@@ -199,7 +199,7 @@ The server returns `save_to` in download listings (`/api/downloads`), so the fol
 
 All section titles in the HTML:
 ```html
-<h2 class="section-title">📡 IDMAM Status</h2>
+<h2 class="section-title">📡 IDMM Status</h2>
 <h2 class="section-title">🔧 Extension</h2>
 <h2 class="section-title">📥 Auto-Intercept Rules</h2>
 <h2 class="section-title">⚙️ Download Defaults</h2>
@@ -215,8 +215,8 @@ No "Server Connection" or similar legacy title exists.
 
 | File | Path |
 |------|------|
-| Options JS | `D:\IDMAM\extension\options\options.js` |
-| Options HTML | `D:\IDMAM\extension\options\options.html` |
-| API Client | `D:\IDMAM\extension\lib\api-client.js` |
-| Popup JS | `D:\IDMAM\extension\popup\popup.js` |
-| Server JS | `D:\IDMAM\app\src\server\server.js` |
+| Options JS | `D:\IDMM\extension\options\options.js` |
+| Options HTML | `D:\IDMM\extension\options\options.html` |
+| API Client | `D:\IDMM\extension\lib\api-client.js` |
+| Popup JS | `D:\IDMM\extension\popup\popup.js` |
+| Server JS | `D:\IDMM\app\src\server\server.js` |

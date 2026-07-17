@@ -1,6 +1,6 @@
 # QC Audit — downloader.js (DownloadManager)
 
-**File:** `D:\IDMAM\app\src\engine\downloader.js` | **Lines:** 869 | **Functions:** 26  
+**File:** `D:\IDMM\app\src\engine\downloader.js` | **Lines:** 869 | **Functions:** 26  
 **Date:** 2026-07-15 | **Auditor:** Manager Agent (automated)
 
 ---

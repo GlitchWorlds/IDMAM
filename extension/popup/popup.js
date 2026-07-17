@@ -1,11 +1,11 @@
 'use strict';
 
 /**
- * IDMAM Extension — Popup Script.
+ * IDMM Extension — Popup Script.
  *
  * Renders the download list with real-time progress, supports
  * pause/resume/cancel/delete actions, and adding new downloads.
- * Uses IDMAM_API from lib/api-client.js (loaded via script tag in popup.html).
+ * Uses IDMM_API from lib/api-client.js (loaded via script tag in popup.html).
  */
 
 // ─── DOM references ────────────────────────────────────────────────
@@ -64,7 +64,7 @@ function setupEventListeners() {
       $tabs.forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       currentFilter = tab.dataset.filter;
-      chrome.storage.local.set({ idmam_lastTab: currentFilter });
+      chrome.storage.local.set({ idmm_lastTab: currentFilter });
       renderDownloads();
     });
   });
@@ -95,8 +95,8 @@ function setupEventListeners() {
 
 async function restoreLastTab() {
   return new Promise((resolve) => {
-    chrome.storage.local.get('idmam_lastTab', (result) => {
-      const saved = result.idmam_lastTab || 'active';
+    chrome.storage.local.get('idmm_lastTab', (result) => {
+      const saved = result.idmm_lastTab || 'active';
       currentFilter = saved;
       $tabs.forEach(t => {
         t.classList.toggle('active', t.dataset.filter === saved);
@@ -110,7 +110,7 @@ async function restoreLastTab() {
 
 async function loadSavePathHint() {
   try {
-    const settings = await IDMAM_API.getSettings();
+    const settings = await IDMM_API.getSettings();
     const path = settings.defaultSavePath;
     if (path) {
       $savePathHint.innerHTML = 'Save to: <strong>' + escapeHtml(path) + '</strong>';
@@ -127,7 +127,7 @@ async function loadSavePathHint() {
 // ─── Server status ─────────────────────────────────────────────────
 
 async function checkServerStatus() {
-  online = await IDMAM_API.healthCheck();
+  online = await IDMM_API.healthCheck();
   updateStatusBadge();
 }
 
@@ -135,11 +135,11 @@ function updateStatusBadge() {
   if (online) {
     $statusBadge.textContent = 'Online';
     $statusBadge.className = 'status-badge status-online';
-    $statusBadge.title = 'IDMAM server is running';
+    $statusBadge.title = 'IDMM server is running';
   } else {
     $statusBadge.textContent = 'Offline';
     $statusBadge.className = 'status-badge status-offline';
-    $statusBadge.title = 'IDMAM server is not running. Start the IDMAM app first.';
+    $statusBadge.title = 'IDMM server is not running. Start the IDMM app first.';
   }
 }
 
@@ -147,7 +147,7 @@ function updateStatusBadge() {
 
 async function refreshDownloads() {
   try {
-    downloads = await IDMAM_API.listDownloads();
+    downloads = await IDMM_API.listDownloads();
     online = true;
   } catch {
     online = false;
@@ -170,12 +170,12 @@ function renderDownloads() {
 
     if (!online) {
       $emptyState.querySelector('.empty-icon').textContent = '\u{1F50C}';
-      $emptyState.querySelector('.empty-text').textContent = 'IDMAM server is offline';
-      $emptyState.querySelector('.empty-hint').textContent = 'Start the IDMAM app, then try again';
+      $emptyState.querySelector('.empty-text').textContent = 'IDMM server is offline';
+      $emptyState.querySelector('.empty-hint').textContent = 'Start the IDMM app, then try again';
     } else if (currentFilter === 'active') {
       $emptyState.querySelector('.empty-icon').textContent = '\u{1F4E5}';
       $emptyState.querySelector('.empty-text').textContent = 'No active downloads';
-      $emptyState.querySelector('.empty-hint').textContent = 'Right-click a link → "Download with IDMAM"';
+      $emptyState.querySelector('.empty-hint').textContent = 'Right-click a link → "Download with IDMM"';
     } else {
       $emptyState.querySelector('.empty-icon').textContent = '\u{1F4ED}';
       $emptyState.querySelector('.empty-text').textContent = `No ${currentFilter} downloads`;
@@ -214,7 +214,7 @@ function updateStats() {
     .reduce((sum, d) => sum + (d.speed || 0), 0);
 
   $statsActive.textContent = `${active} active`;
-  $statsSpeed.textContent = IDMAM_API.formatSpeed(totalSpeed);
+  $statsSpeed.textContent = IDMM_API.formatSpeed(totalSpeed);
   $statsQueued.textContent = `${queued + paused} queued`;
 }
 
@@ -279,10 +279,10 @@ function createDownloadElement(dl) {
   let metaHtml = '';
   if (dl.status === 'downloading') {
     metaHtml = `
-      <span class="dl-speed">${IDMAM_API.formatSpeed(speed)}</span>
+      <span class="dl-speed">${IDMM_API.formatSpeed(speed)}</span>
       <span>·</span>
       <span>${dl.active_threads || dl.threads || 0}T</span>
-      ${eta > 0 ? `<span>·</span><span class="dl-eta">ETA ${IDMAM_API.formatETA(eta)}</span>` : ''}
+      ${eta > 0 ? `<span>·</span><span class="dl-eta">ETA ${IDMM_API.formatETA(eta)}</span>` : ''}
     `;
   } else if (dl.status === 'completed') {
     metaHtml = '<span>Complete</span>';
@@ -303,7 +303,7 @@ function createDownloadElement(dl) {
     <div class="dl-stats">
       <span class="dl-progress-text">${progress.toFixed(1)}%</span>
       <span>·</span>
-      <span>${IDMAM_API.formatBytes(downloaded)}${totalSize > 0 ? ' / ' + IDMAM_API.formatBytes(totalSize) : ''}</span>
+      <span>${IDMM_API.formatBytes(downloaded)}${totalSize > 0 ? ' / ' + IDMM_API.formatBytes(totalSize) : ''}</span>
       <span>·</span>
       ${metaHtml}
     </div>
@@ -330,19 +330,19 @@ async function handleAction(action, id, data = {}) {
   try {
     switch (action) {
       case 'pause':
-        await IDMAM_API.pauseDownload(id);
+        await IDMM_API.pauseDownload(id);
         break;
       case 'resume':
-        await IDMAM_API.resumeDownload(id);
+        await IDMM_API.resumeDownload(id);
         break;
       case 'cancel':
-        await IDMAM_API.cancelDownload(id);
+        await IDMM_API.cancelDownload(id);
         break;
       case 'delete':
-        await IDMAM_API.deleteDownload(id);
+        await IDMM_API.deleteDownload(id);
         break;
       case 'open-folder':
-        await IDMAM_API.openFolder(data.path);
+        await IDMM_API.openFolder(data.path);
         showToast('Opening folder in Explorer...');
         return; // No refresh needed
     }
@@ -365,8 +365,8 @@ async function addDownload() {
 
   try {
     // B1+B2: Read settings and apply save path + threads
-    const settings = await IDMAM_API.getSettings();
-    await IDMAM_API.startDownload({
+    const settings = await IDMM_API.getSettings();
+    await IDMM_API.startDownload({
       url,
       save_to: settings.defaultSavePath || undefined,
       threads: settings.maxThreads || undefined,
@@ -377,7 +377,7 @@ async function addDownload() {
     $tabs.forEach(t => t.classList.remove('active'));
     document.querySelector('.tab[data-filter="active"]').classList.add('active');
     currentFilter = 'active';
-    chrome.storage.local.set({ idmam_lastTab: 'active' });
+    chrome.storage.local.set({ idmm_lastTab: 'active' });
     await refreshDownloads();
   } catch (err) {
     showError(`Failed: ${err.message}`);

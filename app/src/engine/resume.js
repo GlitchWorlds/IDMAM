@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 /**
- * IDMAM Resume Manager.
+ * IDMM Resume Manager.
  *
  * Dual persistence: saves download state to download.json files alongside
  * the SQLite database. This provides resilience — if the DB is corrupted
@@ -13,7 +13,7 @@ const path = require('node:path');
 
 class ResumeManager {
   /**
-   * @param {string} tempDir - Base temp directory (e.g., ~/.idmam/temp)
+   * @param {string} tempDir - Base temp directory (e.g., ~/.IDMM/temp)
    */
   constructor(tempDir) {
     this.tempDir = tempDir;

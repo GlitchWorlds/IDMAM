@@ -1,10 +1,10 @@
-## IDMAM v1.0.0
+## IDMM v1.0.0
 
 🚀 **First release** — Free, open-source IDM alternative
 
 ### Downloads
-- **IDMAM-Setup-1.0.0.exe** — Standard Windows installer (NSIS)
-- **IDMAM-Portable-1.0.0.exe** — Portable (no install needed)
+- **IDMM-Setup-1.0.0.exe** — Standard Windows installer (NSIS)
+- **IDMM-Portable-1.0.0.exe** — Portable (no install needed)
 
 ### Features
 - ⚡ Multi-threaded download (8-64 parallel streams via worker_threads)
@@ -21,8 +21,8 @@ Load unpacked from `extension/` folder, or install from Chrome Web Store (coming
 
 ### Build from Source
 ```bash
-git clone https://github.com/GlitchWorlds/IDMAM.git
-cd IDMAM/app && npm install
+git clone https://github.com/GlitchWorlds/IDMM.git
+cd IDMM/app && npm install
 cd ../electron && npm install && npm run build
 cd ../electron/ui && npm install && npm run build
 ```

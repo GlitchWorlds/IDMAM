@@ -1,4 +1,4 @@
-# IDMAM — Internet Download Manager AI Max
+# IDMM — Internet Download Manager Max
 ## Full System Design Document v1.0
 
 **Created:** 2026-07-14 | **Author:** MANAGER-001 | **Status:** DRAFT → APPROVAL
@@ -12,16 +12,16 @@ Download manager gratis, open-source, tanpa trial/bayar, dengan fitur **melampau
 
 ### Misi
 - Multi-threaded download (segmented/chunked) — kecepatan maksimal
-- Chrome Extension yang auto-intercept download → IDMAM
+- Chrome Extension yang auto-intercept download → IDMM
 - Resume capability (lanjut download yang terputus)
 - UI modern (dark mode, progress real-time)
 - **100% GRATIS, tanpa iklan, tanpa tracking**
 
 ---
 
-## 2. PERBANDINGAN FITUR: IDM vs IDMAM
+## 2. PERBANDINGAN FITUR: IDM vs IDMM
 
-| Fitur | IDM (Berbayar $24.95) | IDMAM (Gratis) |
+| Fitur | IDM (Berbayar $24.95) | IDMM (Gratis) |
 |-------|----------------------|----------------|
 | Multi-threaded download | ✅ 32 threads | ✅ 64 threads (default 8) |
 | Resume download | ✅ | ✅ |
@@ -38,15 +38,15 @@ Download manager gratis, open-source, tanpa trial/bayar, dengan fitur **melampau
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        IDMAM ECOSYSTEM                          │
+│                        IDMM ECOSYSTEM                          │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  ┌──────────────────┐    ┌──────────────────────────────────┐  │
-│  │  Chrome Extension │───▶│       IDMAM Desktop App          │  │
-│  │  (idmam-ext)      │    │       (Electron + Node.js)       │  │
+│  │  Chrome Extension │───▶│       IDMM Desktop App          │  │
+│  │  (IDMM-ext)      │    │       (Electron + Node.js)       │  │
 │  │                   │    │                                  │  │
 │  │  • Intercept DL   │    │  ┌────────────────────────────┐  │  │
-│  │  • Send to IDMAM  │    │  │    Download Engine          │  │  │
+│  │  • Send to IDMM  │    │  │    Download Engine          │  │  │
 │  │  • Show badge     │    │  │    (Node.js Worker Threads) │  │  │
 │  │  • Cookie sender  │    │  │                             │  │  │
 │  │                   │    │  │  ┌──────┐ ┌──────┐ ┌──────┐│  │  │
@@ -76,7 +76,7 @@ Download manager gratis, open-source, tanpa trial/bayar, dengan fitur **melampau
 │                                                                 │
 │  ┌──────────────────────────────────────────────────────────┐  │
 │  │                    Download Folder                         │  │
-│  │  ~/Downloads/IDMAM/                                       │  │
+│  │  ~/Downloads/IDMM/                                       │  │
 │  │  ├── Videos/          (auto-categorize by MIME)           │  │
 │  │  ├── Music/                                             │  │
 │  │  ├── Documents/                                         │  │
@@ -132,7 +132,7 @@ HEAD request → Get Content-Length + Accept-Ranges
 - `retry_count`: 3 per chunk
 - `timeout`: 30s per chunk
 - `speed_limit`: configurable per download or global
-- `temp_dir`: `~/.idmam/temp/<download_id>/` (chunks stored here)
+- `temp_dir`: `~/.IDMM/temp/<download_id>/` (chunks stored here)
 
 **Resume Mechanism:**
 ```
@@ -177,13 +177,13 @@ Metadata file: download.json
 - Rate limit: 100 req/min
 - No external access (bind to 127.0.0.1 only)
 
-### 4.3 Chrome Extension (idmam-ext)
+### 4.3 Chrome Extension (IDMM-ext)
 
 **Manifest V3** (Chrome Web Store compatible)
 
 **Components:**
 ```
-idmam-ext/
+IDMM-ext/
 ├── manifest.json           # Manifest V3
 ├── background.js           # Service Worker — intercept downloads
 ├── content.js              # Content script — page context
@@ -199,14 +199,14 @@ idmam-ext/
 │   ├── icon48.png
 │   └── icon128.png
 └── lib/
-    └── api-client.js       # Communication with IDMAM app
+    └── api-client.js       # Communication with IDMM app
 ```
 
 **Manifest.json key permissions:**
 ```json
 {
   "manifest_version": 3,
-  "name": "IDMAM Extension",
+  "name": "IDMM Extension",
   "permissions": [
     "downloads",
     "downloads.shelf",
@@ -238,8 +238,8 @@ chrome.downloads.onDeterminingFilename.addListener((item, suggest) => {
         chrome.downloads.cancel(item.id);
         chrome.downloads.erase({id: item.id});
         
-        // Send to IDMAM app
-        sendToIDMAM({
+        // Send to IDMM app
+        sendToIDMM({
             url: item.finalUrl || item.url,
             filename: item.filename,
             filesize: item.totalBytes,
@@ -250,15 +250,15 @@ chrome.downloads.onDeterminingFilename.addListener((item, suggest) => {
     }
 });
 
-// 2. Context menu: "Download with IDMAM"
+// 2. Context menu: "Download with IDMM"
 chrome.contextMenus.create({
-    title: "Download with IDMAM",
+    title: "Download with IDMM",
     contexts: ["link", "image", "video", "audio"],
-    onclick: (info) => sendToIDMAM({url: info.linkUrl || info.srcUrl})
+    onclick: (info) => sendToIDMM({url: info.linkUrl || info.srcUrl})
 });
 
-// 3. Communication with IDMAM app via native messaging or HTTP
-async function sendToIDMAM(downloadInfo) {
+// 3. Communication with IDMM app via native messaging or HTTP
+async function sendToIDMM(downloadInfo) {
     const response = await fetch('http://localhost:9977/api/download', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -288,7 +288,7 @@ async function sendToIDMAM(downloadInfo) {
 **Layout:**
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  IDMAM v1.0                              [⚙️ Settings] [─][□][×] │
+│  IDMM v1.0                              [⚙️ Settings] [─][□][×] │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │  [All] [Downloading] [Completed] [Paused] [Queue]    [🔍]  │
@@ -322,7 +322,7 @@ async function sendToIDMAM(downloadInfo) {
 ## 5. STRUKTUR PROJECT
 
 ```
-D:\IDMAM\
+D:\IDMM\
 ├── DESIGN.md                    # This file
 ├── package.json                 # Root workspace
 ├── app/                         # Electron Desktop App
@@ -385,7 +385,7 @@ D:\IDMAM\
 │       └── api-client.js
 │
 └── installer/                   # NSIS Installer (later)
-    └── idmam-setup.nsi
+    └── IDMM-setup.nsi
 ```
 
 ---
@@ -422,8 +422,8 @@ D:\IDMAM\
 - [ ] Express API server (localhost:9977)
 - [ ] WebSocket for real-time updates
 - [ ] Chrome Extension: intercept downloads
-- [ ] Extension: send to IDMAM via API
-- [ ] Extension: context menu "Download with IDMAM"
+- [ ] Extension: send to IDMM via API
+- [ ] Extension: context menu "Download with IDMM"
 - [ ] Extension: popup show active downloads
 
 ### Phase 3: Desktop UI (Week 2)
@@ -451,7 +451,7 @@ D:\IDMAM\
 {
   "url": "https://example.com/file.zip",
   "filename": "file.zip",           // optional, auto-detect
-  "save_to": "D:/Downloads/IDMAM",  // optional, default from settings
+  "save_to": "D:/Downloads/IDMM",  // optional, default from settings
   "threads": 8,                      // optional, default 8
   "cookies": "session=abc123",       // optional, from browser
   "referrer": "https://example.com", // optional

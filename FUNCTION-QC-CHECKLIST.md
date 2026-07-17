@@ -1,4 +1,4 @@
-# FUNCTION QC CHECKLIST — IDMAM v1.1.0
+# FUNCTION QC CHECKLIST — IDMM v1.1.0
 # Status: ✅ PASS | ⚠️ WARNING | ❌ FAIL → FIXED
 
 ## server.js — ✅ ALL PASS (22/22)

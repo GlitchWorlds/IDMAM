@@ -1,7 +1,7 @@
-# IDMAM QC v3 Report
+# IDMM QC v3 Report
 
 **Date:** 2026-07-15 15:44 GMT+7
-**Test environment:** D:\IDMAM\app (Windows, Node.js)
+**Test environment:** D:\IDMM\app (Windows, Node.js)
 
 ---
 

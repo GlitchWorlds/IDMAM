@@ -3,7 +3,7 @@
 const path = require('node:path');
 
 /**
- * MIME type detection and auto-categorization for IDMAM.
+ * MIME type detection and auto-categorization for IDMM.
  * Maps file extensions to MIME types and download categories.
  */
 
@@ -99,7 +99,7 @@ const EXTENSION_TO_MIME = {
   '.bat': 'application/x-bat',
 };
 
-// MIME type → category mapping for IDMAM auto-categorization
+// MIME type → category mapping for IDMM auto-categorization
 const MIME_TO_CATEGORY = {
   'video/mp4': 'Videos',
   'video/x-matroska': 'Videos',

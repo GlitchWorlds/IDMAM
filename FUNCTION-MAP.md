@@ -1,4 +1,4 @@
-# IDMAM v1.1.0 — Full Module & Function Map
+# IDMM v1.1.0 — Full Module & Function Map
 
 > Generated: 2026-07-15 22:50 WIB
 > Total: 10 backend modules + 5 extension files
@@ -283,9 +283,9 @@ Chrome Extension                    Node.js Server
 | 18 | `connectWebSocket()` | Connect to `ws://127.0.0.1:9977` with exponential backoff |
 | 99 | `checkServer()` | Health check every 10s |
 | 107 | `updateBadge()` | Update extension badge (active count / OFF) |
-| 119 | `sendToIDMAM({ url, filename, ... })` | Send download to IDMAM server |
-| 149 | `onDeterminingFilename` listener | Intercept browser downloads → IDMAM |
-| 189 | Context menu setup | "Download with IDMAM" for links/media/selection |
+| 119 | `sendToIDMM({ url, filename, ... })` | Send download to IDMM server |
+| 149 | `onDeterminingFilename` listener | Intercept browser downloads → IDMM |
+| 189 | Context menu setup | "Download with IDMM" for links/media/selection |
 | 234 | `pollDownloads()` | Poll downloads every 5s (fallback) |
 | 250 | Message handlers | Handle popup/options messages |
 | 340 | `init()` | Startup — health check + WebSocket + polling |
