@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { LineChart, Line, ResponsiveContainer, YAxis, XAxis, Tooltip, CartesianGrid } from 'recharts';
+import { formatSpeed } from '../api';
 
 function SpeedGraph({ data = [], mini = false }) {
   const chartData = data.map((d, i) => ({
@@ -66,18 +67,6 @@ function SpeedGraph({ data = [], mini = false }) {
       </div>
     </div>
   );
-}
-
-function formatSpeed(bytesPerSec) {
-  if (!bytesPerSec) return '0 B/s';
-  const units = ['B/s', 'KB/s', 'MB/s', 'GB/s'];
-  let i = 0;
-  let speed = bytesPerSec;
-  while (speed >= 1024 && i < units.length - 1) {
-    speed /= 1024;
-    i++;
-  }
-  return `${speed.toFixed(1)} ${units[i]}`;
 }
 
 export default memo(SpeedGraph);

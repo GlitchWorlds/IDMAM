@@ -1,36 +1,5 @@
 import { memo } from 'react';
-import { pauseDownload, resumeDownload, cancelDownload, deleteDownload, openFolder } from '../api';
-
-function formatSize(bytes) {
-  if (!bytes) return '0 B';
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  let i = 0;
-  let size = bytes;
-  while (size >= 1024 && i < units.length - 1) {
-    size /= 1024;
-    i++;
-  }
-  return `${size.toFixed(1)} ${units[i]}`;
-}
-
-function formatSpeed(bytesPerSec) {
-  if (!bytesPerSec) return '0 B/s';
-  const units = ['B/s', 'KB/s', 'MB/s', 'GB/s'];
-  let i = 0;
-  let speed = bytesPerSec;
-  while (speed >= 1024 && i < units.length - 1) {
-    speed /= 1024;
-    i++;
-  }
-  return `${speed.toFixed(1)} ${units[i]}`;
-}
-
-function formatEta(seconds) {
-  if (!seconds || seconds <= 0) return '--';
-  if (seconds < 60) return `${Math.round(seconds)}s`;
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ${Math.round(seconds % 60)}s`;
-  return `${Math.floor(seconds / 3600)}h ${Math.floor((seconds % 3600) / 60)}m`;
-}
+import { pauseDownload, resumeDownload, cancelDownload, deleteDownload, openFolder, formatBytes as formatSize, formatSpeed, formatETA as formatEta } from '../api';
 
 function getStatusColor(status) {
   switch (status) {
@@ -57,7 +26,7 @@ function getStatusBadge(status) {
 }
 
 function DownloadItem({ download, onRefresh }) {
-  const { id, filename, url, status, progress, speed, size, downloaded, eta, save_to } = download;
+  const { id, filename, url, status, progress, speed, total_size, downloaded, eta, save_to } = download;
   const pct = progress || 0;
   const isActive = status === 'downloading' || status === 'active';
   const isPaused = status === 'paused';
@@ -107,8 +76,8 @@ function DownloadItem({ download, onRefresh }) {
             <span className={getStatusColor(status)}>
               {pct.toFixed(1)}%
             </span>
-            {downloaded != null && size != null && (
-              <span>{formatSize(downloaded)} / {formatSize(size)}</span>
+            {downloaded != null && total_size != null && (
+              <span>{formatSize(downloaded)} / {formatSize(total_size)}</span>
             )}
             {isActive && speed > 0 && (
               <span className="text-accent">{formatSpeed(speed)}</span>

@@ -150,7 +150,12 @@ class IDMMServer {
   _setupRoutes() {
     // Health check
     this.app.get('/api/health', (req, res) => {
-      res.json({ status: 'ok', version: '1.0.0', uptime: process.uptime() });
+      let serverVersion = '1.2.0';
+      try {
+        const pkg = require(path.join(__dirname, '..', '..', 'package.json'));
+        serverVersion = pkg.version || serverVersion;
+      } catch { /* use fallback */ }
+      res.json({ status: 'ok', version: serverVersion, uptime: process.uptime() });
     });
 
     // POST /api/download — Start a new download
@@ -177,6 +182,14 @@ class IDMMServer {
           const hostname = parsedUrl.hostname.toLowerCase();
           const BLOCKED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0', '::1', '[::1]'];
           if (BLOCKED_HOSTS.includes(hostname) || hostname.startsWith('192.168.') || hostname.startsWith('10.') || /^172\.(1[6-9]|2[0-9]|3[01])\./.test(hostname)) {
+            return res.status(400).json({ error: 'Cannot download from localhost or private network' });
+          }
+
+          // DNS resolution check — catch hosts that resolve to private/loopback IPs
+          const { validateDnsResolution } = require('../utils/ssrf');
+          try {
+            await validateDnsResolution(hostname);
+          } catch {
             return res.status(400).json({ error: 'Cannot download from localhost or private network' });
           }
         }
@@ -366,7 +379,7 @@ class IDMMServer {
         const allowedKeys = [
           'default_threads', 'default_thread_mode', 'max_concurrent_downloads', 'max_threads_per_download',
           'default_save_path', 'temp_dir', 'retry_count', 'timeout_ms',
-          'speed_limit_global', 'auto_resume', 'auto_categorize',
+          'speed_limit_global', 'auto_resume', 'auto_categorize', 'intercept_all',
           // Extension sync: intercept rules
           'intercept_min_size', 'intercept_video', 'intercept_audio',
           'intercept_archive', 'intercept_software', 'intercept_document',
@@ -406,7 +419,7 @@ class IDMMServer {
           return res.status(400).json({ error: 'path is required' });
         }
 
-        const { exec } = require('node:child_process');
+        const { execFile } = require('node:child_process');
         const fs = require('node:fs');
 
         // Determine if path is a file or directory
@@ -416,17 +429,15 @@ class IDMMServer {
         const platform = process.platform;
         if (platform === 'win32') {
           if (isDir) {
-            // Just open the directory directly
-            exec(`explorer "${filePath}"`);
+            execFile('explorer', [filePath]);
           } else {
-            // explorer /select highlights the file in its parent folder
-            exec(`explorer /select,"${filePath}"`);
+            execFile('explorer', ['/select,', filePath]);
           }
         } else if (platform === 'darwin') {
-          exec(isDir ? `open "${filePath}"` : `open -R "${filePath}"`);
+          execFile('open', isDir ? [filePath] : ['-R', filePath]);
         } else {
           const dir = isDir ? filePath : require('node:path').dirname(filePath);
-          exec(`xdg-open "${dir}"`);
+          execFile('xdg-open', [dir]);
         }
 
         res.json({ ok: true });

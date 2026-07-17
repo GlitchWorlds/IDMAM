@@ -1,5 +1,7 @@
 'use strict';
 
+const dns = require('node:dns');
+
 /**
  * SSRF (Server-Side Request Forgery) Protection Utilities.
  *
@@ -66,4 +68,26 @@ function validateRedirect(redirectUrl, baseUrl) {
   }
 }
 
-module.exports = { isBlockedHost, validateRedirect };
+/**
+ * Validate that a hostname does not resolve to a blocked IP address.
+ * Catches DNS rebinding / hosts that resolve to 127.0.0.1 (e.g. localtest.me).
+ *
+ * @param {string} hostname
+ * @returns {Promise<boolean>} true if safe
+ */
+async function validateDnsResolution(hostname) {
+  try {
+    const addresses = await dns.promises.lookup(hostname, { all: true });
+    for (const { address } of addresses) {
+      if (isBlockedHost(address.toLowerCase())) {
+        throw new Error(`Host ${hostname} resolves to blocked address: ${address}`);
+      }
+    }
+  } catch (err) {
+    if (err.message && err.message.includes('resolves to blocked')) throw err;
+    // DNS lookup failed (NXDOMAIN etc.) — let the connection fail naturally
+  }
+  return true;
+}
+
+module.exports = { isBlockedHost, validateRedirect, validateDnsResolution };

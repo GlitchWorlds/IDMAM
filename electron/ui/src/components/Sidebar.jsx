@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import SpeedGraph from './SpeedGraph';
+import { formatSpeed } from '../api';
 
 const NAV_ITEMS = [
   { key: 'all', label: 'All Downloads', icon: 'M4 6h16M4 10h16M4 14h16M4 18h16' },
@@ -78,18 +79,6 @@ function Sidebar({ filter, onFilterChange, onSettingsClick, speedHistory, stats 
       </div>
     </aside>
   );
-}
-
-function formatSpeed(bytesPerSec) {
-  if (!bytesPerSec) return '0 B/s';
-  const units = ['B/s', 'KB/s', 'MB/s', 'GB/s'];
-  let i = 0;
-  let speed = bytesPerSec;
-  while (speed >= 1024 && i < units.length - 1) {
-    speed /= 1024;
-    i++;
-  }
-  return `${speed.toFixed(1)} ${units[i]}`;
 }
 
 export default memo(Sidebar);

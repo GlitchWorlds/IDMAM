@@ -1,16 +1,5 @@
 import { memo } from 'react';
-
-function formatSpeed(bytesPerSec) {
-  if (!bytesPerSec) return '0 B/s';
-  const units = ['B/s', 'KB/s', 'MB/s', 'GB/s'];
-  let i = 0;
-  let speed = bytesPerSec;
-  while (speed >= 1024 && i < units.length - 1) {
-    speed /= 1024;
-    i++;
-  }
-  return `${speed.toFixed(1)} ${units[i]}`;
-}
+import { formatSpeed } from '../api';
 
 const FILTER_BTNS = [
   { key: 'all', label: 'All' },

@@ -60,7 +60,7 @@ function printBanner() {
   console.log('  ██║██║  ██║██║╚██╔╝██║ ██║╚██╔╝██║');
   console.log('  ██║██████╔╝██║ ╚═╝ ██║ ██║ ╚═╝ ██║');
   console.log('  ╚═╝╚═════╝ ╚═╝     ╚═╝ ╚═╝     ╚═╝');
-  console.log('  Internet Download Manager Max v1.0.0');
+  console.log('  Internet Download Manager Max v1.2.0');
   console.log('  100% Free. No Ads. No Tracking. Forever.');
   console.log('');
 }
@@ -119,14 +119,15 @@ async function main() {
   // 5. Start API server
   const server = new IDMMServer({ db, downloader });
 
-  // Wire up completion broadcast
+  await server.start();
+
+  // Wire up completion broadcast — must be AFTER server.start() because
+  // server.start() overrides downloader.onComplete with its own handler.
   const origOnComplete = downloader.onComplete;
   downloader.onComplete = (downloadId, result) => {
     origOnComplete(downloadId, result);
     server.broadcast({ type: 'status', id: downloadId, status: 'completed' });
   };
-
-  await server.start();
 
   console.log('');
   console.log('[IDMM] Ready! API endpoints:');

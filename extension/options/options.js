@@ -90,7 +90,7 @@ async function loadSettings() {
   $extEnabled.checked = settings.enabled !== false;
   $maxThreads.value = settings.maxThreads || 8;
   $defaultSavePath.value = settings.defaultSavePath || '';
-  $minSize.value = String(settings.interceptMinSize || 5 * 1024 * 1024);
+  $minSize.value = String(settings.interceptMinSize ?? (5 * 1024 * 1024));
 
   // Intercept toggles
   for (const [category, toggle] of Object.entries($interceptToggles)) {

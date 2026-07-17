@@ -11,7 +11,10 @@ const { mergeAndVerify, cleanupChunks } = require('./merge');
 const { resolveFilename, ensureUniqueFilename } = require('../utils/filename');
 const { detectMime, resolveCategory } = require('../utils/mime');
 const { hashString } = require('../utils/hash');
-const { validateRedirect } = require('../utils/ssrf');
+const { validateRedirect, validateDnsResolution } = require('../utils/ssrf');
+
+const DEBUG = process.env.IDMM_DEBUG === '1' || process.env.DEBUG === 'idmm';
+const debugLog = DEBUG ? console.log.bind(console) : () => {};
 
 /**
  * IDMM Core Download Manager.
@@ -540,7 +543,7 @@ class DownloadManager {
    * Probe a URL with HEAD request to get file info.
    */
   _probeUrl(url, headers = {}, redirectCount = 0) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if (redirectCount > 5) {
         reject(new Error('Too many redirects'));
         return;
@@ -549,6 +552,17 @@ class DownloadManager {
       const parsed = new URL(url);
       const isHttps = parsed.protocol === 'https:';
       const transport = isHttps ? https : http;
+
+      // DNS resolution check — catch hosts resolving to blocked IPs
+      const isTestMode = process.env.IDMM_TEST === '1' || process.env.NODE_ENV === 'test';
+      if (!isTestMode) {
+        try {
+          await validateDnsResolution(parsed.hostname.toLowerCase());
+        } catch (dnsErr) {
+          reject(dnsErr);
+          return;
+        }
+      }
 
       const reqOptions = {
         hostname: parsed.hostname,
@@ -871,7 +885,7 @@ class DownloadManager {
    */
   _handleThrottle(state) {
     state._throttleCount = (state._throttleCount || 0) + 1;
-    console.log(`[IDMM] Throttle #${state._throttleCount} for download ${state.id}`);
+    debugLog(`[IDMM] Throttle #${state._throttleCount} for download ${state.id}`);
 
     let newThreads;
     if (state._throttleCount >= 3) {
@@ -884,7 +898,7 @@ class DownloadManager {
 
     if (newThreads >= state.threads) return; // No reduction needed
 
-    console.log(`[IDMM] Reducing threads for ${state.id}: ${state.threads} → ${newThreads}`);
+    debugLog(`[IDMM] Reducing threads for ${state.id}: ${state.threads} → ${newThreads}`);
     state.threads = newThreads;
     this.db.updateDownload(state.id, { threads: newThreads });
 

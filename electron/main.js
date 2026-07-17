@@ -215,8 +215,9 @@ app.on('activate', () => {
   }
 });
 
-app.on('before-quit', () => {
+app.on('before-quit', async () => {
   app.isQuitting = true;
+  if (server) await server.stop();
   if (db) db.close();
 });
 
