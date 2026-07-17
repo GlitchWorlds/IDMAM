@@ -19,7 +19,7 @@ let interceptedIds = new Set(); // Track downloads we've intercepted to avoid lo
 let ws = null;
 let wsReconnectDelay = 1000; // Start at 1s, doubles on each failure, max 30s
 const WS_MAX_DELAY = 30000;
-const WS_URL = 'ws://127.0.0.1:9977';
+const WS_URL = 'ws://127.0.0.1:9977/ws';
 
 // ─── Health Check ───────────────────────────────────────────────
 
