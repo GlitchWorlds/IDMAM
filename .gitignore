@@ -42,3 +42,10 @@ desktop.ini
 .cache/
 *.tgz
 *.tar.gz
+
+# Build artifacts
+*.zip
+
+# Internal logs
+QC-*.md
+FUNCTION-*.md
