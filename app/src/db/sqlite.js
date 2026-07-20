@@ -6,7 +6,7 @@ const fs = require('node:fs');
 
 /**
  * IDMM SQLite Database Layer.
- * Uses sql.js (WASM-based SQLite) — no native compilation required.
+ * Uses sql.js (WASM-based SQLite)  no native compilation required.
  *
  * Since sql.js init is async, use IDMMDatabase.create(dbPath) factory.
  */
@@ -34,7 +34,7 @@ class IDMMDatabase {
   }
 
   /**
-   * Async factory — creates and initializes the database.
+   * Async factory  creates and initializes the database.
    * @param {string} dbPath - Path to the SQLite database file
    * @returns {Promise<IDMMDatabase>}
    */
@@ -74,7 +74,7 @@ class IDMMDatabase {
     this._dirty = true;
   }
 
-  // ─── sql.js query helpers ────────────────────────────────────────
+  //  sql.js query helpers 
 
   /**
    * Execute SQL that returns rows. Returns array of row objects.
@@ -117,7 +117,7 @@ class IDMMDatabase {
     }
   }
 
-  // ─── Table Init ──────────────────────────────────────────────────
+  //  Table Init 
 
   _initTables() {
     this.db.run(`
@@ -186,6 +186,13 @@ class IDMMDatabase {
       speed_limit_global: '0',
       auto_resume: 'true',
       auto_categorize: 'true',
+      intercept_all: 'true',
+      intercept_min_size: '0',
+      intercept_video: 'true',
+      intercept_audio: 'true',
+      intercept_archive: 'true',
+      intercept_software: 'true',
+      intercept_document: 'true',
     };
 
     for (const [key, value] of Object.entries(defaults)) {
@@ -196,7 +203,7 @@ class IDMMDatabase {
     }
   }
 
-  // ─── Download Operations ─────────────────────────────────────────
+  //  Download Operations 
 
   createDownload(download) {
     this._run(
@@ -279,7 +286,7 @@ class IDMMDatabase {
     this._run('DELETE FROM downloads WHERE id = ?', [id]);
   }
 
-  // ─── Chunk Operations ────────────────────────────────────────────
+  //  Chunk Operations 
 
   createChunks(downloadId, chunks) {
     for (const chunk of chunks) {
@@ -324,7 +331,7 @@ class IDMMDatabase {
     return download;
   }
 
-  // ─── Settings Operations ─────────────────────────────────────────
+  //  Settings Operations 
 
   getSetting(key) {
     const row = this._queryOne('SELECT value FROM settings WHERE key = ?', [key]);
@@ -358,7 +365,7 @@ class IDMMDatabase {
     }
   }
 
-  // ─── Statistics ──────────────────────────────────────────────────
+  //  Statistics 
 
   getStats() {
     const total = this._queryOne('SELECT COUNT(*) as count FROM downloads');
@@ -399,3 +406,4 @@ class IDMMDatabase {
 }
 
 module.exports = IDMMDatabase;
+

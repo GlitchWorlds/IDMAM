@@ -1,7 +1,7 @@
 /**
- * IDMM Chrome Extension — Background Service Worker (Manifest V3)
+ * IDMM Chrome Extension  Background Service Worker (Manifest V3)
  *
- * 1. Intercepts browser downloads → sends to IDMM via REST API
+ * 1. Intercepts browser downloads  sends to IDMM via REST API
  * 2. Context menu: "Download with IDMM" for links/images/video/audio
  * 3. Badge showing active download count (poll every 2s)
  * 4. Handles messages from popup and options pages
@@ -9,7 +9,7 @@
 
 importScripts('./lib/api-client.js');
 
-// ─── State ──────────────────────────────────────────────────────
+//  State 
 
 let serverOnline = false;
 let activeDownloadCount = 0;
@@ -21,7 +21,7 @@ let wsReconnectDelay = 1000; // Start at 1s, doubles on each failure, max 30s
 const WS_MAX_DELAY = 30000;
 const WS_URL = 'ws://127.0.0.1:9977/ws';
 
-// ─── Health Check ───────────────────────────────────────────────
+//  Health Check 
 
 async function checkServer() {
   serverOnline = await IDMM_API.healthCheck();
@@ -29,7 +29,7 @@ async function checkServer() {
   return serverOnline;
 }
 
-// ─── Badge ──────────────────────────────────────────────────────
+//  Badge 
 
 function updateBadge() {
   if (!serverOnline) {
@@ -46,7 +46,7 @@ function updateBadge() {
   }
 }
 
-// ─── E5: WebSocket real-time sync ─────────────────────────────────
+//  E5: WebSocket real-time sync 
 
 function connectWebSocket() {
   if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
@@ -69,7 +69,7 @@ function connectWebSocket() {
     try {
       const data = JSON.parse(event.data);
 
-      // Settings changed (from another client or desktop app) → update local cache
+      // Settings changed (from another client or desktop app)  update local cache
       if (data.type === 'SETTINGS_CHANGED' && data.settings) {
         const mapped = IDMM_API._mapServerToLocal(data.settings);
         // Preserve extension-only settings (enabled)
@@ -88,7 +88,7 @@ function connectWebSocket() {
         type: 'DOWNLOAD_UPDATE',
         downloads: data.downloads || data,
       }).catch(() => {
-        // No listeners (popup closed) — not an error
+        // No listeners (popup closed)  not an error
       });
     } catch (err) {
       console.warn('[IDMM] WebSocket message parse error:', err.message);
@@ -102,7 +102,7 @@ function connectWebSocket() {
   };
 
   ws.onerror = () => {
-    // onclose will fire after onerror — reconnect handled there
+    // onclose will fire after onerror  reconnect handled there
   };
 }
 
@@ -112,7 +112,7 @@ function scheduleReconnect() {
   setTimeout(connectWebSocket, delay);
 }
 
-// ─── Send Download to IDMM ─────────────────────────────────────
+//  Send Download to IDMM 
 
 async function sendToIDMM({ url, filename, filesize, cookies, referrer }) {
   if (!serverOnline) {
@@ -143,7 +143,7 @@ async function sendToIDMM({ url, filename, filesize, cookies, referrer }) {
   }
 }
 
-// ─── Download Interception ──────────────────────────────────────
+//  Download Interception 
 
 chrome.downloads.onDeterminingFilename.addListener(async (item, suggest) => {
   // Skip if we already intercepted this (avoid loops)
@@ -204,7 +204,7 @@ chrome.downloads.onDeterminingFilename.addListener(async (item, suggest) => {
   suggest();
 });
 
-// ─── Context Menu ───────────────────────────────────────────────
+//  Context Menu 
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
@@ -277,7 +277,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   }
 });
 
-// ─── Polling for Active Downloads ───────────────────────────────
+//  Polling for Active Downloads 
 
 async function pollDownloads() {
   if (!serverOnline) return;
@@ -295,10 +295,10 @@ async function pollDownloads() {
   }
 }
 
-// ─── Message Handlers (popup & options communication) ───────────
+//  Message Handlers (popup & options communication) 
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  // Handle async — return true to keep message channel open
+  // Handle async  return true to keep message channel open
   (async () => {
     switch (message.type) {
       case 'CHECK_STATUS':
@@ -367,7 +367,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true; // Keep channel open for async response
 });
 
-// ─── Startup ────────────────────────────────────────────────────
+//  Startup 
 
 (async function init() {
   // Initial health check
@@ -382,3 +382,4 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   console.log('[IDMM] Extension service worker started');
 })();
+

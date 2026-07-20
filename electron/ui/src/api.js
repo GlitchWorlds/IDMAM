@@ -42,8 +42,9 @@ export function cancelDownload(id) {
   return request(`/api/download/${id}/cancel`, { method: 'POST' });
 }
 
-export function deleteDownload(id) {
-  return request(`/api/download/${id}`, { method: 'DELETE' });
+export function deleteDownload(id, deleteFile = false) {
+  const url = deleteFile ? `/api/download/${id}?delete_file=true` : `/api/download/${id}`;
+  return request(url, { method: 'DELETE' });
 }
 
 export function openFolder(path) {

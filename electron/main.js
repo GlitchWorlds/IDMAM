@@ -5,8 +5,8 @@ const path = require('node:path');
 const os = require('node:os');
 const fs = require('node:fs');
 
-// ─── IDMM Core ─────────────────────────────────────────────────
-// Resolve engine paths — works in both dev and packaged mode
+//  IDMM Core 
+// Resolve engine paths  works in both dev and packaged mode
 function resolveEngine() {
   // Try multiple candidate paths (covers dev, asar, no-asar, portable)
   const candidates = [
@@ -49,7 +49,7 @@ let server = null;
 let db = null;
 let downloader = null;
 
-// ─── Server Start ───────────────────────────────────────────────
+//  Server Start 
 
 async function startServer() {
   console.log('[IDMM] Starting server...');
@@ -64,7 +64,7 @@ async function startServer() {
   console.log('[IDMM] Server ready on http://127.0.0.1:9977');
 }
 
-// ─── Window ─────────────────────────────────────────────────────
+//  Window 
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -72,11 +72,18 @@ function createWindow() {
     height: 700,
     minWidth: 600,
     minHeight: 400,
-    title: 'IDMM - Internet Download Manager Max',
+    title: 'IDMM',
     icon: path.join(__dirname, 'assets', 'icon.png'),
     backgroundColor: '#0f172a',
     show: false, // Show when ready
     autoHideMenuBar: true,
+    frame: false,
+    titleBarStyle: 'hidden',
+    titleBarOverlay: {
+      color: '#0f172a',
+      symbolColor: '#cbd5e1',
+      height: 32
+    },
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
@@ -115,7 +122,7 @@ function createWindow() {
   });
 }
 
-// ─── System Tray ────────────────────────────────────────────────
+//  System Tray 
 
 function createTray() {
   // Create a simple tray icon (16x16 blue circle)
@@ -177,7 +184,7 @@ function createTray() {
   });
 }
 
-// ─── App Lifecycle ──────────────────────────────────────────────
+//  App Lifecycle 
 
 app.whenReady().then(async () => {
   try {
@@ -233,3 +240,4 @@ if (!gotLock) {
     }
   });
 }
+

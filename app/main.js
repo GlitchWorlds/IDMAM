@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * IDMM — Internet Download Manager Max
+ * IDMM  Internet Download Manager Max
  * Entry Point v1.0
  *
  * Starts the API server, initializes the database, and optionally
@@ -17,7 +17,7 @@ const IDMMDatabase = require('./src/db/sqlite');
 const DownloadManager = require('./src/engine/downloader');
 const IDMMServer = require('./src/server/server');
 
-// ─── Configuration ─────────────────────────────────────────────────
+//  Configuration 
 
 const APP_DIR = __dirname;
 const LEGACY_DATA_DIR = path.join(os.homedir(), '.idmam');
@@ -26,17 +26,17 @@ const DB_PATH = path.join(DATA_DIR, 'idmm.db');
 const TEMP_DIR = path.join(DATA_DIR, 'temp');
 const DEFAULT_SAVE_PATH = path.join(os.homedir(), 'Downloads', 'IDMM');
 
-// ─── Data Migration (.idmam → .idmm) ──────────────────────────────
+//  Data Migration (.idmam  .idmm) 
 // Migrate legacy data directory if it exists and new one doesn't
 if (fs.existsSync(LEGACY_DATA_DIR) && !fs.existsSync(DATA_DIR)) {
   try {
     fs.renameSync(LEGACY_DATA_DIR, DATA_DIR);
-    console.log('[IDMM] Migrated data dir: .idmam → .idmm');
+    console.log('[IDMM] Migrated data dir: .idmam  .idmm');
     // Rename DB file if it still has the old name
     const legacyDb = path.join(DATA_DIR, 'idmam.db');
     if (fs.existsSync(legacyDb)) {
       fs.renameSync(legacyDb, DB_PATH);
-      console.log('[IDMM] Migrated DB: idmam.db → idmm.db');
+      console.log('[IDMM] Migrated DB: idmam.db  idmm.db');
     }
   } catch (err) {
     console.error('[IDMM] Data migration failed (using existing paths):', err.message);
@@ -50,29 +50,29 @@ for (const dir of [DATA_DIR, TEMP_DIR, DEFAULT_SAVE_PATH]) {
   }
 }
 
-// ─── Banner ────────────────────────────────────────────────────────
+//  Banner 
 
 function printBanner() {
   console.log('');
-  console.log('  ██╗██████╗ ███╗   ███╗ ███╗   ███╗');
-  console.log('  ██║██╔══██╗████╗ ████║ ████╗ ████║');
-  console.log('  ██║██║  ██║██╔████╔██║ ██╔████╔██║');
-  console.log('  ██║██║  ██║██║╚██╔╝██║ ██║╚██╔╝██║');
-  console.log('  ██║██████╔╝██║ ╚═╝ ██║ ██║ ╚═╝ ██║');
-  console.log('  ╚═╝╚═════╝ ╚═╝     ╚═╝ ╚═╝     ╚═╝');
+  console.log('          ');
+  console.log('     ');
+  console.log('     ');
+  console.log('     ');
+  console.log('       ');
+  console.log('              ');
   console.log('  Internet Download Manager Max v1.2.0');
   console.log('  100% Free. No Ads. No Tracking. Forever.');
   console.log('');
 }
 
-// ─── Main ──────────────────────────────────────────────────────────
+//  Main 
 
 async function main() {
   printBanner();
 
   const autoResume = process.argv.includes('--auto-resume');
 
-  // 1. Initialize database (async — sql.js WASM needs to load first)
+  // 1. Initialize database (async  sql.js WASM needs to load first)
   console.log('[IDMM] Initializing database...');
   const db = await IDMMDatabase.create(DB_PATH);
   console.log(`[IDMM] Database: ${DB_PATH}`);
@@ -91,10 +91,10 @@ async function main() {
       // Progress is broadcast via WebSocket in server.js
     },
     onComplete: (downloadId, result) => {
-      console.log(`[IDMM] ✅ Download completed: ${result.filename} (${formatBytes(result.total_size)} in ${result.duration}s)`);
+      console.log(`[IDMM]  Download completed: ${result.filename} (${formatBytes(result.total_size)} in ${result.duration}s)`);
     },
     onError: (downloadId, error) => {
-      console.error(`[IDMM] ❌ Download error: ${error.message}`);
+      console.error(`[IDMM]  Download error: ${error.message}`);
     },
   });
 
@@ -121,7 +121,7 @@ async function main() {
 
   await server.start();
 
-  // Wire up completion broadcast — must be AFTER server.start() because
+  // Wire up completion broadcast  must be AFTER server.start() because
   // server.start() overrides downloader.onComplete with its own handler.
   const origOnComplete = downloader.onComplete;
   downloader.onComplete = (downloadId, result) => {
@@ -131,17 +131,17 @@ async function main() {
 
   console.log('');
   console.log('[IDMM] Ready! API endpoints:');
-  console.log(`  POST   http://127.0.0.1:9977/api/download     — Start download`);
-  console.log(`  GET    http://127.0.0.1:9977/api/downloads    — List downloads`);
-  console.log(`  GET    http://127.0.0.1:9977/api/download/:id — Download status`);
-  console.log(`  POST   http://127.0.0.1:9977/api/download/:id/pause  — Pause`);
-  console.log(`  POST   http://127.0.0.1:9977/api/download/:id/resume — Resume`);
-  console.log(`  POST   http://127.0.0.1:9977/api/download/:id/cancel — Cancel`);
-  console.log(`  DELETE http://127.0.0.1:9977/api/download/:id  — Delete`);
-  console.log(`  GET    http://127.0.0.1:9977/api/settings     — Settings`);
-  console.log(`  PUT    http://127.0.0.1:9977/api/settings     — Update settings`);
-  console.log(`  GET    http://127.0.0.1:9977/api/stats        — Statistics`);
-  console.log(`  WS     ws://127.0.0.1:9977/ws                — Real-time progress`);
+  console.log(`  POST   http://127.0.0.1:9977/api/download      Start download`);
+  console.log(`  GET    http://127.0.0.1:9977/api/downloads     List downloads`);
+  console.log(`  GET    http://127.0.0.1:9977/api/download/:id  Download status`);
+  console.log(`  POST   http://127.0.0.1:9977/api/download/:id/pause   Pause`);
+  console.log(`  POST   http://127.0.0.1:9977/api/download/:id/resume  Resume`);
+  console.log(`  POST   http://127.0.0.1:9977/api/download/:id/cancel  Cancel`);
+  console.log(`  DELETE http://127.0.0.1:9977/api/download/:id   Delete`);
+  console.log(`  GET    http://127.0.0.1:9977/api/settings      Settings`);
+  console.log(`  PUT    http://127.0.0.1:9977/api/settings      Update settings`);
+  console.log(`  GET    http://127.0.0.1:9977/api/stats         Statistics`);
+  console.log(`  WS     ws://127.0.0.1:9977/ws                 Real-time progress`);
   console.log('');
 
   // 6. Graceful shutdown
@@ -186,7 +186,7 @@ function formatBytes(bytes) {
   return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${units[i]}`;
 }
 
-// ─── Run ───────────────────────────────────────────────────────────
+//  Run 
 
 // Global error handlers to prevent silent crashes
 process.on('unhandledRejection', (reason, promise) => {
@@ -200,3 +200,4 @@ main().catch((err) => {
   console.error('[IDMM] Fatal error:', err);
   process.exit(1);
 });
+

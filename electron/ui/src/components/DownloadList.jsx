@@ -42,10 +42,97 @@ function DownloadItem({ download, onRefresh }) {
   const handleCancel = async () => {
     try { await cancelDownload(id); onRefresh?.(); } catch (e) { console.error(e); }
   };
-  const handleDelete = async () => {
-    try { await deleteDownload(id); onRefresh?.(); } catch (e) { console.error(e); }
+  const handleDelete = async (deleteFile = false) => {
+    try { await deleteDownload(id, deleteFile); onRefresh?.(); } catch (e) { console.error(e); }
   };
 
+  // Format Date Helper
+  const formatDate = (isoString) => {
+    if (!isoString) return '-';
+    const date = new Date(isoString);
+    return date.toLocaleString();
+  };
+
+  // Compact layout for completed/error downloads
+  if (isCompleted || isError) {
+    return (
+      <div className="card-hover bg-slate-800/30 hover:bg-slate-800/50 rounded-lg p-3 animate-fade-in border border-transparent hover:border-slate-700/50 transition-colors">
+        <div className="flex items-center gap-4">
+          
+          {/* File Icon / Type Indicator */}
+          <div className="shrink-0 w-10 h-10 rounded bg-slate-700/50 flex items-center justify-center text-slate-400">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+
+          {/* Details */}
+          <div className="flex-1 min-w-0 grid grid-cols-12 gap-4 items-center">
+            
+            {/* Name & URL */}
+            <div className="col-span-5 flex flex-col min-w-0">
+              <span className="text-sm font-medium text-slate-200 truncate" title={filename || url}>
+                {filename || 'Unknown file'}
+              </span>
+              <span className="text-[11px] text-slate-500 truncate" title={url}>
+                {url}
+              </span>
+            </div>
+
+            {/* Size */}
+            <div className="col-span-2 text-xs text-slate-400">
+              {total_size ? formatSize(total_size) : '-'}
+            </div>
+
+            {/* Date */}
+            <div className="col-span-3 text-xs text-slate-400 truncate">
+              {formatDate(download.completed_at || download.created_at)}
+            </div>
+
+            {/* Status Badge */}
+            <div className="col-span-2 flex justify-end">
+              <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${getStatusBadge(status)}`}>
+                {status}
+              </span>
+            </div>
+
+          </div>
+
+          {/* Actions */}
+          <div className="shrink-0 flex items-center gap-1">
+            {isError && (
+               <button onClick={handleCancel} className="p-1.5 rounded text-slate-500 hover:text-red-400 hover:bg-slate-700 transition-colors" title="Cancel/Remove">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+            {isCompleted && (
+              <>
+                <button onClick={() => openFolder(save_to)} className="p-1.5 rounded text-slate-500 hover:text-emerald-400 hover:bg-slate-700 transition-colors" title="Open Folder">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                  </svg>
+                </button>
+                <button onClick={() => handleDelete(false)} className="p-1.5 rounded text-slate-500 hover:text-red-400 hover:bg-slate-700 transition-colors" title="Delete History">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </button>
+                <button onClick={() => handleDelete(true)} className="p-1.5 rounded text-slate-500 hover:text-red-400 hover:bg-slate-700 transition-colors" title="Delete History and File">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Active / Paused Layout (Detailed)
   return (
     <div className="card-hover bg-slate-800/50 rounded-xl p-4 animate-fade-in">
       <div className="flex items-start justify-between gap-4">
@@ -116,7 +203,12 @@ function DownloadItem({ download, onRefresh }) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                 </svg>
               </button>
-              <button onClick={handleDelete} className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-slate-700 transition-colors" title="Delete">
+              <button onClick={() => handleDelete(false)} className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-slate-700 transition-colors" title="Delete History">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+              <button onClick={() => handleDelete(true)} className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-slate-700 transition-colors" title="Delete History and File">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>

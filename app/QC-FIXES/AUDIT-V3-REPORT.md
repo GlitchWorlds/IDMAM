@@ -2,7 +2,7 @@
 
 **Auditor:** OPS-001 (Security Subagent)
 **Date:** 2026-07-15 15:41 WIB
-**Scope:** All 14 specified files — engine, server, db, utils, extension
+**Scope:** All 14 specified files  engine, server, db, utils, extension
 **Prior fixes verified:** 22 previous fixes + extension UI cleanup
 
 ---
@@ -11,11 +11,11 @@
 
 | # | Check | Status | Detail |
 |---|-------|--------|--------|
-| 1.1 | popup.js — no `127.0.0.1:9977` | **PASS** | No hardcoded URL. Uses `IDMM_API` methods only. |
-| 1.2 | options.js — no `127.0.0.1:9977` | **PASS** | Shows "Connected ✓" / "Not Running ✗" only. No URL in UI text. |
-| 1.3 | options.html — no `127.0.0.1:9977` | **PASS** | Clean HTML, no embedded URLs. |
-| 1.4 | popup.html — no `127.0.0.1:9977` | **PASS** | (Referenced but not in scope; popup.js is clean.) |
-| 1.5 | api-client.js — BASE_URL internal only | **PASS** | `BASE_URL` = `http://127.0.0.1:9977` in library file only. `defaultSettings()` also contains it but never rendered to user. Acceptable. |
+| 1.1 | popup.js  no `127.0.0.1:9977` | **PASS** | No hardcoded URL. Uses `IDMM_API` methods only. |
+| 1.2 | options.js  no `127.0.0.1:9977` | **PASS** | Shows "Connected " / "Not Running " only. No URL in UI text. |
+| 1.3 | options.html  no `127.0.0.1:9977` | **PASS** | Clean HTML, no embedded URLs. |
+| 1.4 | popup.html  no `127.0.0.1:9977` | **PASS** | (Referenced but not in scope; popup.js is clean.) |
+| 1.5 | api-client.js  BASE_URL internal only | **PASS** | `BASE_URL` = `http://127.0.0.1:9977` in library file only. `defaultSettings()` also contains it but never rendered to user. Acceptable. |
 
 ---
 
@@ -23,12 +23,12 @@
 
 | # | Check | Status | Detail |
 |---|-------|--------|--------|
-| 2.1 | Permissions minimal | **PASS** | `downloads`, `downloads.shelf`, `activeTab`, `storage`, `contextMenus` — all justified. |
+| 2.1 | Permissions minimal | **PASS** | `downloads`, `downloads.shelf`, `activeTab`, `storage`, `contextMenus`  all justified. |
 | 2.2 | host_permissions `<all_urls>` | **PASS** | Required for download URL interception. Documented with `_comment_host_permissions`. |
-| 2.3 | CSP: script-src | **PASS** | `script-src 'self'` — no remote scripts, no eval. |
-| 2.4 | CSP: style-src | **PASS** | `style-src 'self' 'unsafe-inline'` — acceptable for extension UI. |
-| 2.5 | CSP: connect-src | **WARNING** | `connect-src http://127.0.0.1:* ws://127.0.0.1:*` — wildcard port. Any local service on any port is reachable. Acceptable for local-only app but should be narrowed to `:9977` if port is ever configurable server-side. |
-| 2.6 | CSP: default-src | **PASS** | `default-src 'self'` — restrictive baseline. |
+| 2.3 | CSP: script-src | **PASS** | `script-src 'self'`  no remote scripts, no eval. |
+| 2.4 | CSP: style-src | **PASS** | `style-src 'self' 'unsafe-inline'`  acceptable for extension UI. |
+| 2.5 | CSP: connect-src | **WARNING** | `connect-src http://127.0.0.1:* ws://127.0.0.1:*`  wildcard port. Any local service on any port is reachable. Acceptable for local-only app but should be narrowed to `:9977` if port is ever configurable server-side. |
+| 2.6 | CSP: default-src | **PASS** | `default-src 'self'`  restrictive baseline. |
 | 2.7 | minimum_chrome_version | **PASS** | Set to `109` (MV3 stable). |
 
 ---
@@ -76,7 +76,7 @@
 
 | # | Check | Status | Detail |
 |---|-------|--------|--------|
-| 5.1 | Redirect cap | **PASS** | `redirectCount >= 5` → reject. |
+| 5.1 | Redirect cap | **PASS** | `redirectCount >= 5`  reject. |
 | 5.2 | File write error handling | **PASS** | `fileStream.on('error', reject)` present. |
 | 5.3 | Token-bucket speed limiting | **PASS** | Implemented with pause/resume on response stream. |
 | 5.4 | Flush before exit (R5) | **PASS** | `setTimeout(() => process.exit(0/1), 100)` after final report. |
@@ -103,8 +103,8 @@
 | 7.1 | Debounce optimization (F12) | **PASS** | 500ms debounce per download. |
 | 7.2 | Re-entrancy guard (AW2) | **PASS** | `_flushing` flag prevents infinite recursion in `flushPending`. |
 | 7.3 | Debounce cancellation on direct save | **PASS** | `saveState()` clears pending timers. |
-| 7.4 | Download ID as directory name | **PASS** | UUIDs — no path traversal risk. |
-| 7.5 | Chunk path validation | **PASS** | `padStart(5, '0')` — numeric index only. |
+| 7.4 | Download ID as directory name | **PASS** | UUIDs  no path traversal risk. |
+| 7.5 | Chunk path validation | **PASS** | `padStart(5, '0')`  numeric index only. |
 
 ---
 
@@ -124,11 +124,11 @@
 
 | # | Check | Status | Detail |
 |---|-------|--------|--------|
-| 9.1 | filename.js — sanitizeFilename | **PASS** | Removes `<>:"/\|?*\x00-\x1f`, reserved Windows names, length cap 255. |
-| 9.2 | filename.js — ensureUniqueFilename (R6) | **PASS** | Bounded at 999 iterations. Throws on overflow. |
-| 9.3 | filename.js — Content-Disposition parsing | **PASS** | RFC 5987 + standard format. decodeURIComponent with try/catch. |
-| 9.4 | hash.js — streaming hash | **PASS** | Uses `createReadStream` — no full-file memory load. |
-| 9.5 | mime.js — no user input to dangerous functions | **PASS** | Pure lookup maps. |
+| 9.1 | filename.js  sanitizeFilename | **PASS** | Removes `<>:"/\|?*\x00-\x1f`, reserved Windows names, length cap 255. |
+| 9.2 | filename.js  ensureUniqueFilename (R6) | **PASS** | Bounded at 999 iterations. Throws on overflow. |
+| 9.3 | filename.js  Content-Disposition parsing | **PASS** | RFC 5987 + standard format. decodeURIComponent with try/catch. |
+| 9.4 | hash.js  streaming hash | **PASS** | Uses `createReadStream`  no full-file memory load. |
+| 9.5 | mime.js  no user input to dangerous functions | **PASS** | Pure lookup maps. |
 
 ---
 
@@ -136,9 +136,9 @@
 
 | # | Check | Status | Detail |
 |---|-------|--------|--------|
-| 10.1 | XSS in popup.js | **PASS** | `escapeHtml()` via `textContent` → `innerHTML`. Applied to filename, URL, error. |
+| 10.1 | XSS in popup.js | **PASS** | `escapeHtml()` via `textContent`  `innerHTML`. Applied to filename, URL, error. |
 | 10.2 | Prototype pollution | **PASS** | No `__proto__`, `constructor`, or `Object.assign` from untrusted input. |
-| 10.3 | ReDoS | **PASS** | Regex in filename.js (`parseContentDisposition`) — simple patterns, no nested quantifiers. |
+| 10.3 | ReDoS | **PASS** | Regex in filename.js (`parseContentDisposition`)  simple patterns, no nested quantifiers. |
 | 10.4 | SSRF via download URL | **LOW** | Server downloads from any URL. By design (download manager). No mitigation needed. |
 | 10.5 | Cookie storage in DB/resume files | **INFO** | Cookies stored in plaintext in SQLite + download.json. Acceptable for local-only app. |
 
@@ -162,13 +162,14 @@
 
 ### Warnings (3)
 
-1. **CSP connect-src wildcard port** — `http://127.0.0.1:*` allows any port. Narrow to `:9977` if port becomes configurable.
-2. **Error message leakage in 500 responses** — `err.message` may include internal file paths. Low risk (localhost-only).
-3. **SSRF by design** — Download manager fetches arbitrary URLs. Expected behavior, not a vulnerability.
+1. **CSP connect-src wildcard port**  `http://127.0.0.1:*` allows any port. Narrow to `:9977` if port becomes configurable.
+2. **Error message leakage in 500 responses**  `err.message` may include internal file paths. Low risk (localhost-only).
+3. **SSRF by design**  Download manager fetches arbitrary URLs. Expected behavior, not a vulnerability.
 
 ### Verdict
 
-**PASS — No blocking issues.** All 22 prior fixes verified intact. No new vulnerabilities introduced. Extension UI cleanup confirmed clean — no info leaks to user-facing surfaces.
+**PASS  No blocking issues.** All 22 prior fixes verified intact. No new vulnerabilities introduced. Extension UI cleanup confirmed clean  no info leaks to user-facing surfaces.
 
 ---
 *Report generated by OPS-001 Security Auditor | IDMM v3 Round 3*
+

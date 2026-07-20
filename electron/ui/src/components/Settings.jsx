@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getSettings, updateSettings } from '../api';
 
-export default function Settings({ onBack }) {
+export default function Settings({ onBack, theme, onThemeChange }) {
   const [settings, setSettings] = useState({
     threadMode: 'auto',
     threads: 8,
@@ -72,6 +72,21 @@ export default function Settings({ onBack }) {
       </div>
 
       <div className="space-y-6">
+        {/* Theme Settings */}
+        <div className="bg-slate-800/50 rounded-xl p-5">
+          <label className="block text-sm font-medium text-slate-300 mb-2">Theme</label>
+          <p className="text-xs text-slate-500 mb-3">Select application color theme</p>
+          <select
+            value={theme}
+            onChange={(e) => onThemeChange(e.target.value)}
+            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all"
+          >
+            <option value="dark-green">Dark Green (Default)</option>
+            <option value="dark-blue">Dark Blue</option>
+            <option value="light">Light</option>
+          </select>
+        </div>
+
         {/* Thread Mode */}
         <div className="bg-slate-800/50 rounded-xl p-5">
           <label className="block text-sm font-medium text-slate-300 mb-2">Thread Mode</label>

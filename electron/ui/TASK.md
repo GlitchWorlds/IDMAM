@@ -21,7 +21,7 @@ Fixed left sidebar (w-56), dark bg-slate-950. Shows:
 
 ### 2. src/components/Header.jsx
 Top bar (h-14 bg-slate-900 border-b). Contains:
-- Search input (dark style, magnifying glass icon via unicode 🔍)
+- Search input (dark style, magnifying glass icon via unicode )
 - Total speed display (e.g. "12.4 MB/s")
 - "New Download" button (blue, rounded)
 - Server status dot (green=online, red=offline)
@@ -72,3 +72,4 @@ Modal overlay. Dark card with settings form:
 - Dark theme: bg-slate-900 base, bg-slate-800 cards, blue-500 accent
 - After creating files: cd D:\IDMM\electron\ui && npm install && npm run build
 - Report: files created, build success/failure, any errors
+

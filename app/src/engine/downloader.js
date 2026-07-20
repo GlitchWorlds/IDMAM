@@ -20,10 +20,10 @@ const debugLog = DEBUG ? console.log.bind(console) : () => {};
  * IDMM Core Download Manager.
  *
  * Orchestrates multi-threaded chunk downloads via worker threads.
- * Handles the full lifecycle: probe → split → download → merge → verify.
+ * Handles the full lifecycle: probe  split  download  merge  verify.
  */
 
-// F11: Global worker concurrency semaphore — max 128 total workers across all downloads
+// F11: Global worker concurrency semaphore  max 128 total workers across all downloads
 const _globalWorkerSemaphore = {
   current: 0,
   max: 128,
@@ -69,7 +69,7 @@ class DownloadManager {
     this.speedSamples = new Map();
   }
 
-  // ─── Public API ──────────────────────────────────────────────────
+  //  Public API 
 
   /**
    * Start a new download.
@@ -101,7 +101,7 @@ class DownloadManager {
     // Resolve thread mode: param > settings > default "auto"
     const threadMode = (requestedThreadMode || this.settings.default_thread_mode || 'auto').toLowerCase();
 
-    // Resolve settings (coerce to numbers — DB stores everything as strings)
+    // Resolve settings (coerce to numbers  DB stores everything as strings)
     const defaultThreads = parseInt(this.settings.default_threads, 10) || 8;
     let threads;
     if (threadMode === 'manual') {
@@ -113,7 +113,7 @@ class DownloadManager {
       );
     } else {
       // Auto mode: will be determined after probe (size-based heuristic)
-      // Placeholder — actual value set after HEAD probe returns contentLength
+      // Placeholder  actual value set after HEAD probe returns contentLength
       threads = null;
     }
     const savePath = saveTo || this.settings.default_save_path || path.join(require('node:os').homedir(), 'Downloads', 'IDMM');
@@ -148,7 +148,7 @@ class DownloadManager {
     // Resolve final thread count (auto mode needs file size from probe)
     let finalThreads;
     if (!probe.acceptsRanges || (probe.contentLength || 0) === 0) {
-      finalThreads = 1; // No range support or unknown size → single stream
+      finalThreads = 1; // No range support or unknown size  single stream
     } else if (threadMode === 'auto') {
       finalThreads = this._autoDetectThreads(probe.contentLength);
     } else {
@@ -202,7 +202,7 @@ class DownloadManager {
       headers: download.headers,
       requestHeaders, // BUG FIX: Store for fallback to single-stream on noRangeSupport
       noRangeSupport: false,
-      speedLimit: (parseInt(this.settings.speed_limit_global, 10) || 0) * 1024, // KB/s → bytes/s
+      speedLimit: (parseInt(this.settings.speed_limit_global, 10) || 0) * 1024, // KB/s  bytes/s
       _throttleCount: 0, // Track consecutive 429/ECONNRESET events
     };
 
@@ -309,7 +309,7 @@ class DownloadManager {
     // Also try loading from resume state file
     const resumeState = this.resume.loadState(downloadId);
 
-    // Build state object — cross-validate DB chunk state with actual .part file sizes
+    // Build state object  cross-validate DB chunk state with actual .part file sizes
     const downloadTempDir = this.resume.getDownloadTempDir(downloadId);
     const chunks = this._buildResumeChunks(downloadId, dbDownload);
 
@@ -336,7 +336,7 @@ class DownloadManager {
       referrer: dbDownload.referrer,
       headers: dbDownload.headers,
       noRangeSupport: false,
-      speedLimit: (parseInt(this.settings.speed_limit_global, 10) || 0) * 1024, // KB/s → bytes/s
+      speedLimit: (parseInt(this.settings.speed_limit_global, 10) || 0) * 1024, // KB/s  bytes/s
       _throttleCount: (resumeState && resumeState._throttleCount) || 0,
     };
 
@@ -387,7 +387,7 @@ class DownloadManager {
 
     if (state) {
       // Mark workers as intentionally terminated before terminating
-      // (same as pauseDownload — prevents exit handler from marking chunks as failed)
+      // (same as pauseDownload  prevents exit handler from marking chunks as failed)
       for (const worker of state.workers) {
         if (worker) worker.__terminated = true;
       }
@@ -411,17 +411,18 @@ class DownloadManager {
   }
 
   /**
-   * Delete a download and all its files.
+   * Delete a download and optionally its files.
    * @param {string} downloadId
+   * @param {boolean} [deleteFile=false] - Whether to delete the downloaded file from disk
    */
-  deleteDownload(downloadId) {
+  deleteDownload(downloadId, deleteFile = false) {
     // Cancel if active
     if (this.active.has(downloadId)) {
       this.cancelDownload(downloadId);
     }
 
     const download = this.db.getDownload(downloadId);
-    if (download) {
+    if (download && deleteFile) {
       // Delete the output file if it exists
       const outputPath = path.join(download.save_to, download.filename);
       try {
@@ -439,7 +440,7 @@ class DownloadManager {
     // Remove from DB
     this.db.deleteDownload(downloadId);
 
-    return { id: downloadId, deleted: true };
+    return { id: downloadId, deleted: true, fileDeleted: deleteFile };
   }
 
   /**
@@ -509,15 +510,15 @@ class DownloadManager {
     return this.active.size;
   }
 
-  // ─── Internal: Auto Thread Detection ─────────────────────────────
+  //  Internal: Auto Thread Detection 
 
   /**
    * Determine optimal thread count based on file size.
    * Auto mode heuristics:
-   *   < 5MB    → 1 thread  (no chunking overhead worth it)
-   *   5-50MB   → 4 threads
-   *   50-500MB → 16 threads
-   *   > 500MB  → 32 threads
+   *   < 5MB     1 thread  (no chunking overhead worth it)
+   *   5-50MB    4 threads
+   *   50-500MB  16 threads
+   *   > 500MB   32 threads
    * Hard cap: 64 threads (safety).
    * @param {number} totalSize - File size in bytes
    * @returns {number} Recommended thread count
@@ -537,7 +538,7 @@ class DownloadManager {
     return Math.min(threads, 64); // Auto mode hard cap
   }
 
-  // ─── Internal: Probing ───────────────────────────────────────────
+  //  Internal: Probing 
 
   /**
    * Probe a URL with HEAD request to get file info.
@@ -553,7 +554,7 @@ class DownloadManager {
       const isHttps = parsed.protocol === 'https:';
       const transport = isHttps ? https : http;
 
-      // DNS resolution check — catch hosts resolving to blocked IPs
+      // DNS resolution check  catch hosts resolving to blocked IPs
       const isTestMode = process.env.IDMM_TEST === '1' || process.env.NODE_ENV === 'test';
       if (!isTestMode) {
         try {
@@ -580,7 +581,7 @@ class DownloadManager {
         // Handle redirects
         if ([301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location) {
           res.resume(); // R4: Drain response body to free socket before following redirect
-          // R1: SSRF — validate redirect target before following
+          // R1: SSRF  validate redirect target before following
           try {
             validateRedirect(res.headers.location, url);
           } catch (ssrfErr) {
@@ -622,7 +623,7 @@ class DownloadManager {
     });
   }
 
-  // ─── Internal: Chunked Download ──────────────────────────────────
+  //  Internal: Chunked Download 
 
   /**
    * Start a multi-threaded chunked download.
@@ -707,7 +708,7 @@ class DownloadManager {
   }
 
   /**
-   * Spawn a single worker thread for a chunk (async — waits for global semaphore).
+   * Spawn a single worker thread for a chunk (async  waits for global semaphore).
    * F11: Global worker concurrency cap (max 128 total).
    */
   async _spawnWorkerAsync(state, chunk, chunkPath, opts) {
@@ -789,7 +790,7 @@ class DownloadManager {
         this._recalcProgress(state);
 
         // Note: Speed limiting is handled at the worker level via token-bucket
-        // in chunk-worker.js — no need to terminate workers from the main thread.
+        // in chunk-worker.js  no need to terminate workers from the main thread.
 
         // Persist to resume file periodically (every ~1MB)
         if (msg.downloaded % (1024 * 1024) < 65536) {
@@ -864,7 +865,7 @@ class DownloadManager {
         break;
 
       case 'throttle':
-        // Server is rate-limiting or connection reset — reduce threads
+        // Server is rate-limiting or connection reset  reduce threads
         this._handleThrottle(state);
         break;
 
@@ -889,7 +890,7 @@ class DownloadManager {
 
     let newThreads;
     if (state._throttleCount >= 3) {
-      // 3+ consecutive throttles — hard cap at 4 threads
+      // 3+ consecutive throttles  hard cap at 4 threads
       newThreads = Math.min(state.threads, 4);
     } else {
       // Reduce by half, minimum 1
@@ -898,7 +899,7 @@ class DownloadManager {
 
     if (newThreads >= state.threads) return; // No reduction needed
 
-    debugLog(`[IDMM] Reducing threads for ${state.id}: ${state.threads} → ${newThreads}`);
+    debugLog(`[IDMM] Reducing threads for ${state.id}: ${state.threads}  ${newThreads}`);
     state.threads = newThreads;
     this.db.updateDownload(state.id, { threads: newThreads });
 
@@ -927,7 +928,7 @@ class DownloadManager {
     state.workers = [];
   }
 
-  // ─── Internal: Chunk State Flush ────────────────────────────────
+  //  Internal: Chunk State Flush 
 
   /**
    * Build chunk descriptors for resume, cross-referencing DB, resume file, and disk.
@@ -1032,10 +1033,10 @@ class DownloadManager {
     this.resume.flushPending();
   }
 
-  // ─── Internal: Single Stream (fallback) ──────────────────────────
+  //  Internal: Single Stream (fallback) 
 
   /**
-   * Download without Range support — single HTTP stream.
+   * Download without Range support  single HTTP stream.
    */
   _startSingleStreamDownload(state, opts) {
     return new Promise((resolve, reject) => {
@@ -1111,7 +1112,7 @@ class DownloadManager {
         // prevent late-firing 'error' or 'timeout' events on the old socket
         // from racing with the new recursive request.
         req.destroy();
-        // R1: SSRF — validate redirect target before following
+        // R1: SSRF  validate redirect target before following
         try { validateRedirect(res.headers.location, state.url); } catch (e) { safeReject(e); return; }
         state.url = new URL(res.headers.location, state.url).href;
         this._doSingleStream(state, opts, chunkPath, existingBytes, resolve, reject);
@@ -1198,7 +1199,7 @@ class DownloadManager {
     // Validate chunk integrity
     const validation = this.resume.validateChunks(state.id, state.chunks);
     if (!validation.valid) {
-      // Some chunks are corrupted — reset them
+      // Some chunks are corrupted  reset them
       for (let i = 0; i < validation.chunks.length; i++) {
         if (!validation.chunks[i].valid) {
           const chunkPath = this.resume.getChunkPath(state.id, i);
@@ -1223,7 +1224,7 @@ class DownloadManager {
     this._spawnWorkers(state, opts);
   }
 
-  // ─── Internal: Progress Tracking ─────────────────────────────────
+  //  Internal: Progress Tracking 
 
   /**
    * Recalculate total downloaded bytes and speed.
@@ -1267,7 +1268,7 @@ class DownloadManager {
   }
 
   /**
-   * Check if all chunks are done → finalize.
+   * Check if all chunks are done  finalize.
    */
   _checkCompletion(state) {
     if (state.status === 'paused' || state.status === 'cancelled') return;
@@ -1398,3 +1399,4 @@ class DownloadManager {
 }
 
 module.exports = DownloadManager;
+

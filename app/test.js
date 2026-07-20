@@ -12,7 +12,7 @@
  *
  * Usage: node test.js
  *
- * This script is self-contained — it creates its own test file server
+ * This script is self-contained  it creates its own test file server
  * so it works without internet access.
  */
 
@@ -27,7 +27,7 @@ const TEST_PORT = 19890;
 const TEST_THROTTLE_MS = 50; // ms delay per chunk to simulate slower download for pause test
 const TEST_URL = `http://127.0.0.1:${TEST_PORT}/testfile.bin`;
 
-// ─── Utilities ─────────────────────────────────────────────────────
+//  Utilities 
 
 function formatBytes(bytes) {
   if (!bytes || bytes === 0) return '0 B';
@@ -45,7 +45,7 @@ function sleep(ms) {
   return new Promise(r => setTimeout(r, ms));
 }
 
-// ─── WebSocket Test ─────────────────────────────────────────────
+//  WebSocket Test 
 
 function testWebSocket() {
   return new Promise((resolve, reject) => {
@@ -79,7 +79,7 @@ function testWebSocket() {
   });
 }
 
-// ─── Local Test File Server ────────────────────────────────────────
+//  Local Test File Server 
 
 function createTestFileServer() {
   // Create deterministic test data
@@ -138,7 +138,7 @@ function createTestFileServer() {
   return { server, expectedHash, testData };
 }
 
-// ─── HTTP Client ───────────────────────────────────────────────────
+//  HTTP Client 
 
 function apiRequest(method, apiPath, body = null) {
   return new Promise((resolve, reject) => {
@@ -172,22 +172,22 @@ function apiRequest(method, apiPath, body = null) {
   });
 }
 
-// ─── Test Steps ────────────────────────────────────────────────────
+//  Test Steps 
 
 async function runTests() {
-  console.log('╔══════════════════════════════════════════════════════╗');
-  console.log('║  IDMM Core Engine — Integration Test               ║');
-  console.log('╚══════════════════════════════════════════════════════╝');
+  console.log('');
+  console.log('  IDMM Core Engine  Integration Test               ');
+  console.log('');
   console.log('');
 
   const results = { passed: 0, failed: 0, skipped: 0, errors: [] };
-  function pass(name) { results.passed++; console.log(`  ✅ ${name}`); }
-  function fail(name, err) { results.failed++; results.errors.push(`${name}: ${err}`); console.error(`  ❌ ${name}: ${err}`); }
-  function skip(name) { results.skipped++; console.log(`  ⏭️  ${name}`); }
+  function pass(name) { results.passed++; console.log(`   ${name}`); }
+  function fail(name, err) { results.failed++; results.errors.push(`${name}: ${err}`); console.error(`   ${name}: ${err}`); }
+  function skip(name) { results.skipped++; console.log(`    ${name}`); }
 
-  // ─── Setup ───────────────────────────────────────────────────────
+  //  Setup 
 
-  console.log('▸ Step 0: Setting up test environment...');
+  console.log(' Step 0: Setting up test environment...');
 
   const IDMMDatabase = require('./src/db/sqlite');
   const DownloadManager = require('./src/engine/downloader');
@@ -206,13 +206,13 @@ async function runTests() {
   // Start test file server
   const { server: testServer, expectedHash } = createTestFileServer();
   await new Promise(r => testServer.listen(TEST_PORT, '127.0.0.1', r));
-  console.log(`  ✅ Test file server on http://127.0.0.1:${TEST_PORT} (${formatBytes(TEST_FILE_SIZE)})`);
+  console.log(`   Test file server on http://127.0.0.1:${TEST_PORT} (${formatBytes(TEST_FILE_SIZE)})`);
 
   // Initialize IDMM
   const db = await IDMMDatabase.create(path.join(DATA_DIR, 'test.db'));
   db.setSetting('default_save_path', SAVE_DIR);
   const settings = db.getAllSettings();
-  console.log('  ✅ Database initialized');
+  console.log('   Database initialized');
 
   let completedResult = null;
   let errorResult = null;
@@ -225,18 +225,18 @@ async function runTests() {
     },
     onError: (id, err) => {
       errorResult = err;
-      console.error(`  ❌ Error: ${err.message}`);
+      console.error(`   Error: ${err.message}`);
     },
   });
 
   const server = new IDRAMServer({ db, downloader });
   await server.start();
-  console.log('  ✅ IDMM server started on http://127.0.0.1:9977');
+  console.log('   IDMM server started on http://127.0.0.1:9977');
   console.log('');
 
-  // ─── Test 1: Health Check ────────────────────────────────────────
+  //  Test 1: Health Check 
 
-  console.log('\n▸ Step 1: Health check...');
+  console.log('\n Step 1: Health check...');
   try {
     const health = await apiRequest('GET', '/api/health');
     if (health.status === 200 && health.data.status === 'ok') {
@@ -248,9 +248,9 @@ async function runTests() {
     fail('Health check', err.message);
   }
 
-  // ─── Test 2: Start Download ──────────────────────────────────────
+  //  Test 2: Start Download 
 
-  console.log('\n▸ Step 2: Starting download...');
+  console.log('\n Step 2: Starting download...');
   let downloadId = null;
   try {
     const startRes = await apiRequest('POST', '/api/download', {
@@ -276,9 +276,9 @@ async function runTests() {
     process.exit(1);
   }
 
-  // ─── Test 3: Monitor Progress ────────────────────────────────────
+  //  Test 3: Monitor Progress 
 
-  console.log('\n▸ Step 3: Monitoring progress...');
+  console.log('\n Step 3: Monitoring progress...');
   let pauseTested = false;
   let prePauseDownloaded = 0;
 
@@ -289,8 +289,8 @@ async function runTests() {
     if (statusRes.status !== 200) continue;
 
     const d = statusRes.data;
-    const bar = '█'.repeat(Math.floor((d.progress || 0) / 5)) +
-                '░'.repeat(20 - Math.floor((d.progress || 0) / 5));
+    const bar = ''.repeat(Math.floor((d.progress || 0) / 5)) +
+                ''.repeat(20 - Math.floor((d.progress || 0) / 5));
     const line = `  [${bar}] ${(d.progress || 0).toFixed(1)}% | ${formatBytes(d.downloaded)} / ${formatBytes(d.total_size)} | ${formatSpeed(d.speed)} | ETA: ${d.eta}s | threads: ${d.active_threads}`;
 
     if (tick % 4 === 0) {
@@ -323,7 +323,7 @@ async function runTests() {
     fail('Download monitoring', 'Timed out waiting for 30% progress');
   }
 
-  // ─── Test 4: Pause ──────────────────────────────────────────────
+  //  Test 4: Pause 
 
   let resumeSucceeded = false;
 
@@ -334,7 +334,7 @@ async function runTests() {
       skip('Resume test (download completed too fast)');
       resumeSucceeded = true; // No resume needed
     } else {
-      console.log('\n▸ Step 4: Pausing download...');
+      console.log('\n Step 4: Pausing download...');
       try {
         const pauseRes = await apiRequest('POST', `/api/download/${downloadId}/pause`);
         console.log(`  Status: ${pauseRes.data.status}`);
@@ -354,9 +354,9 @@ async function runTests() {
         fail('Pause download', err.message);
       }
 
-      // ─── Test 5: Resume ──────────────────────────────────────────
+      //  Test 5: Resume 
 
-      console.log('\n▸ Step 5: Resuming download...');
+      console.log('\n Step 5: Resuming download...');
       try {
         const resumeRes = await apiRequest('POST', `/api/download/${downloadId}/resume`);
         console.log(`  Status: ${resumeRes.data.status}`);
@@ -370,9 +370,9 @@ async function runTests() {
         fail('Resume download', err.message);
       }
 
-      // ─── Test 6: Wait for completion after resume ────────────────
+      //  Test 6: Wait for completion after resume 
 
-      console.log('\n▸ Step 6: Waiting for completion after resume...');
+      console.log('\n Step 6: Waiting for completion after resume...');
       let completedAfterResume = false;
       let failedAfterResume = false;
       let lastProgress = 0;
@@ -391,12 +391,12 @@ async function runTests() {
         if (d.status === 'completed') {
           completedAfterResume = true;
           resumeSucceeded = true;
-          console.log(`  ✅ Download completed after resume!\n`);
+          console.log(`   Download completed after resume!\n`);
           break;
         }
         if (d.status === 'failed') {
           failedAfterResume = true;
-          console.error(`  ❌ Download failed after resume: ${d.error}\n`);
+          console.error(`   Download failed after resume: ${d.error}\n`);
           break;
         }
 
@@ -406,7 +406,7 @@ async function runTests() {
           stuckTicks++;
           if (stuckTicks >= 20) {
             failedAfterResume = true;
-            console.error(`  ❌ Download stuck at ${formatBytes(currentProgress)} — no progress for 5s\n`);
+            console.error(`   Download stuck at ${formatBytes(currentProgress)}  no progress for 5s\n`);
             break;
           }
         } else {
@@ -425,9 +425,9 @@ async function runTests() {
     }
   }
 
-  // ─── Test 7: Verify File ─────────────────────────────────────────
+  //  Test 7: Verify File 
 
-  console.log('\n▸ Step 7: Verifying downloaded file...');
+  console.log('\n Step 7: Verifying downloaded file...');
   let fileVerified = false;
   if (fs.existsSync(SAVE_DIR)) {
     const files = fs.readdirSync(SAVE_DIR);
@@ -443,7 +443,7 @@ async function runTests() {
         const hash = crypto.createHash('sha256').update(content).digest('hex');
         if (hash === expectedHash) {
           fileVerified = true;
-          console.log(`  SHA-256 verified — file integrity confirmed!`);
+          console.log(`  SHA-256 verified  file integrity confirmed!`);
         } else {
           console.error(`  Hash mismatch! Expected: ${expectedHash.substring(0, 16)}..., Got: ${hash.substring(0, 16)}...`);
         }
@@ -461,9 +461,9 @@ async function runTests() {
     fail('File integrity verification', 'SHA-256 hash mismatch or file missing');
   }
 
-  // ─── Test 8: WebSocket Connection ────────────────────────────────
+  //  Test 8: WebSocket Connection 
 
-  console.log('\n▸ Step 8: Testing WebSocket connection...');
+  console.log('\n Step 8: Testing WebSocket connection...');
   try {
     await testWebSocket();
     pass('WebSocket connection');
@@ -471,14 +471,14 @@ async function runTests() {
     fail('WebSocket connection', err.message);
   }
 
-  // ─── Test 9: List & Stats ────────────────────────────────────────
+  //  Test 9: List & Stats 
 
-  console.log('\n▸ Step 9: Listing downloads...');
+  console.log('\n Step 9: Listing downloads...');
   try {
     const listRes = await apiRequest('GET', '/api/downloads');
     console.log(`  Found ${listRes.data.length} download(s)`);
     for (const d of listRes.data) {
-      console.log(`  • ${d.filename} — ${d.status} (${(d.progress || 0).toFixed(1)}%)`);
+      console.log(`   ${d.filename}  ${d.status} (${(d.progress || 0).toFixed(1)}%)`);
     }
     if (listRes.data.length > 0) {
       pass('List downloads');
@@ -489,7 +489,7 @@ async function runTests() {
     fail('List downloads', err.message);
   }
 
-  console.log('\n▸ Step 10: Statistics...');
+  console.log('\n Step 10: Statistics...');
   try {
     const statsRes = await apiRequest('GET', '/api/stats');
     const s = statsRes.data;
@@ -500,29 +500,29 @@ async function runTests() {
     fail('Statistics', err.message);
   }
 
-  // ─── Summary ─────────────────────────────────────────────────────
+  //  Summary 
 
   console.log('');
-  console.log('════════════════════════════════════════════════════════');
+  console.log('');
   console.log(`  Results: ${results.passed} passed, ${results.failed} failed, ${results.skipped} skipped`);
   if (results.errors.length > 0) {
     console.log('  Failures:');
     for (const err of results.errors) {
-      console.log(`    ❌ ${err}`);
+      console.log(`     ${err}`);
     }
   }
-  console.log('════════════════════════════════════════════════════════');
+  console.log('');
 
   if (results.failed === 0) {
     console.log('');
-    console.log('╔══════════════════════════════════════════════════════╗');
-    console.log('║  ✅ ALL TESTS PASSED!                               ║');
-    console.log('╚══════════════════════════════════════════════════════╝');
+    console.log('');
+    console.log('   ALL TESTS PASSED!                               ');
+    console.log('');
   } else {
     console.log('');
-    console.log('╔══════════════════════════════════════════════════════╗');
-    console.log(`║  ❌ ${results.failed} TEST(S) FAILED!                            ║`);
-    console.log('╚══════════════════════════════════════════════════════╝');
+    console.log('');
+    console.log(`   ${results.failed} TEST(S) FAILED!                            `);
+    console.log('');
   }
 
   // Cleanup
@@ -547,7 +547,8 @@ async function cleanup(server, db, testServer, dataDir) {
 }
 
 runTests().catch(err => {
-  console.error('\n❌ Test failed:', err.message);
+  console.error('\n Test failed:', err.message);
   console.error(err.stack);
   process.exit(1);
 });
+

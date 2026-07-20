@@ -1,14 +1,14 @@
 'use strict';
 
 /**
- * IDMM Extension — Popup Script.
+ * IDMM Extension  Popup Script.
  *
  * Renders the download list with real-time progress, supports
  * pause/resume/cancel/delete actions, and adding new downloads.
  * Uses IDMM_API from lib/api-client.js (loaded via script tag in popup.html).
  */
 
-// ─── DOM references ────────────────────────────────────────────────
+//  DOM references 
 
 const $list = document.getElementById('downloads-list');
 const $emptyState = document.getElementById('empty-state');
@@ -22,14 +22,14 @@ const $statsQueued = document.getElementById('stats-queued');
 const $tabs = document.querySelectorAll('.tab');
 const $savePathHint = document.getElementById('save-path-hint'); // E9
 
-// ─── State ─────────────────────────────────────────────────────────
+//  State 
 
 let currentFilter = 'active';
 let downloads = [];
 let online = false;
 let refreshTimer = null;
 
-// ─── Initialization ────────────────────────────────────────────────
+//  Initialization 
 
 document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await refreshDownloads();
   await loadSavePathHint(); // E9: Show save path if configured
 
-  // E5: Reduced polling — 5s as fallback (WebSocket provides real-time)
+  // E5: Reduced polling  5s as fallback (WebSocket provides real-time)
   refreshTimer = setInterval(refreshDownloads, 5000);
 });
 
@@ -47,7 +47,7 @@ window.addEventListener('unload', () => {
   if (refreshTimer) clearInterval(refreshTimer);
 });
 
-// ─── Event listeners ───────────────────────────────────────────────
+//  Event listeners 
 
 function setupEventListeners() {
   $btnAdd.addEventListener('click', addDownload);
@@ -91,7 +91,7 @@ function setupEventListeners() {
   });
 }
 
-// ─── Tab memory (B4 / T1 / T2) ────────────────────────────────────
+//  Tab memory (B4 / T1 / T2) 
 
 async function restoreLastTab() {
   return new Promise((resolve) => {
@@ -106,7 +106,7 @@ async function restoreLastTab() {
   });
 }
 
-// ─── E9: Save path hint ────────────────────────────────────────────
+//  E9: Save path hint 
 
 async function loadSavePathHint() {
   try {
@@ -124,7 +124,7 @@ async function loadSavePathHint() {
   }
 }
 
-// ─── Server status ─────────────────────────────────────────────────
+//  Server status 
 
 async function checkServerStatus() {
   online = await IDMM_API.healthCheck();
@@ -143,7 +143,7 @@ function updateStatusBadge() {
   }
 }
 
-// ─── Downloads management ──────────────────────────────────────────
+//  Downloads management 
 
 async function refreshDownloads() {
   try {
@@ -175,7 +175,7 @@ function renderDownloads() {
     } else if (currentFilter === 'active') {
       $emptyState.querySelector('.empty-icon').textContent = '\u{1F4E5}';
       $emptyState.querySelector('.empty-text').textContent = 'No active downloads';
-      $emptyState.querySelector('.empty-hint').textContent = 'Right-click a link → "Download with IDMM"';
+      $emptyState.querySelector('.empty-hint').textContent = 'Right-click a link  "Download with IDMM"';
     } else {
       $emptyState.querySelector('.empty-icon').textContent = '\u{1F4ED}';
       $emptyState.querySelector('.empty-text').textContent = `No ${currentFilter} downloads`;
@@ -218,7 +218,7 @@ function updateStats() {
   $statsQueued.textContent = `${queued + paused} queued`;
 }
 
-// ─── Download item rendering ───────────────────────────────────────
+//  Download item rendering 
 
 function createDownloadElement(dl) {
   const div = document.createElement('div');
@@ -236,29 +236,29 @@ function createDownloadElement(dl) {
   let statusIcon = '\u{1F4E5}';
   let progressClass = '';
   if (dl.status === 'completed') {
-    statusIcon = '✅';
+    statusIcon = '';
     progressClass = 'completed';
   } else if (dl.status === 'paused') {
-    statusIcon = '⏸';
+    statusIcon = '';
     progressClass = 'paused';
   } else if (dl.status === 'failed') {
-    statusIcon = '❌';
+    statusIcon = '';
     progressClass = 'failed';
   } else if (dl.status === 'downloading') {
-    statusIcon = '⬇️';
+    statusIcon = '';
   }
 
   // Action buttons
   let actionsHtml = '';
   if (dl.status === 'downloading') {
     actionsHtml = `
-      <button class="dl-btn btn-pause" data-action="pause" data-id="${dl.id}">⏸ Pause</button>
-      <button class="dl-btn btn-cancel" data-action="cancel" data-id="${dl.id}">✕ Cancel</button>
+      <button class="dl-btn btn-pause" data-action="pause" data-id="${dl.id}"> Pause</button>
+      <button class="dl-btn btn-cancel" data-action="cancel" data-id="${dl.id}"> Cancel</button>
     `;
   } else if (dl.status === 'paused') {
     actionsHtml = `
-      <button class="dl-btn btn-resume" data-action="resume" data-id="${dl.id}">▶ Resume</button>
-      <button class="dl-btn btn-cancel" data-action="cancel" data-id="${dl.id}">✕ Cancel</button>
+      <button class="dl-btn btn-resume" data-action="resume" data-id="${dl.id}"> Resume</button>
+      <button class="dl-btn btn-cancel" data-action="cancel" data-id="${dl.id}"> Cancel</button>
     `;
   } else if (dl.status === 'completed') {
     const openBtn = dl.save_to
@@ -270,7 +270,7 @@ function createDownloadElement(dl) {
     `;
   } else if (dl.status === 'failed') {
     actionsHtml = `
-      <button class="dl-btn btn-resume" data-action="resume" data-id="${dl.id}">↻ Retry</button>
+      <button class="dl-btn btn-resume" data-action="resume" data-id="${dl.id}"> Retry</button>
       <button class="dl-btn btn-delete" data-action="delete" data-id="${dl.id}">\u{1F5D1} Remove</button>
     `;
   }
@@ -280,14 +280,14 @@ function createDownloadElement(dl) {
   if (dl.status === 'downloading') {
     metaHtml = `
       <span class="dl-speed">${IDMM_API.formatSpeed(speed)}</span>
-      <span>·</span>
+      <span></span>
       <span>${dl.active_threads || dl.threads || 0}T</span>
-      ${eta > 0 ? `<span>·</span><span class="dl-eta">ETA ${IDMM_API.formatETA(eta)}</span>` : ''}
+      ${eta > 0 ? `<span></span><span class="dl-eta">ETA ${IDMM_API.formatETA(eta)}</span>` : ''}
     `;
   } else if (dl.status === 'completed') {
     metaHtml = '<span>Complete</span>';
   } else if (dl.status === 'paused') {
-    metaHtml = `<span>Paused</span>${dl.threads ? ` · ${dl.threads}T` : ''}`;
+    metaHtml = `<span>Paused</span>${dl.threads ? `  ${dl.threads}T` : ''}`;
   } else if (dl.status === 'failed') {
     metaHtml = `<span style="color: var(--danger)">${escapeHtml(dl.error || 'Failed')}</span>`;
   }
@@ -302,9 +302,9 @@ function createDownloadElement(dl) {
     </div>
     <div class="dl-stats">
       <span class="dl-progress-text">${progress.toFixed(1)}%</span>
-      <span>·</span>
+      <span></span>
       <span>${IDMM_API.formatBytes(downloaded)}${totalSize > 0 ? ' / ' + IDMM_API.formatBytes(totalSize) : ''}</span>
-      <span>·</span>
+      <span></span>
       ${metaHtml}
     </div>
     <div class="dl-actions">${actionsHtml}</div>
@@ -324,7 +324,7 @@ function createDownloadElement(dl) {
   return div;
 }
 
-// ─── Actions ───────────────────────────────────────────────────────
+//  Actions 
 
 async function handleAction(action, id, data = {}) {
   try {
@@ -384,9 +384,9 @@ async function addDownload() {
   }
 }
 
-// ─── UI helpers ────────────────────────────────────────────────────
+//  UI helpers 
 
-// ─── B5: Open Folder helpers ──────────────────────────────────────
+//  B5: Open Folder helpers 
 
 async function copyToClipboard(text) {
   try {
@@ -452,3 +452,4 @@ function escapeHtml(str) {
   div.textContent = str;
   return div.innerHTML;
 }
+

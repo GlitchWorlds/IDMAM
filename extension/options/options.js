@@ -1,14 +1,14 @@
 'use strict';
 
 /**
- * IDMM Extension — Options Page Script.
+ * IDMM Extension  Options Page Script.
  *
  * Uses IDMM_API from lib/api-client.js for settings persistence.
  * Settings are stored under the 'idmm_settings' key in chrome.storage.local.
- * Backend URL is hidden from users — only shows Connected/Not Running.
+ * Backend URL is hidden from users  only shows Connected/Not Running.
  */
 
-// ─── DOM references ────────────────────────────────────────────────
+//  DOM references 
 
 const $serverStatus = document.getElementById('server-status');
 const $extEnabled = document.getElementById('ext-enabled');
@@ -39,7 +39,7 @@ const CATEGORY_KEY_MAP = {
   document: 'interceptDocument',
 };
 
-// ─── Initialization ────────────────────────────────────────────────
+//  Initialization 
 
 document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
@@ -54,13 +54,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 });
 
-// ─── Event listeners ───────────────────────────────────────────────
+//  Event listeners 
 
 function setupEventListeners() {
   $btnSave.addEventListener('click', saveSettings);
   $btnReset.addEventListener('click', resetSettings);
 
-  // E3: Browse button — open hidden folder picker
+  // E3: Browse button  open hidden folder picker
   $btnBrowse.addEventListener('click', () => {
     $folderPicker.click();
   });
@@ -69,7 +69,7 @@ function setupEventListeners() {
     const files = $folderPicker.files;
     if (!files || files.length === 0) return;
 
-    // Extract folder name from webkitRelativePath (e.g. "MyFolder/file.txt" → "MyFolder")
+    // Extract folder name from webkitRelativePath (e.g. "MyFolder/file.txt"  "MyFolder")
     const relativePath = files[0].webkitRelativePath || '';
     const folderName = relativePath.split('/')[0] || '';
 
@@ -82,7 +82,7 @@ function setupEventListeners() {
   });
 }
 
-// ─── Load settings from storage ────────────────────────────────────
+//  Load settings from storage 
 
 async function loadSettings() {
   const settings = await IDMM_API.getSettings();
@@ -101,7 +101,7 @@ async function loadSettings() {
   }
 }
 
-// ─── Save settings to storage ──────────────────────────────────────
+//  Save settings to storage 
 
 async function saveSettings() {
   const settings = {
@@ -130,7 +130,7 @@ async function saveSettings() {
   showSaveStatus('Settings saved!', false);
 }
 
-// ─── Reset to defaults ─────────────────────────────────────────────
+//  Reset to defaults 
 
 async function resetSettings() {
   if (!confirm('Reset all settings to defaults?')) return;
@@ -148,7 +148,7 @@ async function resetSettings() {
   showSaveStatus('Settings reset to defaults', false);
 }
 
-// ─── Server status check (no URL exposed) ──────────────────────────
+//  Server status check (no URL exposed) 
 
 async function checkStatus() {
   $serverStatus.textContent = 'Checking...';
@@ -169,7 +169,7 @@ async function checkStatus() {
   }
 }
 
-// ─── Message helper ────────────────────────────────────────────────
+//  Message helper 
 
 function sendMessage(message) {
   return new Promise((resolve, reject) => {
@@ -183,7 +183,7 @@ function sendMessage(message) {
   });
 }
 
-// ─── UI helpers ────────────────────────────────────────────────────
+//  UI helpers 
 
 function showSaveStatus(text, isError) {
   $saveStatus.textContent = text;
@@ -196,3 +196,4 @@ function showSaveStatus(text, isError) {
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
+

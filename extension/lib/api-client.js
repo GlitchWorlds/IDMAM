@@ -1,5 +1,5 @@
 /**
- * IDMM API Client — shared between popup, background, and options.
+ * IDMM API Client  shared between popup, background, and options.
  * Handles all communication with the IDMM desktop app server.
  */
 
@@ -42,7 +42,7 @@ const IDMM_API = {
     }
   },
 
-  // ─── Downloads ─────────────────────────────────────────────────
+  //  Downloads 
 
   async startDownload({ url, filename, cookies, referrer, threads, save_to, headers }) {
     return IDMM_API._fetch('/api/download', {
@@ -100,10 +100,10 @@ const IDMM_API = {
     }
   },
 
-  // ─── Settings (Server SSOT + local cache) ──────────────────────
+  //  Settings (Server SSOT + local cache) 
 
   /**
-   * Key mapping: extension camelCase ↔ server snake_case.
+   * Key mapping: extension camelCase  server snake_case.
    */
   _LOCAL_TO_SERVER: {
     maxThreads: 'default_threads',
@@ -192,7 +192,7 @@ const IDMM_API = {
 
       return merged;
     } catch {
-      // Server offline → use full local cache
+      // Server offline  use full local cache
       return new Promise((resolve) => {
         chrome.storage.local.get('idmm_settings', (result) => {
           resolve({ ...defaults, ...result.idmm_settings, ...localOnly });
@@ -216,7 +216,7 @@ const IDMM_API = {
         body: JSON.stringify(serverPayload),
       });
     } catch {
-      // Server offline — local cache saved, will sync on next save
+      // Server offline  local cache saved, will sync on next save
       console.warn('[IDMM] Server offline, settings cached locally only');
     }
   },
@@ -248,7 +248,7 @@ const IDMM_API = {
     };
   },
 
-  // ─── File Type Detection ───────────────────────────────────────
+  //  File Type Detection 
 
   INTERCEPT_EXTENSIONS: {
     video: ['.mp4', '.mkv', '.avi', '.mov', '.webm', '.flv', '.wmv', '.m4v', '.ts', '.mpg', '.mpeg'],
@@ -271,7 +271,7 @@ const IDMM_API = {
 
     const lower = filename.toLowerCase();
 
-    // Size threshold — skip small files
+    // Size threshold  skip small files
     const minSize = settings.interceptMinSize || 0;
     if (fileSize > 0 && fileSize < minSize) return false;
 
@@ -295,7 +295,7 @@ const IDMM_API = {
     return false;
   },
 
-  // ─── Formatting Helpers ────────────────────────────────────────
+  //  Formatting Helpers 
 
   formatBytes(bytes) {
     if (!bytes || bytes === 0) return '0 B';
@@ -320,3 +320,4 @@ const IDMM_API = {
 };
 
 if (typeof module !== 'undefined') module.exports = IDMM_API;
+

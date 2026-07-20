@@ -7,7 +7,7 @@ const path = require('node:path');
  * Maps file extensions to MIME types and download categories.
  */
 
-// Extension → MIME type mapping (common download types)
+// Extension  MIME type mapping (common download types)
 const EXTENSION_TO_MIME = {
   // Video
   '.mp4': 'video/mp4',
@@ -99,7 +99,7 @@ const EXTENSION_TO_MIME = {
   '.bat': 'application/x-bat',
 };
 
-// MIME type → category mapping for IDMM auto-categorization
+// MIME type  category mapping for IDMM auto-categorization
 const MIME_TO_CATEGORY = {
   'video/mp4': 'Videos',
   'video/x-matroska': 'Videos',
@@ -222,3 +222,4 @@ module.exports = {
   EXTENSION_TO_MIME,
   MIME_TO_CATEGORY,
 };
+

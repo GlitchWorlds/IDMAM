@@ -30,10 +30,10 @@ Create a professional Windows installer using Electron Builder that works like I
 4. **Chrome Extension auto-install**: Copy extension files to a known location and provide a registry entry or batch script that loads it into Chrome via --load-extension flag
 
 5. **Startup flow**:
-   - Windows boots → IDMM starts minimized to tray
+   - Windows boots  IDMM starts minimized to tray
    - API server starts on 127.0.0.1:9977
    - Chrome extension connects to server
-   - User clicks tray icon → opens IDMM window
+   - User clicks tray icon  opens IDMM window
    - Downloads go through IDMM automatically
 
 ### Steps:
@@ -51,3 +51,4 @@ Create a professional Windows installer using Electron Builder that works like I
 - electron/package.json must have correct "build" config
 
 After building, report the output .exe path and file size.
+

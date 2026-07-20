@@ -7,7 +7,7 @@ const path = require('node:path');
  * IDMM Resume Manager.
  *
  * Dual persistence: saves download state to download.json files alongside
- * the SQLite database. This provides resilience — if the DB is corrupted
+ * the SQLite database. This provides resilience  if the DB is corrupted
  * or the process crashes, we can reconstruct state from the JSON files.
  */
 
@@ -60,7 +60,7 @@ class ResumeManager {
    * @param {Object} state - Download state object
    */
   saveState(state) {
-    // F12: Cancel any pending debounced save for this download — direct save supersedes
+    // F12: Cancel any pending debounced save for this download  direct save supersedes
     if (this._pendingTimers && this._pendingTimers[state.id]) {
       clearTimeout(this._pendingTimers[state.id]);
       delete this._pendingTimers[state.id];
@@ -119,7 +119,7 @@ class ResumeManager {
   }
 
   /**
-   * Validate chunk integrity — check if .part file sizes match expected bytes.
+   * Validate chunk integrity  check if .part file sizes match expected bytes.
    * @param {string} downloadId
    * @param {Object[]} chunks - Chunk descriptors from state
    * @returns {{ valid: boolean, chunks: Object[] }} Validated chunks with actual sizes
@@ -275,9 +275,9 @@ class ResumeManager {
    * Call before pause/cancel/shutdown to avoid losing state.
    */
   flushPending() {
-    // AW2: Re-entrancy guard — flushPending() can be called while a
+    // AW2: Re-entrancy guard  flushPending() can be called while a
     // debounced saveState() callback is already running inside the same
-    // tick (e.g. via _flushChunkState → saveState).  Prevent infinite
+    // tick (e.g. via _flushChunkState  saveState).  Prevent infinite
     // recursion by bailing out if we are already mid-flush.
     if (this._flushing) return;
     this._flushing = true;
@@ -309,3 +309,4 @@ class ResumeManager {
 }
 
 module.exports = ResumeManager;
+

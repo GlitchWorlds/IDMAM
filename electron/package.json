@@ -17,7 +17,7 @@
   "build": {
     "appId": "com.idmm.desktop",
     "productName": "IDMM",
-    "copyright": "Copyright © 2026 IDMM",
+    "copyright": "Copyright  2026 IDMM",
     "directories": {
       "output": "dist"
     },
@@ -85,3 +85,4 @@
     "electron-builder": "^25.0.0"
   }
 }
+

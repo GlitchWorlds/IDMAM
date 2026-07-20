@@ -15,7 +15,15 @@ export default function App() {
   const [search, setSearch] = useState('');
   const [showAdd, setShowAdd] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [speedHistory, setSpeedHistory] = useState([]);
+  // Theming state
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('idmm_theme') || 'dark-green';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('idmm_theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   const handleWsMessage = useCallback((msg) => {
     if (msg.type === 'progress') {
@@ -88,7 +96,7 @@ export default function App() {
           stats={stats}
         />
         <div className="flex-1 overflow-y-auto">
-          <Settings onBack={() => setShowSettings(false)} />
+          <Settings onBack={() => setShowSettings(false)} theme={theme} onThemeChange={setTheme} />
         </div>
       </div>
     );

@@ -7,10 +7,10 @@ Error: Cannot find module
 ```
 
 ## Root Cause Analysis
-When Electron packages the app with `asar: true`, `require()` fails to resolve paths inside the asar archive. The `prebuild` script copies `../app/src` → `app-engine/src` but:
+When Electron packages the app with `asar: true`, `require()` fails to resolve paths inside the asar archive. The `prebuild` script copies `../app/src`  `app-engine/src` but:
 
-1. **Module resolution inside asar is fragile** — `require(path.join(__dirname, 'app-engine', 'src', 'db', 'sqlite'))` can fail
-2. **Dependencies from `../app/node_modules` are NOT copied** — if `sqlite.js` requires `sql.js`, it won't find it
+1. **Module resolution inside asar is fragile**  `require(path.join(__dirname, 'app-engine', 'src', 'db', 'sqlite'))` can fail
+2. **Dependencies from `../app/node_modules` are NOT copied**  if `sqlite.js` requires `sql.js`, it won't find it
 3. The previous Claude Code session set `"asar": false` but that change got lost or overwritten
 
 ## Required Fix (COMPREHENSIVE)
@@ -27,7 +27,7 @@ Keep `asar: true` but:
 - Ensure ALL dependencies are bundled
 - Add `asarUnpack` for native modules
 
-**GO WITH OPTION A** — reliability over size.
+**GO WITH OPTION A**  reliability over size.
 
 ## Also Fix These Issues
 
@@ -64,7 +64,7 @@ After building, test that ALL these resolve correctly:
 - `app-engine/src/server/server`
 
 ### 4. Icon path in packaged mode
-`path.join(__dirname, 'assets', 'icon.png')` — verify this works in packaged mode.
+`path.join(__dirname, 'assets', 'icon.png')`  verify this works in packaged mode.
 For NSIS: `extraResources` copies to `process.resourcesPath`, not `__dirname`.
 
 ## Steps
@@ -80,3 +80,4 @@ For NSIS: `extraResources` copies to `process.resourcesPath`, not `__dirname`.
 - Test that `require()` works for all 3 engine modules in the packaged output
 - Do NOT leave asar:true without thorough testing
 - The fix must work on a FRESH Windows machine (no dev dependencies)
+

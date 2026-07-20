@@ -60,14 +60,14 @@ class IDMMServer {
     this.broadcastTimer = null;
     this._heartbeatTimer = null;
     this.activeUrls = new Set(); // F10: Track URLs currently being downloaded
-    this.downloadUrlMap = new Map(); // F10: downloadId → url for cleanup
+    this.downloadUrlMap = new Map(); // F10: downloadId  url for cleanup
     this._rateLimitCleanupTimer = null;
 
     this._setupMiddleware();
     this._setupRoutes();
   }
 
-  // ─── Middleware ───────────────────────────────────────────────────
+  //  Middleware 
 
   _setupMiddleware() {
     // Security headers
@@ -134,7 +134,7 @@ class IDMMServer {
       next();
     });
 
-    // F9: TTL-based eviction — clean up stale rate limit entries every 5 minutes
+    // F9: TTL-based eviction  clean up stale rate limit entries every 5 minutes
     this._rateLimitCleanupTimer = setInterval(() => {
       const now = Date.now();
       for (const [ip, entry] of rateLimitMap) {
@@ -145,7 +145,7 @@ class IDMMServer {
     }, 5 * 60 * 1000);
   }
 
-  // ─── Routes ──────────────────────────────────────────────────────
+  //  Routes 
 
   _setupRoutes() {
     // Health check
@@ -158,7 +158,7 @@ class IDMMServer {
       res.json({ status: 'ok', version: serverVersion, uptime: process.uptime() });
     });
 
-    // POST /api/download — Start a new download
+    // POST /api/download  Start a new download
     this.app.post('/api/download', async (req, res) => {
       const url = req.body && req.body.url; // F10: Extract URL early for catch block
       try {
@@ -176,7 +176,7 @@ class IDMMServer {
           return res.status(400).json({ error: 'Invalid URL' });
         }
 
-        // SSRF protection — block localhost/private IPs (skip in test mode)
+        // SSRF protection  block localhost/private IPs (skip in test mode)
         const isTestMode = process.env.IDMM_TEST === '1' || process.env.NODE_ENV === 'test';
         if (!isTestMode) {
           const hostname = parsedUrl.hostname.toLowerCase();
@@ -185,7 +185,7 @@ class IDMMServer {
             return res.status(400).json({ error: 'Cannot download from localhost or private network' });
           }
 
-          // DNS resolution check — catch hosts that resolve to private/loopback IPs
+          // DNS resolution check  catch hosts that resolve to private/loopback IPs
           const { validateDnsResolution } = require('../utils/ssrf');
           try {
             await validateDnsResolution(hostname);
@@ -194,14 +194,14 @@ class IDMMServer {
           }
         }
 
-        // F1: Path traversal protection — validate save_to against allowed roots
+        // F1: Path traversal protection  validate save_to against allowed roots
         {
           const defaultSavePath = this.db.getSetting('default_save_path') || '';
           const allowedRoots = new Set();
           if (defaultSavePath) allowedRoots.add(path.resolve(defaultSavePath));
           try {
             allowedRoots.add(path.resolve(require('node:os').homedir(), 'Downloads'));
-          } catch { /* OS module unavailable — rely on default_save_path only */ }
+          } catch { /* OS module unavailable  rely on default_save_path only */ }
 
           if (allowedRoots.size > 0) {
             const resolvedSaveTo = path.resolve(save_to || defaultSavePath);
@@ -256,7 +256,7 @@ class IDMMServer {
       }
     });
 
-    // GET /api/downloads — List all downloads
+    // GET /api/downloads  List all downloads
     this.app.get('/api/downloads', (req, res) => {
       try {
         const { status } = req.query;
@@ -294,7 +294,7 @@ class IDMMServer {
       }
     });
 
-    // GET /api/download/:id — Get download status
+    // GET /api/download/:id  Get download status
     this.app.get('/api/download/:id', (req, res) => {
       try {
         const state = this.downloader.getDownloadState(req.params.id);
@@ -307,7 +307,7 @@ class IDMMServer {
       }
     });
 
-    // POST /api/download/:id/pause — Pause download
+    // POST /api/download/:id/pause  Pause download
     this.app.post('/api/download/:id/pause', (req, res) => {
       try {
         const result = this.downloader.pauseDownload(req.params.id);
@@ -321,7 +321,7 @@ class IDMMServer {
       }
     });
 
-    // POST /api/download/:id/resume — Resume download
+    // POST /api/download/:id/resume  Resume download
     this.app.post('/api/download/:id/resume', async (req, res) => {
       try {
         const result = await this.downloader.resumeDownload(req.params.id);
@@ -333,7 +333,7 @@ class IDMMServer {
       }
     });
 
-    // POST /api/download/:id/cancel — Cancel download
+    // POST /api/download/:id/cancel  Cancel download
     this.app.post('/api/download/:id/cancel', (req, res) => {
       try {
         const result = this.downloader.cancelDownload(req.params.id);
@@ -345,10 +345,11 @@ class IDMMServer {
       }
     });
 
-    // DELETE /api/download/:id — Delete download + files
+    // DELETE /api/download/:id  Delete download (and optionally file)
     this.app.delete('/api/download/:id', (req, res) => {
       try {
-        const result = this.downloader.deleteDownload(req.params.id);
+        const deleteFile = req.query.delete_file === 'true';
+        const result = this.downloader.deleteDownload(req.params.id, deleteFile);
         this._removeActiveUrl(req.params.id);
         this.broadcast({ type: 'removed', id: req.params.id });
         res.json(result);
@@ -357,7 +358,7 @@ class IDMMServer {
       }
     });
 
-    // GET /api/settings — Get all settings
+    // GET /api/settings  Get all settings
     this.app.get('/api/settings', (req, res) => {
       try {
         const settings = this.db.getAllSettings();
@@ -367,7 +368,7 @@ class IDMMServer {
       }
     });
 
-    // PUT /api/settings — Update settings
+    // PUT /api/settings  Update settings
     this.app.put('/api/settings', (req, res) => {
       try {
         const updates = req.body;
@@ -411,7 +412,7 @@ class IDMMServer {
       }
     });
 
-    // POST /api/open-folder — Open file location in system file explorer
+    // POST /api/open-folder  Open file location in system file explorer
     this.app.post('/api/open-folder', (req, res) => {
       try {
         const { path: filePath } = req.body;
@@ -446,7 +447,7 @@ class IDMMServer {
       }
     });
 
-    // GET /api/stats — Download statistics
+    // GET /api/stats  Download statistics
     this.app.get('/api/stats', (req, res) => {
       try {
         const stats = this.db.getStats();
@@ -457,13 +458,13 @@ class IDMMServer {
     });
   }
 
-  // ─── WebSocket ───────────────────────────────────────────────────
+  //  WebSocket 
 
   _setupWebSocket() {
     // F6: Set maxPayload to prevent memory abuse from huge messages
     this.wss = new WebSocketServer({ server: this.server, path: '/ws', maxPayload: 64 * 1024 });
 
-    // F7: Heartbeat — terminate dead connections every 30s
+    // F7: Heartbeat  terminate dead connections every 30s
     this._heartbeatTimer = setInterval(() => {
       for (const ws of this.wsClients) {
         if (ws.isAlive === false) {
@@ -576,7 +577,7 @@ class IDMMServer {
     }
   }
 
-  // ─── Lifecycle ───────────────────────────────────────────────────
+  //  Lifecycle 
 
   /**
    * Start the server.
@@ -588,7 +589,7 @@ class IDMMServer {
 
       this._setupWebSocket();
 
-      // W7: Overwriting onComplete/onError is safe here — the DownloadManager
+      // W7: Overwriting onComplete/onError is safe here  the DownloadManager
       // constructor initialises both to no-ops (() => {}), so no prior handler
       // is lost.  The replacements extend the original contract: they add
       // WebSocket broadcast + active-URL cleanup on top of the base no-op,
@@ -631,7 +632,7 @@ class IDMMServer {
    * @returns {Promise<void>}
    */
   stop() {
-    // BUG FIX: Guard against double-call — return same promise if already stopping
+    // BUG FIX: Guard against double-call  return same promise if already stopping
     if (this._stopping) {
       return this._stopping;
     }
@@ -678,3 +679,4 @@ class IDMMServer {
 }
 
 module.exports = IDMMServer;
+

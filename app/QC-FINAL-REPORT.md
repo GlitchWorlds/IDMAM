@@ -1,4 +1,4 @@
-# IDMM — FINAL QC REPORT
+# IDMM  FINAL QC REPORT
 
 > **Date:** 2026-07-15 13:35 WIB  
 > **Auditor:** Manager + 5 Sub-agents (CODE-001, KNOWLEDGE-001)  
@@ -12,9 +12,9 @@
 | Metric | Value |
 |--------|-------|
 | **Total Functions** | 105 |
-| **✅ PASS** | 88 (83.8%) |
-| **⚠️ WARNING** | 12 (11.4%) |
-| **❌ FAIL/BUG** | 5 (4.8%) |
+| ** PASS** | 88 (83.8%) |
+| ** WARNING** | 12 (11.4%) |
+| ** FAIL/BUG** | 5 (4.8%) |
 | **Integration Tests** | 9/9 PASSED |
 | **Critical Bugs Fixed** | 2 (pause/resume crash, test false positive) |
 
@@ -22,7 +22,7 @@
 
 ## Module Breakdown
 
-| Module | Functions | ✅ | ⚠️ | ❌ | Pass Rate |
+| Module | Functions |  |  |  | Pass Rate |
 |--------|-----------|---|---|---|-----------|
 | engine/downloader.js | 26 | 21 | 4 | 1 | 80.8% |
 | engine/chunk-worker.js | 4 | 3 | 1 | 0 | 75.0% |
@@ -39,42 +39,42 @@
 
 ---
 
-## Critical Bugs (❌)
+## Critical Bugs ()
 
-### Bug #1 — RESUME CRASH (FIXED ✅)
-- **File:** `downloader.js` → `resumeDownload()`
+### Bug #1  RESUME CRASH (FIXED )
+- **File:** `downloader.js`  `resumeDownload()`
 - **Root Cause:** `timeout_ms` and `retry_count` passed as STRING from SQLite DB to worker threads. Node.js HTTP requires `timeout` as number.
 - **Error:** `The "timeout" argument must be of type number. Received type string ('30000')`
 - **Fix:** `parseInt(this.settings.timeout_ms, 10)` and `parseInt(this.settings.retry_count, 10)`
 - **Status:** FIXED + TESTED + PUSHED (commit `e3da4bb`)
 
-### Bug #2 — MERGE STREAM LEAK
-- **File:** `merge.js` → `mergeChunks()`
+### Bug #2  MERGE STREAM LEAK
+- **File:** `merge.js`  `mergeChunks()`
 - **Root Cause:** When chunk read fails or file is missing, `reject()` is called but `outputStream` is never destroyed. File descriptor leaks, partial file left open.
 - **Fix:** Add `outputStream.destroy()` before `reject()`
 - **Status:** IDENTIFIED, not yet fixed
 
-### Bug #3 — LOST HEADERS ON RANGE FALLBACK
-- **File:** `downloader.js` → `_handleWorkerMessage()`
+### Bug #3  LOST HEADERS ON RANGE FALLBACK
+- **File:** `downloader.js`  `_handleWorkerMessage()`
 - **Root Cause:** When server doesn't support Range requests, fallback to single-stream loses cookies/referrer/custom headers (`requestHeaders: {}` instead of original).
 - **Fix:** Store `requestHeaders` on `state` object, read back in fallback branch
 - **Status:** IDENTIFIED, not yet fixed
 
-### Bug #4 — `getCategories()` MISSING
+### Bug #4  `getCategories()` MISSING
 - **File:** `db/sqlite.js`
 - **Root Cause:** Listed in design docs but never implemented. Categories are stored as column on downloads table.
 - **Status:** LOW PRIORITY, design gap
 
 ---
 
-## Warnings (⚠️) — Top 10
+## Warnings ()  Top 10
 
 | # | Module | Issue | Severity |
 |---|--------|-------|----------|
-| 1 | chunk-worker.js | `fileStream` missing `'error'` handler → silent hang on disk error | MEDIUM |
-| 2 | resume.js | `updateChunkState` has no locking → race condition on 8-thread writes | MEDIUM |
+| 1 | chunk-worker.js | `fileStream` missing `'error'` handler  silent hang on disk error | MEDIUM |
+| 2 | resume.js | `updateChunkState` has no locking  race condition on 8-thread writes | MEDIUM |
 | 3 | downloader.js | `_recalcProgress` writes to DB on every progress tick (no throttle) | MEDIUM |
-| 4 | downloader.js | `_doSingleStream` wrapper never sets `exited: true` → inflated thread count | MEDIUM |
+| 4 | downloader.js | `_doSingleStream` wrapper never sets `exited: true`  inflated thread count | MEDIUM |
 | 5 | server.js | `start()` resource leak on EADDRINUSE (WSS + broadcast timer not cleaned) | LOW |
 | 6 | server.js | `stop()` double-call can hang (promise never resolves) | LOW |
 | 7 | server.js | Rate limiter Map never evicts stale entries | LOW |
@@ -87,14 +87,14 @@
 ## Integration Test Results
 
 ```
-✅ Health check
-✅ Download started (4 threads, 10MB)
-✅ Pause (35% progress saved to DB + resume file)
-✅ Resume (continued from 35% → 100%)
-✅ SHA-256 file integrity verified
-✅ WebSocket connection
-✅ List downloads
-✅ Statistics
+ Health check
+ Download started (4 threads, 10MB)
+ Pause (35% progress saved to DB + resume file)
+ Resume (continued from 35%  100%)
+ SHA-256 file integrity verified
+ WebSocket connection
+ List downloads
+ Statistics
 
 Result: 9/9 PASSED
 ```
@@ -128,9 +128,9 @@ Result: 9/9 PASSED
 ## Recommendations
 
 ### Must Fix (Before Release)
-1. ~~Resume crash~~ ✅ DONE
-2. Merge stream leak — add `outputStream.destroy()` on error paths
-3. Lost headers on range fallback — store `requestHeaders` on state
+1. ~~Resume crash~~  DONE
+2. Merge stream leak  add `outputStream.destroy()` on error paths
+3. Lost headers on range fallback  store `requestHeaders` on state
 
 ### Should Fix
 4. Add `fileStream.on('error', reject)` in chunk-worker
@@ -145,4 +145,5 @@ Result: 9/9 PASSED
 
 ---
 
-**Overall Assessment:** IDMM core engine is **solid and production-ready** for a localhost application. The critical resume bug has been fixed. Remaining issues are edge-case hardening and code hygiene. The download lifecycle (start → pause → resume → verify) works correctly end-to-end.
+**Overall Assessment:** IDMM core engine is **solid and production-ready** for a localhost application. The critical resume bug has been fixed. Remaining issues are edge-case hardening and code hygiene. The download lifecycle (start  pause  resume  verify) works correctly end-to-end.
+

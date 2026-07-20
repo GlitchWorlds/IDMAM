@@ -17,12 +17,12 @@ fs.mkdirSync(path.join(testDir, 'downloads'), { recursive: true });
 
 let pass = 0, fail = 0, warn = 0;
 function check(name, cond, detail) {
-  if (cond) { pass++; console.log('  ✅ ' + name); }
-  else { fail++; console.log('  ❌ ' + name + (detail ? ' — ' + detail : '')); }
+  if (cond) { pass++; console.log('   ' + name); }
+  else { fail++; console.log('   ' + name + (detail ? '  ' + detail : '')); }
 }
-function warning(name, msg) { warn++; console.log('  ⚠️  ' + name + ' — ' + msg); }
+function warning(name, msg) { warn++; console.log('    ' + name + '  ' + msg); }
 
-// ─── Test File Server ──────────────────────────────────────────────
+//  Test File Server 
 
 const FILE_1MB = 1 * 1024 * 1024;
 const FILE_50MB = 50 * 1024 * 1024;
@@ -144,12 +144,12 @@ const testServer = http.createServer((req, res) => {
   }
 });
 
-// ─── Tests ─────────────────────────────────────────────────────────
+//  Tests 
 
 async function run() {
-  console.log('╔══════════════════════════════════════════════════════╗');
-  console.log('║  IDMM Deep Function Test Suite                     ║');
-  console.log('╚══════════════════════════════════════════════════════╝\n');
+  console.log('');
+  console.log('  IDMM Deep Function Test Suite                     ');
+  console.log('\n');
 
   await new Promise(r => testServer.listen(TEST_PORT, '127.0.0.1', r));
   console.log(`  Test server on port ${TEST_PORT}\n`);
@@ -196,10 +196,10 @@ async function run() {
 
   function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-  // ═══════════════════════════════════════════════════════════════
-  // GROUP 1: startDownload — Edge Cases
-  // ═══════════════════════════════════════════════════════════════
-  console.log('\n▸ GROUP 1: startDownload edge cases');
+  // 
+  // GROUP 1: startDownload  Edge Cases
+  // 
+  console.log('\n GROUP 1: startDownload edge cases');
 
   // 1.1 Normal download
   const r1 = await req('POST', '/api/download', { url: `http://127.0.0.1:${TEST_PORT}/1mb.bin`, threads: 2 });
@@ -218,7 +218,7 @@ async function run() {
   const r3 = await req('POST', '/api/download', { url: 'not-a-url' });
   check('1.3 Invalid URL rejected', r3.s >= 400, `status=${r3.s}`);
 
-  // 1.4 Blocked URL (localhost SSRF — test mode bypassed, but still test the path)
+  // 1.4 Blocked URL (localhost SSRF  test mode bypassed, but still test the path)
   const r4 = await req('POST', '/api/download', { url: 'http://127.0.0.1:1/secret' });
   // In test mode (IDMM_TEST=1), SSRF is bypassed so this may succeed or fail for other reasons
   warning('1.4 SSRF test mode', `status=${r4.s} (SSRF bypassed in test mode)`);
@@ -226,7 +226,7 @@ async function run() {
   // 1.5 Duplicate URL
   const r5a = await req('POST', '/api/download', { url: `http://127.0.0.1:${TEST_PORT}/dup.bin`, threads: 4 });
   check('1.5 First dup starts', r5a.s === 200 || r5a.s === 201);
-  // Send duplicate immediately (no sleep) — URL should be in activeUrls
+  // Send duplicate immediately (no sleep)  URL should be in activeUrls
   const r5b = await req('POST', '/api/download', { url: `http://127.0.0.1:${TEST_PORT}/dup.bin`, threads: 1 });
   check('1.5 Duplicate URL rejected', r5b.s === 409, `status=${r5b.s}`);
   // Cancel first one
@@ -241,22 +241,22 @@ async function run() {
     check('1.6 Zero-byte status', s6.d.status === 'completed' || s6.d.status === 'failed', `status=${s6.d.status}`);
   }
 
-  // 1.7 Redirect (302 → actual file) — SSRF validation blocks localhost redirect even in test mode
+  // 1.7 Redirect (302  actual file)  SSRF validation blocks localhost redirect even in test mode
   const r7 = await req('POST', '/api/download', { url: `http://127.0.0.1:${TEST_PORT}/redirect.bin`, threads: 2 });
   check('1.7 Redirect blocked by SSRF', r7.s >= 400, `status=${r7.s}`);
 
-  // ═══════════════════════════════════════════════════════════════
-  // GROUP 2: pauseDownload — Edge Cases
-  // ═══════════════════════════════════════════════════════════════
-  console.log('\n▸ GROUP 2: pauseDownload edge cases');
+  // 
+  // GROUP 2: pauseDownload  Edge Cases
+  // 
+  console.log('\n GROUP 2: pauseDownload edge cases');
 
   // 2.1 Pause non-existent
   const r21 = await req('POST', '/api/download/nonexistent/pause');
-  check('2.1 Pause non-existent → 404', r21.s === 404, `status=${r21.s}`);
+  check('2.1 Pause non-existent  404', r21.s === 404, `status=${r21.s}`);
 
   // 2.2 Pause already completed
   const r22 = await req('POST', '/api/download/' + id1 + '/pause');
-  check('2.2 Pause completed → error', r22.s >= 400, `status=${r22.s}`);
+  check('2.2 Pause completed  error', r22.s >= 400, `status=${r22.s}`);
 
   // 2.3 Pause + verify bytes preserved
   const r23 = await req('POST', '/api/download', { url: `http://127.0.0.1:${TEST_PORT}/slow.bin`, threads: 2 });
@@ -269,12 +269,12 @@ async function run() {
 
   // 2.4 Double pause
   const r24 = await req('POST', '/api/download/' + r23.d.id + '/pause');
-  check('2.4 Double pause → error', r24.s >= 400, `status=${r24.s}`);
+  check('2.4 Double pause  error', r24.s >= 400, `status=${r24.s}`);
 
-  // ═══════════════════════════════════════════════════════════════
-  // GROUP 3: resumeDownload — Edge Cases
-  // ═══════════════════════════════════════════════════════════════
-  console.log('\n▸ GROUP 3: resumeDownload edge cases');
+  // 
+  // GROUP 3: resumeDownload  Edge Cases
+  // 
+  console.log('\n GROUP 3: resumeDownload edge cases');
 
   // 3.1 Resume paused download
   const r31 = await req('POST', '/api/download/' + r23.d.id + '/resume');
@@ -285,16 +285,16 @@ async function run() {
 
   // 3.2 Resume non-existent
   const r32 = await req('POST', '/api/download/nonexistent/resume');
-  check('3.2 Resume non-existent → 404', r32.s === 404, `status=${r32.s}`);
+  check('3.2 Resume non-existent  404', r32.s === 404, `status=${r32.s}`);
 
   // 3.3 Resume completed
   const r33 = await req('POST', '/api/download/' + id1 + '/resume');
-  check('3.3 Resume completed → error', r33.s >= 400, `status=${r33.s}`);
+  check('3.3 Resume completed  error', r33.s >= 400, `status=${r33.s}`);
 
-  // ═══════════════════════════════════════════════════════════════
-  // GROUP 4: cancelDownload — Edge Cases
-  // ═══════════════════════════════════════════════════════════════
-  console.log('\n▸ GROUP 4: cancelDownload edge cases');
+  // 
+  // GROUP 4: cancelDownload  Edge Cases
+  // 
+  console.log('\n GROUP 4: cancelDownload edge cases');
 
   // 4.1 Cancel active
   const r41 = await req('POST', '/api/download', { url: `http://127.0.0.1:${TEST_PORT}/slow.bin`, threads: 2 });
@@ -308,16 +308,16 @@ async function run() {
 
   // 4.2 Cancel non-existent
   const r42 = await req('POST', '/api/download/nonexistent/cancel');
-  check('4.2 Cancel non-existent → handled', r42.s === 200 || r42.s >= 400, `status=${r42.s}`);
+  check('4.2 Cancel non-existent  handled', r42.s === 200 || r42.s >= 400, `status=${r42.s}`);
 
   // 4.3 Cancel already cancelled
   const r43 = await req('POST', '/api/download/' + r41.d.id + '/cancel');
-  check('4.3 Double cancel → handled', r43.s === 200 || r43.s >= 400, `status=${r43.s}`);
+  check('4.3 Double cancel  handled', r43.s === 200 || r43.s >= 400, `status=${r43.s}`);
 
-  // ═══════════════════════════════════════════════════════════════
-  // GROUP 5: deleteDownload — Edge Cases
-  // ═══════════════════════════════════════════════════════════════
-  console.log('\n▸ GROUP 5: deleteDownload edge cases');
+  // 
+  // GROUP 5: deleteDownload  Edge Cases
+  // 
+  console.log('\n GROUP 5: deleteDownload edge cases');
 
   // 5.1 Delete completed
   const r51 = await req('DELETE', '/api/download/' + id1);
@@ -327,16 +327,16 @@ async function run() {
 
   // 5.2 Delete non-existent
   const r52 = await req('DELETE', '/api/download/nonexistent');
-  check('5.2 Delete non-existent → 404 or handled', r52.s === 404 || r52.s === 200, `status=${r52.s}`);
+  check('5.2 Delete non-existent  404 or handled', r52.s === 404 || r52.s === 200, `status=${r52.s}`);
 
   // 5.3 Delete cancelled
   const r53 = await req('DELETE', '/api/download/' + r41.d.id);
   check('5.3 Delete cancelled download', r53.s === 200, `status=${r53.s}`);
 
-  // ═══════════════════════════════════════════════════════════════
-  // GROUP 6: Settings — Deep
-  // ═══════════════════════════════════════════════════════════════
-  console.log('\n▸ GROUP 6: Settings deep test');
+  // 
+  // GROUP 6: Settings  Deep
+  // 
+  console.log('\n GROUP 6: Settings deep test');
 
   const r61 = await req('GET', '/api/settings');
   check('6.1 GET settings returns object', typeof r61.d === 'object' && r61.d !== null, `type=${typeof r61.d}`);
@@ -356,10 +356,10 @@ async function run() {
   const r69 = await req('PUT', '/api/settings', { nonexistent_key: 'hack' });
   check('6.9 Invalid key ignored', r69.s === 200, `status=${r69.s}`);
 
-  // ═══════════════════════════════════════════════════════════════
+  // 
   // GROUP 7: Stats
-  // ═══════════════════════════════════════════════════════════════
-  console.log('\n▸ GROUP 7: Stats deep test');
+  // 
+  console.log('\n GROUP 7: Stats deep test');
 
   const r71 = await req('GET', '/api/stats');
   check('7.1 Stats has total_downloads', typeof r71.d.total_downloads === 'number');
@@ -369,10 +369,10 @@ async function run() {
   check('7.5 Stats has failed', typeof r71.d.failed === 'number');
   check('7.6 Stats has total_bytes_downloaded', typeof r71.d.total_bytes_downloaded === 'number');
 
-  // ═══════════════════════════════════════════════════════════════
+  // 
   // GROUP 8: Health
-  // ═══════════════════════════════════════════════════════════════
-  console.log('\n▸ GROUP 8: Health + WebSocket');
+  // 
+  console.log('\n GROUP 8: Health + WebSocket');
 
   const r81 = await req('GET', '/api/health');
   check('8.1 Health returns 200', r81.s === 200);
@@ -391,10 +391,10 @@ async function run() {
   check('8.3 WebSocket receives data', wsMsg !== null);
   ws.close();
 
-  // ═══════════════════════════════════════════════════════════════
+  // 
   // GROUP 9: File Integrity
-  // ═══════════════════════════════════════════════════════════════
-  console.log('\n▸ GROUP 9: File integrity');
+  // 
+  console.log('\n GROUP 9: File integrity');
 
   // Download and verify SHA-256
   const expectedHash = crypto.createHash('sha256').update(files['/1mb.bin']).digest('hex');
@@ -416,10 +416,10 @@ async function run() {
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════
+  // 
   // GROUP 10: No-Range Support
-  // ═══════════════════════════════════════════════════════════════
-  console.log('\n▸ GROUP 10: No-Range (single-stream)');
+  // 
+  console.log('\n GROUP 10: No-Range (single-stream)');
 
   const r101 = await req('POST', '/api/download', { url: `http://127.0.0.1:${TEST_PORT}/no-range.bin`, threads: 4 });
   check('10.1 No-range download starts', r101.s === 200 || r101.s === 201, `status=${r101.s}`);
@@ -429,10 +429,10 @@ async function run() {
     check('10.2 No-range completes or downloading', ['completed', 'downloading', 'pending'].includes(s101.d.status), `status=${s101.d.status}`);
   }
 
-  // ═══════════════════════════════════════════════════════════════
+  // 
   // GROUP 11: Broken Connection
-  // ═══════════════════════════════════════════════════════════════
-  console.log('\n▸ GROUP 11: Broken connection (retry)');
+  // 
+  console.log('\n GROUP 11: Broken connection (retry)');
 
   const r111 = await req('POST', '/api/download', { url: `http://127.0.0.1:${TEST_PORT}/broken.bin`, threads: 1 });
   check('11.1 Broken download starts', r111.s === 200 || r111.s === 201);
@@ -445,21 +445,21 @@ async function run() {
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════
+  // 
   // CLEANUP
-  // ═══════════════════════════════════════════════════════════════
-  console.log('\n▸ Cleanup...');
+  // 
+  console.log('\n Cleanup...');
   await server.stop();
   db.close();
   testServer.close();
   fs.rmSync(testDir, { recursive: true, force: true });
 
-  // ═══════════════════════════════════════════════════════════════
+  // 
   // SUMMARY
-  // ═══════════════════════════════════════════════════════════════
-  console.log('\n╔══════════════════════════════════════════════════════╗');
-  console.log(`║  Results: ${pass} passed, ${fail} failed, ${warn} warnings`);
-  console.log('╚══════════════════════════════════════════════════════╝');
+  // 
+  console.log('\n');
+  console.log(`  Results: ${pass} passed, ${fail} failed, ${warn} warnings`);
+  console.log('');
 
   if (fail > 0) process.exit(1);
 }
@@ -468,3 +468,4 @@ run().catch(err => {
   console.error('FATAL:', err);
   process.exit(1);
 });
+

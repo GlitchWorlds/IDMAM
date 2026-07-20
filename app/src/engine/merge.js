@@ -21,7 +21,7 @@ const path = require('node:path');
  */
 function mergeChunks({ chunkPaths, outputPath, totalSize, onProgress }) {
   return new Promise((resolve, reject) => {
-    // F13: Atomic write — write to temp file first, rename on completion
+    // F13: Atomic write  write to temp file first, rename on completion
     const outDir = path.dirname(outputPath);
     if (!fs.existsSync(outDir)) {
       fs.mkdirSync(outDir, { recursive: true });
@@ -36,7 +36,7 @@ function mergeChunks({ chunkPaths, outputPath, totalSize, onProgress }) {
     function writeNextChunk() {
       if (chunkIndex >= chunkPaths.length) {
         outputStream.end(() => {
-          // F13: Atomic rename — on the same filesystem this is guaranteed atomic
+          // F13: Atomic rename  on the same filesystem this is guaranteed atomic
           try {
             fs.renameSync(tempPath, outputPath);
             resolve();
@@ -68,7 +68,7 @@ function mergeChunks({ chunkPaths, outputPath, totalSize, onProgress }) {
         if (onProgress) {
           onProgress(bytesWritten, totalSize);
         }
-        // R2: Backpressure — pause reader until writer drains
+        // R2: Backpressure  pause reader until writer drains
         if (!canContinue) {
           inputStream.pause();
           outputStream.once('drain', () => inputStream.resume());
@@ -116,7 +116,7 @@ function cleanupChunks(chunkPaths, stateFilePath) {
 }
 
 /**
- * Full merge operation: merge chunks → verify → cleanup.
+ * Full merge operation: merge chunks  verify  cleanup.
  * @param {Object} options
  * @param {string} options.downloadId
  * @param {string[]} options.chunkPaths - Ordered chunk paths
@@ -185,3 +185,4 @@ module.exports = {
   cleanupChunks,
   mergeAndVerify,
 };
+

@@ -1,9 +1,9 @@
-# IDMM Extension Fix Task — v5
+# IDMM Extension Fix Task  v5
 
 > Source: QC-EXTENSION-V5.md
 > Priority: P0 first, then P1
 
-## E3: Save Path — Add folder browse button
+## E3: Save Path  Add folder browse button
 Files: D:\IDMM\extension\options\options.html, D:\IDMM\extension\options\options.js
 Fix:
 1. Add a "Browse" button next to the save path input
@@ -22,12 +22,12 @@ Fix:
 5. Keep polling as fallback (every 5s instead of 2s)
 6. Reconnect WebSocket on disconnect (exponential backoff)
 
-## E6: Open Folder — improve UX
+## E6: Open Folder  improve UX
 Files: D:\IDMM\extension\popup\popup.js
 Fix:
 1. When "Open" button clicked, copy path to clipboard
 2. Show prominent toast: "Path copied! Open Explorer and paste in address bar"
-3. Add a small "📋" icon on the button to indicate clipboard action
+3. Add a small "" icon on the button to indicate clipboard action
 
 ## E7: Settings hint text
 Files: D:\IDMM\extension\options\options.html
@@ -55,3 +55,4 @@ Fix:
 - Verify all settings save/load correctly
 - Verify WebSocket connects and receives updates
 - Report: files changed per fix
+

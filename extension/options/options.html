@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IDMM — Settings</title>
+  <title>IDMM  Settings</title>
   <link rel="stylesheet" href="options.css">
 </head>
 <body>
   <div class="container">
     <header class="page-header">
-      <h1>⚡ IDMM Settings</h1>
+      <h1> IDMM Settings</h1>
       <p class="subtitle">Configure download interception</p>
     </header>
 
     <!-- IDMM Status -->
     <section class="section">
-      <h2 class="section-title">📡 IDMM Status</h2>
+      <h2 class="section-title"> IDMM Status</h2>
       <div class="setting-row">
         <label>Status</label>
         <div class="setting-control">
@@ -26,7 +26,7 @@
 
     <!-- Extension toggle -->
     <section class="section">
-      <h2 class="section-title">🔧 Extension</h2>
+      <h2 class="section-title"> Extension</h2>
       <div class="setting-row">
         <label for="ext-enabled">Enable IDMM Integration</label>
         <div class="setting-control">
@@ -41,13 +41,13 @@
 
     <!-- Auto-intercept rules -->
     <section class="section">
-      <h2 class="section-title">📥 Auto-Intercept Rules</h2>
+      <h2 class="section-title"> Auto-Intercept Rules</h2>
       <p class="section-desc">Choose which file types are automatically sent to IDMM. Small files (&lt; 5MB) are never intercepted.</p>
 
       <div class="intercept-grid">
         <div class="intercept-card">
           <div class="intercept-header">
-            <span class="intercept-icon">🎬</span>
+            <span class="intercept-icon"></span>
             <span class="intercept-label">Video</span>
             <label class="toggle toggle-sm">
               <input type="checkbox" id="intercept-video" checked data-category="video">
@@ -59,7 +59,7 @@
 
         <div class="intercept-card">
           <div class="intercept-header">
-            <span class="intercept-icon">🎵</span>
+            <span class="intercept-icon"></span>
             <span class="intercept-label">Audio</span>
             <label class="toggle toggle-sm">
               <input type="checkbox" id="intercept-audio" checked data-category="audio">
@@ -71,7 +71,7 @@
 
         <div class="intercept-card">
           <div class="intercept-header">
-            <span class="intercept-icon">📦</span>
+            <span class="intercept-icon"></span>
             <span class="intercept-label">Archive</span>
             <label class="toggle toggle-sm">
               <input type="checkbox" id="intercept-archive" checked data-category="archive">
@@ -83,7 +83,7 @@
 
         <div class="intercept-card">
           <div class="intercept-header">
-            <span class="intercept-icon">💿</span>
+            <span class="intercept-icon"></span>
             <span class="intercept-label">Software</span>
             <label class="toggle toggle-sm">
               <input type="checkbox" id="intercept-software" checked data-category="software">
@@ -95,7 +95,7 @@
 
         <div class="intercept-card">
           <div class="intercept-header">
-            <span class="intercept-icon">📄</span>
+            <span class="intercept-icon"></span>
             <span class="intercept-label">Document</span>
             <label class="toggle toggle-sm">
               <input type="checkbox" id="intercept-document" checked data-category="document">
@@ -109,13 +109,13 @@
 
     <!-- Download defaults -->
     <section class="section">
-      <h2 class="section-title">⚙️ Download Defaults</h2>
+      <h2 class="section-title"> Download Defaults</h2>
       <p class="section-desc">These settings apply to new downloads only.</p>
       <div class="setting-row">
         <label for="max-threads">Default Threads per Download</label>
         <div class="setting-control">
           <input type="number" id="max-threads" min="1" max="64" value="8">
-          <span class="setting-hint">1–64 (higher = faster, uses more connections)</span>
+          <span class="setting-hint">164 (higher = faster, uses more connections)</span>
         </div>
       </div>
       <div class="setting-row">
@@ -123,7 +123,7 @@
         <div class="setting-control">
           <div class="save-path-row">
             <input type="text" id="default-save-path" placeholder="Leave empty for IDMM default" value="">
-            <button type="button" id="btn-browse" class="btn btn-secondary btn-browse">Browse…</button>
+            <button type="button" id="btn-browse" class="btn btn-secondary btn-browse">Browse</button>
           </div>
           <input type="file" id="folder-picker" webkitdirectory style="display:none">
           <span class="setting-hint">Override IDMM's default save directory</span>
@@ -157,3 +157,4 @@
   <script src="options.js"></script>
 </body>
 </html>
+

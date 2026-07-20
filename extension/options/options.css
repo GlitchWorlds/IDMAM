@@ -1,4 +1,4 @@
-/* IDMM Options Page — Dark Theme */
+/* IDMM Options Page  Dark Theme */
 
 :root {
   --bg-primary: #0f0f0f;
@@ -42,7 +42,7 @@ body {
   padding: 24px 20px 100px;
 }
 
-/* ─── Page header ─────────────────────────────────────────────── */
+/*  Page header  */
 
 .page-header {
   margin-bottom: 32px;
@@ -60,7 +60,7 @@ body {
   color: var(--text-muted);
 }
 
-/* ─── Sections ────────────────────────────────────────────────── */
+/*  Sections  */
 
 .section {
   background: var(--bg-secondary);
@@ -86,7 +86,7 @@ body {
   margin-top: -8px;
 }
 
-/* ─── Setting rows ────────────────────────────────────────────── */
+/*  Setting rows  */
 
 .setting-row {
   display: flex;
@@ -124,7 +124,7 @@ body {
   margin-top: 2px;
 }
 
-/* ─── Inputs ──────────────────────────────────────────────────── */
+/*  Inputs  */
 
 input[type="text"],
 input[type="number"],
@@ -156,7 +156,7 @@ select {
   cursor: pointer;
 }
 
-/* ─── Toggle switch ───────────────────────────────────────────── */
+/*  Toggle switch  */
 
 .toggle {
   position: relative;
@@ -224,7 +224,7 @@ select {
   transform: translateX(14px);
 }
 
-/* ─── Intercept grid ──────────────────────────────────────────── */
+/*  Intercept grid  */
 
 .intercept-grid {
   display: grid;
@@ -275,7 +275,7 @@ select {
   word-spacing: 2px;
 }
 
-/* ─── Save path row ───────────────────────────────────────────── */
+/*  Save path row  */
 
 .save-path-row {
   display: flex;
@@ -297,7 +297,7 @@ select {
   font-size: 12px;
 }
 
-/* ─── Buttons ─────────────────────────────────────────────────── */
+/*  Buttons  */
 
 .btn {
   padding: 7px 16px;
@@ -332,7 +332,7 @@ select {
   border-color: #3a3a3a;
 }
 
-/* ─── Save bar ────────────────────────────────────────────────── */
+/*  Save bar  */
 
 .save-bar {
   position: fixed;
@@ -364,7 +364,7 @@ select {
   color: var(--danger);
 }
 
-/* ─── Status indicator ────────────────────────────────────────── */
+/*  Status indicator  */
 
 .status-indicator {
   font-size: 12px;
@@ -387,3 +387,4 @@ select {
   background: rgba(245, 158, 11, 0.15);
   color: var(--warning);
 }
+

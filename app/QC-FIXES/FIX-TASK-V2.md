@@ -1,10 +1,10 @@
-# IDMM v2 — REMAINING FIX TASK (QC + Audit v2)
+# IDMM v2  REMAINING FIX TASK (QC + Audit v2)
 
 > Generated: 2026-07-15 15:20 WIB
 > Sources: QC-V2-REPORT.md + AUDIT-V2-REPORT.md
-> Status: 13 previous fixes verified ✅ — these are NEW findings
+> Status: 13 previous fixes verified   these are NEW findings
 
-## P1 — SHOULD FIX
+## P1  SHOULD FIX
 
 ### R1: Redirect loop cap in chunk-worker.js
 File: D:\IDMM\app\src\engine\chunk-worker.js
@@ -26,7 +26,7 @@ File: D:\IDMM\app\src\engine\downloader.js
 Problem: On redirect in _probeUrl(), response body not drained. Socket could hang.
 Fix: Add res.resume() before following redirect.
 
-## P2 — NICE TO HAVE
+## P2  NICE TO HAVE
 
 ### R5: process.exit() flush in chunk-worker.js
 File: D:\IDMM\app\src\engine\chunk-worker.js
@@ -39,14 +39,15 @@ Problem: No upper bound on counter loop. Could be slow with thousands of files.
 Fix: Add max 999 iterations, throw if exceeded.
 
 ## SKIP (acceptable as-is)
-- W2: Redirect settled scope — theoretical, req destroyed on redirect
-- W3: flushPending re-entrancy — Node.js single-threaded, no real risk
-- W4: Rate limiter IP — localhost-only, no proxy scenario
-- W5: Redundant _finalizing — defensive, no harm
-- W6: terminate() not awaited — __terminated flag handles it
-- W7: Callback overwrite — cosmetic, add comment
+- W2: Redirect settled scope  theoretical, req destroyed on redirect
+- W3: flushPending re-entrancy  Node.js single-threaded, no real risk
+- W4: Rate limiter IP  localhost-only, no proxy scenario
+- W5: Redundant _finalizing  defensive, no harm
+- W6: terminate() not awaited  __terminated flag handles it
+- W7: Callback overwrite  cosmetic, add comment
 
 ## Output Contract
 1. Fix R1-R6
-2. After fixes: cd D:\IDMM\app && node test.js — all 9 must pass
+2. After fixes: cd D:\IDMM\app && node test.js  all 9 must pass
 3. Report: files changed, what was fixed per item
+

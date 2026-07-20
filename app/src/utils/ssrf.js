@@ -26,7 +26,7 @@ const BLOCKED_HOSTS = new Set([
 
 /**
  * Check if a hostname resolves to a blocked (private/loopback/link-local) host.
- * @param {string} hostname — already lowercased
+ * @param {string} hostname  already lowercased
  * @returns {boolean}
  */
 function isBlockedHost(hostname) {
@@ -49,8 +49,8 @@ function isBlockedHost(hostname) {
  * Validate a redirect target URL before following it.
  * Resolves relative redirects against the base URL, then checks the host.
  *
- * @param {string} redirectUrl — raw Location header value (may be relative)
- * @param {string} baseUrl     — the URL that returned the redirect
+ * @param {string} redirectUrl  raw Location header value (may be relative)
+ * @param {string} baseUrl      the URL that returned the redirect
  * @throws {Error} if the resolved host is blocked
  */
 function validateRedirect(redirectUrl, baseUrl) {
@@ -59,7 +59,7 @@ function validateRedirect(redirectUrl, baseUrl) {
     const resolved = new URL(redirectUrl, baseUrl);
     hostname = resolved.hostname.toLowerCase();
   } catch {
-    // Invalid URL — let the caller's own error handling deal with it
+    // Invalid URL  let the caller's own error handling deal with it
     return;
   }
 
@@ -85,9 +85,10 @@ async function validateDnsResolution(hostname) {
     }
   } catch (err) {
     if (err.message && err.message.includes('resolves to blocked')) throw err;
-    // DNS lookup failed (NXDOMAIN etc.) — let the connection fail naturally
+    // DNS lookup failed (NXDOMAIN etc.)  let the connection fail naturally
   }
   return true;
 }
 
 module.exports = { isBlockedHost, validateRedirect, validateDnsResolution };
+

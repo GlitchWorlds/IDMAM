@@ -1,7 +1,7 @@
-# IDMM — Internet Download Manager Max
+# IDMM  Internet Download Manager Max
 ## Full System Design Document v1.0
 
-**Created:** 2026-07-14 | **Author:** MANAGER-001 | **Status:** DRAFT → APPROVAL
+**Created:** 2026-07-14 | **Author:** MANAGER-001 | **Status:** DRAFT  APPROVAL
 
 ---
 
@@ -11,8 +11,8 @@
 Download manager gratis, open-source, tanpa trial/bayar, dengan fitur **melampaui IDM** berbayar.
 
 ### Misi
-- Multi-threaded download (segmented/chunked) — kecepatan maksimal
-- Chrome Extension yang auto-intercept download → IDMM
+- Multi-threaded download (segmented/chunked)  kecepatan maksimal
+- Chrome Extension yang auto-intercept download  IDMM
 - Resume capability (lanjut download yang terputus)
 - UI modern (dark mode, progress real-time)
 - **100% GRATIS, tanpa iklan, tanpa tracking**
@@ -23,67 +23,67 @@ Download manager gratis, open-source, tanpa trial/bayar, dengan fitur **melampau
 
 | Fitur | IDM (Berbayar $24.95) | IDMM (Gratis) |
 |-------|----------------------|----------------|
-| Multi-threaded download | ✅ 32 threads | ✅ 64 threads (default 8) |
-| Resume download | ✅ | ✅ |
-| Browser integration | ✅ (IE/Chrome/FF) | ✅ (Chrome Extension, FF later) |
-| Speed acceleration | ✅ 5x claim | ✅ Multi-segment + parallel |
-| Video grabber | ✅ | ✅ (v2) |
-| Scheduler | ✅ | ✅ (v2) |
-| Anti-virus scan | ✅ | ❌ (v1) |
-| Price | $24.95/license | **$0 — Forever** |
+| Multi-threaded download |  32 threads |  64 threads (default 8) |
+| Resume download |  |  |
+| Browser integration |  (IE/Chrome/FF) |  (Chrome Extension, FF later) |
+| Speed acceleration |  5x claim |  Multi-segment + parallel |
+| Video grabber |  |  (v2) |
+| Scheduler |  |  (v2) |
+| Anti-virus scan |  |  (v1) |
+| Price | $24.95/license | **$0  Forever** |
 
 ---
 
 ## 3. ARSITEKTUR SISTEM
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        IDMM ECOSYSTEM                          │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌──────────────────┐    ┌──────────────────────────────────┐  │
-│  │  Chrome Extension │───▶│       IDMM Desktop App          │  │
-│  │  (IDMM-ext)      │    │       (Electron + Node.js)       │  │
-│  │                   │    │                                  │  │
-│  │  • Intercept DL   │    │  ┌────────────────────────────┐  │  │
-│  │  • Send to IDMM  │    │  │    Download Engine          │  │  │
-│  │  • Show badge     │    │  │    (Node.js Worker Threads) │  │  │
-│  │  • Cookie sender  │    │  │                             │  │  │
-│  │                   │    │  │  ┌──────┐ ┌──────┐ ┌──────┐│  │  │
-│  └──────────────────┘    │  │  │Chunk1│ │Chunk2│ │ChunkN││  │  │
-│                          │  │  └──────┘ └──────┘ └──────┘│  │  │
-│  ┌──────────────────┐    │  │  • HTTP Range requests     │  │  │
-│  │  Local API Server │◀──│  │  • Parallel streams        │  │  │
-│  │  (localhost:9977) │    │  │  • Progress tracking       │  │  │
-│  │                   │    │  │  • Auto-resume             │  │  │
-│  │  REST API:        │    │  └────────────────────────────┘  │  │
-│  │  POST /download   │    │                                  │  │
-│  │  GET /status/:id  │    │  ┌────────────────────────────┐  │  │
-│  │  POST /pause/:id  │    │  │    File Manager             │  │  │
-│  │  POST /resume/:id │    │  │  • Merge chunks             │  │  │
-│  │  GET /list         │    │  │  • Verify integrity         │  │  │
-│  └──────────────────┘    │  │  • Organize by type          │  │  │
-│                          │  └────────────────────────────┘  │  │
-│                          │                                  │  │
-│                          │  ┌────────────────────────────┐  │  │
-│                          │  │    UI (React + Tailwind)    │  │  │
-│                          │  │  • Download list            │  │  │
-│                          │  │  • Speed graph              │  │  │
-│                          │  │  • Queue manager            │  │  │
-│                          │  │  • Settings                 │  │  │
-│                          │  └────────────────────────────┘  │  │
-│                          └──────────────────────────────────┘  │
-│                                                                 │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │                    Download Folder                         │  │
-│  │  ~/Downloads/IDMM/                                       │  │
-│  │  ├── Videos/          (auto-categorize by MIME)           │  │
-│  │  ├── Music/                                             │  │
-│  │  ├── Documents/                                         │  │
-│  │  ├── Software/                                          │  │
-│  │  └── Others/                                            │  │
-│  └──────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
+
+                        IDMM ECOSYSTEM                          
+
+                                                                 
+        
+    Chrome Extension        IDMM Desktop App            
+    (IDMM-ext)                 (Electron + Node.js)         
+                                                             
+     Intercept DL             
+     Send to IDMM            Download Engine              
+     Show badge               (Node.js Worker Threads)     
+     Cookie sender                                         
+                                   
+          Chunk1 Chunk2 ChunkN    
+                                    
+           HTTP Range requests         
+    Local API Server      Parallel streams            
+    (localhost:9977)          Progress tracking           
+                              Auto-resume                 
+    REST API:                  
+    POST /download                                           
+    GET /status/:id            
+    POST /pause/:id            File Manager                 
+    POST /resume/:id          Merge chunks                 
+    GET /list                  Verify integrity             
+           Organize by type              
+                                
+                                                              
+                                
+                                UI (React + Tailwind)        
+                               Download list                
+                               Speed graph                  
+                               Queue manager                
+                               Settings                     
+                                
+                            
+                                                                 
+    
+                      Download Folder                           
+    ~/Downloads/IDMM/                                         
+     Videos/          (auto-categorize by MIME)             
+     Music/                                               
+     Documents/                                           
+     Software/                                            
+     Others/                                              
+    
+
 ```
 
 ---
@@ -97,31 +97,31 @@ Download manager gratis, open-source, tanpa trial/bayar, dengan fitur **melampau
 **Alur Download:**
 ```
 URL received
-    │
-    ▼
-HEAD request → Get Content-Length + Accept-Ranges
-    │
-    ├─ Accept-Ranges: bytes? → MULTI-SEGMENT MODE
-    │   │
-    │   ▼
-    │   Split into N chunks (N = default 8, max 64)
-    │   │
-    │   ▼
-    │   Worker Thread per chunk → HTTP Range header
-    │   Range: bytes=start-end
-    │   │
-    │   ▼
-    │   Progress callback → UI update (real-time)
-    │   │
-    │   ▼
-    │   All chunks complete → MERGE → Final file
-    │   │
-    │   ▼
-    │   SHA-256 verify (if checksum provided)
-    │
-    └─ No Range support? → SINGLE STREAM MODE
-        │
-        ▼
+    
+    
+HEAD request  Get Content-Length + Accept-Ranges
+    
+     Accept-Ranges: bytes?  MULTI-SEGMENT MODE
+       
+       
+       Split into N chunks (N = default 8, max 64)
+       
+       
+       Worker Thread per chunk  HTTP Range header
+       Range: bytes=start-end
+       
+       
+       Progress callback  UI update (real-time)
+       
+       
+       All chunks complete  MERGE  Final file
+       
+       
+       SHA-256 verify (if checksum provided)
+    
+     No Range support?  SINGLE STREAM MODE
+        
+        
         Normal download with progress
 ```
 
@@ -184,22 +184,22 @@ Metadata file: download.json
 **Components:**
 ```
 IDMM-ext/
-├── manifest.json           # Manifest V3
-├── background.js           # Service Worker — intercept downloads
-├── content.js              # Content script — page context
-├── popup/
-│   ├── popup.html          # Extension popup UI
-│   ├── popup.js            # Popup logic
-│   └── popup.css           # Styles
-├── options/
-│   ├── options.html        # Settings page
-│   └── options.js          # Settings logic
-├── icons/                  # Extension icons
-│   ├── icon16.png
-│   ├── icon48.png
-│   └── icon128.png
-└── lib/
-    └── api-client.js       # Communication with IDMM app
+ manifest.json           # Manifest V3
+ background.js           # Service Worker  intercept downloads
+ content.js              # Content script  page context
+ popup/
+    popup.html          # Extension popup UI
+    popup.js            # Popup logic
+    popup.css           # Styles
+ options/
+    options.html        # Settings page
+    options.js          # Settings logic
+ icons/                  # Extension icons
+    icon16.png
+    icon48.png
+    icon128.png
+ lib/
+     api-client.js       # Communication with IDMM app
 ```
 
 **Manifest.json key permissions:**
@@ -272,14 +272,14 @@ async function sendToIDMM(downloadInfo) {
 **Auto-intercept Rules (configurable):**
 | File Type | Extensions | Auto-Intercept |
 |-----------|-----------|----------------|
-| Video | .mp4, .mkv, .avi, .mov, .webm, .flv | ✅ Always |
-| Audio | .mp3, .wav, .flac, .aac, .ogg | ✅ Always |
-| Archive | .zip, .rar, .7z, .tar, .gz | ✅ Always |
-| Software | .exe, .msi, .dmg, .deb, .rpm, .apk | ✅ Always |
-| Document | .pdf, .docx, .xlsx, .pptx | ✅ Always |
-| Image | .jpg, .png, .gif, .webp | ❌ Browser handles |
-| Small files | < 5MB | ❌ Browser handles |
-| Dynamic | .php, .asp (streaming) | ❌ Browser handles |
+| Video | .mp4, .mkv, .avi, .mov, .webm, .flv |  Always |
+| Audio | .mp3, .wav, .flac, .aac, .ogg |  Always |
+| Archive | .zip, .rar, .7z, .tar, .gz |  Always |
+| Software | .exe, .msi, .dmg, .deb, .rpm, .apk |  Always |
+| Document | .pdf, .docx, .xlsx, .pptx |  Always |
+| Image | .jpg, .png, .gif, .webp |  Browser handles |
+| Small files | < 5MB |  Browser handles |
+| Dynamic | .php, .asp (streaming) |  Browser handles |
 
 ### 4.4 Desktop UI
 
@@ -287,34 +287,34 @@ async function sendToIDMM(downloadInfo) {
 
 **Layout:**
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  IDMM v1.0                              [⚙️ Settings] [─][□][×] │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  [All] [Downloading] [Completed] [Paused] [Queue]    [🔍]  │
-│                                                             │
-│  ┌───────────────────────────────────────────────────────┐  │
-│  │ 📥 ubuntu-24.04-desktop.iso                          │  │
-│  │ ████████████████░░░░░░░░░░  67% │ 1.2 GB / 1.8 GB   │  │
-│  │ ⚡ 12.4 MB/s │ 8 threads │ ETA: 48s   [⏸] [❌]      │  │
-│  ├───────────────────────────────────────────────────────┤  │
-│  │ 📥 game-setup.zip                                    │  │
-│  │ ████████████████████████████  100% │ 4.2 GB           │  │
-│  │ ✅ Complete │ SHA-256 verified        [📂] [🗑️]      │  │
-│  ├───────────────────────────────────────────────────────┤  │
-│  │ 📥 video-tutorial.mp4                                │  │
-│  │ ████████░░░░░░░░░░░░░░░░░░░  32% │ 450 MB / 1.4 GB  │  │
-│  │ ⏸ Paused │ 4 threads │ Resume available  [▶️] [❌]   │  │
-│  └───────────────────────────────────────────────────────┘  │
-│                                                             │
-│  ┌───────────────────────────────────────────────────────┐  │
-│  │ 📊 Speed Graph (last 60s)                            │  │
-│  │ ▁▂▃▄▅▆▇█▇▆▅▄▃▂▁▂▃▄▅▆▇█▇▆▅▄▃▂▁                      │  │
-│  │ Current: 12.4 MB/s │ Peak: 18.7 MB/s │ Avg: 10.2 MB/s│  │
-│  └───────────────────────────────────────────────────────┘  │
-│                                                             │
-│  Status: 2 active │ 1 paused │ 1 completed │ Queue: 3      │
-└─────────────────────────────────────────────────────────────┘
+
+  IDMM v1.0                              [ Settings] [][][] 
+
+                                                             
+  [All] [Downloading] [Completed] [Paused] [Queue]    []  
+                                                             
+    
+    ubuntu-24.04-desktop.iso                            
+     67%  1.2 GB / 1.8 GB     
+    12.4 MB/s  8 threads  ETA: 48s   [] []        
+    
+    game-setup.zip                                      
+     100%  4.2 GB             
+    Complete  SHA-256 verified        [] []        
+    
+    video-tutorial.mp4                                  
+     32%  450 MB / 1.4 GB    
+    Paused  4 threads  Resume available  [] []     
+    
+                                                             
+    
+    Speed Graph (last 60s)                              
+                           
+   Current: 12.4 MB/s  Peak: 18.7 MB/s  Avg: 10.2 MB/s  
+    
+                                                             
+  Status: 2 active  1 paused  1 completed  Queue: 3      
+
 ```
 
 ---
@@ -323,69 +323,69 @@ async function sendToIDMM(downloadInfo) {
 
 ```
 D:\IDMM\
-├── DESIGN.md                    # This file
-├── package.json                 # Root workspace
-├── app/                         # Electron Desktop App
-│   ├── package.json
-│   ├── main.js                  # Electron main process
-│   ├── preload.js               # Preload script
-│   ├── src/
-│   │   ├── engine/              # Download Engine
-│   │   │   ├── downloader.js    # Core download logic
-│   │   │   ├── chunk-worker.js  # Worker thread for chunks
-│   │   │   ├── merge.js         # Chunk merger
-│   │   │   └── resume.js        # Resume manager
-│   │   ├── server/              # Local API Server
-│   │   │   ├── server.js        # Express server
-│   │   │   ├── routes/          # API routes
-│   │   │   ├── middleware/       # Auth, rate limit
-│   │   │   └── websocket.js     # WS for real-time
-│   │   ├── db/                  # Local database
-│   │   │   ├── sqlite.js        # SQLite via better-sqlite3
-│   │   │   └── migrations/      # Schema migrations
-│   │   └── utils/               # Utilities
-│   │       ├── filename.js      # Smart filename resolver
-│   │       ├── mime.js           # MIME type detection
-│   │       └── hash.js          # Checksum verification
-│   ├── ui/                      # React Frontend
-│   │   ├── src/
-│   │   │   ├── App.jsx
-│   │   │   ├── components/
-│   │   │   │   ├── DownloadList.jsx
-│   │   │   │   ├── DownloadItem.jsx
-│   │   │   │   ├── SpeedGraph.jsx
-│   │   │   │   ├── Settings.jsx
-│   │   │   │   ├── AddDownload.jsx
-│   │   │   │   └── QueueManager.jsx
-│   │   │   ├── hooks/
-│   │   │   │   └── useWebSocket.js
-│   │   │   └── store/
-│   │   │       └── downloadStore.js
-│   │   ├── index.html
-│   │   ├── vite.config.js
-│   │   ├── tailwind.config.js
-│   │   └── package.json
-│   └── assets/
-│       ├── icon.ico
-│       └── tray-icon.png
-│
-├── extension/                   # Chrome Extension
-│   ├── manifest.json
-│   ├── background.js
-│   ├── content.js
-│   ├── popup/
-│   │   ├── popup.html
-│   │   ├── popup.js
-│   │   └── popup.css
-│   ├── options/
-│   │   ├── options.html
-│   │   └── options.js
-│   ├── icons/
-│   └── lib/
-│       └── api-client.js
-│
-└── installer/                   # NSIS Installer (later)
-    └── IDMM-setup.nsi
+ DESIGN.md                    # This file
+ package.json                 # Root workspace
+ app/                         # Electron Desktop App
+    package.json
+    main.js                  # Electron main process
+    preload.js               # Preload script
+    src/
+       engine/              # Download Engine
+          downloader.js    # Core download logic
+          chunk-worker.js  # Worker thread for chunks
+          merge.js         # Chunk merger
+          resume.js        # Resume manager
+       server/              # Local API Server
+          server.js        # Express server
+          routes/          # API routes
+          middleware/       # Auth, rate limit
+          websocket.js     # WS for real-time
+       db/                  # Local database
+          sqlite.js        # SQLite via better-sqlite3
+          migrations/      # Schema migrations
+       utils/               # Utilities
+           filename.js      # Smart filename resolver
+           mime.js           # MIME type detection
+           hash.js          # Checksum verification
+    ui/                      # React Frontend
+       src/
+          App.jsx
+          components/
+             DownloadList.jsx
+             DownloadItem.jsx
+             SpeedGraph.jsx
+             Settings.jsx
+             AddDownload.jsx
+             QueueManager.jsx
+          hooks/
+             useWebSocket.js
+          store/
+              downloadStore.js
+       index.html
+       vite.config.js
+       tailwind.config.js
+       package.json
+    assets/
+        icon.ico
+        tray-icon.png
+
+ extension/                   # Chrome Extension
+    manifest.json
+    background.js
+    content.js
+    popup/
+       popup.html
+       popup.js
+       popup.css
+    options/
+       options.html
+       options.js
+    icons/
+    lib/
+        api-client.js
+
+ installer/                   # NSIS Installer (later)
+     IDMM-setup.nsi
 ```
 
 ---
@@ -494,7 +494,7 @@ D:\IDMM\
 
 ### WebSocket /ws
 ```json
-// Server → Client (every 500ms)
+// Server  Client (every 500ms)
 {
   "type": "progress",
   "download_id": "550e8400-...",
@@ -505,7 +505,7 @@ D:\IDMM\
   "active_threads": 8
 }
 
-// Server → Client (on complete)
+// Server  Client (on complete)
 {
   "type": "completed",
   "download_id": "550e8400-...",
@@ -547,30 +547,31 @@ D:\IDMM\
 
 ## 11. CATATAN TEKNIS
 
-### Multi-threaded Download — Cara Kerja
+### Multi-threaded Download  Cara Kerja
 ```
 File: ubuntu.iso (1.8 GB)
 Server supports: Accept-Ranges: bytes
 
-Thread 1: Range: 0-234881023        → chunk_001.part (224 MB)
-Thread 2: Range: 234881024-469762047 → chunk_002.part (224 MB)
-Thread 3: Range: 469762048-704643071 → chunk_003.part (224 MB)
+Thread 1: Range: 0-234881023         chunk_001.part (224 MB)
+Thread 2: Range: 234881024-469762047  chunk_002.part (224 MB)
+Thread 3: Range: 469762048-704643071  chunk_003.part (224 MB)
 ...
-Thread 8: Range: 1610612736-1879048191 → chunk_008.part (256 MB)
+Thread 8: Range: 1610612736-1879048191  chunk_008.part (256 MB)
 
-All 8 download PARALEL → ~8x faster than single stream
-After all complete → merge chunks → ubuntu.iso (1.8 GB)
+All 8 download PARALEL  ~8x faster than single stream
+After all complete  merge chunks  ubuntu.iso (1.8 GB)
 ```
 
 ### Edge Cases
-1. **Server doesn't support Range** → fallback to single stream
-2. **Connection drops mid-chunk** → retry that chunk (3x), then resume
-3. **Server returns 416 (Range Not Satisfiable)** → chunk already complete
-4. **Redirect chains** → follow up to 5 redirects, preserve cookies
-5. **Cloudflare/JS challenge** → use cookies from Chrome extension
-6. **Very large files (>4GB)** → use 64-bit range, no issue with Node.js streams
+1. **Server doesn't support Range**  fallback to single stream
+2. **Connection drops mid-chunk**  retry that chunk (3x), then resume
+3. **Server returns 416 (Range Not Satisfiable)**  chunk already complete
+4. **Redirect chains**  follow up to 5 redirects, preserve cookies
+5. **Cloudflare/JS challenge**  use cookies from Chrome extension
+6. **Very large files (>4GB)**  use 64-bit range, no issue with Node.js streams
 
 ---
 
 **END OF DESIGN DOCUMENT**
 **Awaiting Bob's approval before Phase 1 execution.**
+

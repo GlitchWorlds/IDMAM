@@ -10,8 +10,8 @@ const FILTER_BTNS = [
 
 function Header({ search, onSearchChange, totalSpeed, onAddClick, activeCount, completedCount }) {
   return (
-    <header className="bg-slate-900/80 backdrop-blur-sm border-b border-slate-800 px-6 py-3 shrink-0">
-      <div className="flex items-center gap-4">
+    <header className="bg-slate-900/80 backdrop-blur-sm border-b border-slate-800 px-6 py-3 shrink-0" style={{ WebkitAppRegion: 'drag' }}>
+      <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' }}>
         {/* Search */}
         <div className="relative flex-1 max-w-md">
           <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

@@ -1,4 +1,4 @@
-# IDMM QC v5 — Bug Report
+# IDMM QC v5  Bug Report
 
 **Date:** 2026-07-15  
 **Tester:** Agent (automated code review)  
@@ -10,18 +10,18 @@
 
 | Bug | Description | Verdict |
 |-----|-------------|---------|
-| B1 | Save Path not working | ✅ PASS |
-| B2 | Download Threads not saved | ✅ PASS |
-| B3 | Server URL still showing | ✅ PASS |
-| B4 | Tab memory missing | ❌ FAIL |
-| B5 | No "Open Folder" button | ❌ FAIL |
-| B6 | Extension settings section title | ✅ PASS |
+| B1 | Save Path not working |  PASS |
+| B2 | Download Threads not saved |  PASS |
+| B3 | Server URL still showing |  PASS |
+| B4 | Tab memory missing |  FAIL |
+| B5 | No "Open Folder" button |  FAIL |
+| B6 | Extension settings section title |  PASS |
 
 **Result: 4 PASS / 2 FAIL**
 
 ---
 
-## B1: Save Path not working — ✅ PASS
+## B1: Save Path not working   PASS
 
 **Files reviewed:** `options/options.js`, `lib/api-client.js`
 
@@ -66,7 +66,7 @@ $defaultSavePath.value = settings.defaultSavePath || '';
 
 ---
 
-## B2: Download Threads not saved — ✅ PASS
+## B2: Download Threads not saved   PASS
 
 **Files reviewed:** `options/options.js`, `lib/api-client.js`
 
@@ -88,34 +88,34 @@ The `maxThreads` property is included in the saved settings object and read back
 
 ---
 
-## B3: Server URL still showing — ✅ PASS
+## B3: Server URL still showing   PASS
 
 **Files reviewed:** `options/options.html`, `options/options.js`
 
 **Evidence:**
 
 `options.html` section titles are:
-- `📡 IDMM Status`
-- `🔧 Extension`
-- `📥 Auto-Intercept Rules`
-- `⚙️ Download Defaults`
+- ` IDMM Status`
+- ` Extension`
+- ` Auto-Intercept Rules`
+- ` Download Defaults`
 
 None expose a server URL. The status section only shows a status indicator span (`<span id="server-status">`), never a URL.
 
-`options.js` checkStatus() displays "Connected ✓" or "Not Running ✗" — no URL:
+`options.js` checkStatus() displays "Connected " or "Not Running "  no URL:
 ```js
 $serverStatus.textContent = 'Connected \u2713';
 // or
 $serverStatus.textContent = 'Not Running \u2717';
 ```
 
-The code comment confirms intent: `Backend URL is hidden from users — only shows Connected/Not Running.`
+The code comment confirms intent: `Backend URL is hidden from users  only shows Connected/Not Running.`
 
 **Verdict:** Server URL is not displayed anywhere in the options page. No bug found.
 
 ---
 
-## B4: Tab memory missing — ❌ FAIL
+## B4: Tab memory missing   FAIL
 
 **Files reviewed:** `popup/popup.js`
 
@@ -154,7 +154,7 @@ No attempt to read a saved filter and activate the corresponding tab on load.
 
 ---
 
-## B5: No "Open Folder" button — ❌ FAIL
+## B5: No "Open Folder" button   FAIL
 
 **Files reviewed:** `popup/popup.js`, `app/src/server/server.js`
 
@@ -164,7 +164,7 @@ The completed download actions only include a "Remove" button:
 ```js
 } else if (dl.status === 'completed') {
     actionsHtml = `
-      <button class="dl-btn btn-delete" data-action="delete" data-id="${dl.id}">🗑 Remove</button>
+      <button class="dl-btn btn-delete" data-action="delete" data-id="${dl.id}"> Remove</button>
     `;
 }
 ```
@@ -191,7 +191,7 @@ The server returns `save_to` in download listings (`/api/downloads`), so the fol
 
 ---
 
-## B6: Extension settings section title — ✅ PASS
+## B6: Extension settings section title   PASS
 
 **Files reviewed:** `options/options.html`
 
@@ -199,10 +199,10 @@ The server returns `save_to` in download listings (`/api/downloads`), so the fol
 
 All section titles in the HTML:
 ```html
-<h2 class="section-title">📡 IDMM Status</h2>
-<h2 class="section-title">🔧 Extension</h2>
-<h2 class="section-title">📥 Auto-Intercept Rules</h2>
-<h2 class="section-title">⚙️ Download Defaults</h2>
+<h2 class="section-title"> IDMM Status</h2>
+<h2 class="section-title"> Extension</h2>
+<h2 class="section-title"> Auto-Intercept Rules</h2>
+<h2 class="section-title"> Download Defaults</h2>
 ```
 
 No "Server Connection" or similar legacy title exists.
@@ -220,3 +220,4 @@ No "Server Connection" or similar legacy title exists.
 | API Client | `D:\IDMM\extension\lib\api-client.js` |
 | Popup JS | `D:\IDMM\extension\popup\popup.js` |
 | Server JS | `D:\IDMM\app\src\server\server.js` |
+

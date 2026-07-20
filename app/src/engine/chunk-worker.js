@@ -122,32 +122,32 @@ function downloadChunk(attempt, currentUrl, redirectCount = 0) {
           reject(new Error(`Too many redirects (max 5) for chunk ${chunkIndex}`));
           return;
         }
-        // R1: SSRF — validate redirect target before following
+        // R1: SSRF  validate redirect target before following
         try { validateRedirect(res.headers.location, currentUrl); } catch (e) { reject(e); return; }
-        // Follow redirect — use updated URL
+        // Follow redirect  use updated URL
         const newUrl = new URL(res.headers.location, currentUrl).href;
         resolve(downloadChunk(attempt, newUrl, redirectCount + 1)); // retry with new URL
         return;
       }
 
-      // 416 Range Not Satisfiable — chunk may already be complete
+      // 416 Range Not Satisfiable  chunk may already be complete
       if (res.statusCode === 416) {
         report('chunk_done', { downloaded: totalChunkSize, totalBytes: totalChunkSize });
         resolve();
         return;
       }
 
-      // Server doesn't support Range — but we asked for it, so 200 means full file
+      // Server doesn't support Range  but we asked for it, so 200 means full file
       if (res.statusCode === 200) {
         report('error', {
-          message: 'Server returned 200 for Range request — Range not supported',
+          message: 'Server returned 200 for Range request  Range not supported',
           noRangeSupport: true,
         });
         reject(new Error('NO_RANGE_SUPPORT'));
         return;
       }
 
-      // 429 Too Many Requests — report as throttle so parent can reduce threads
+      // 429 Too Many Requests  report as throttle so parent can reduce threads
       if (res.statusCode === 429) {
         res.resume(); // Drain response body
         const retryAfter = parseInt(res.headers['retry-after'], 10) || 0;
@@ -262,13 +262,13 @@ async function main() {
     try {
       report('attempt', { attempt, maxRetries });
       await downloadChunk(attempt, url);
-      // Success — R5: Allow final postMessage to flush before exiting
+      // Success  R5: Allow final postMessage to flush before exiting
       setTimeout(() => process.exit(0), 100);
       return;
     } catch (err) {
       lastError = err;
 
-      // If server doesn't support Range, don't retry — report immediately
+      // If server doesn't support Range, don't retry  report immediately
       if (err.message === 'NO_RANGE_SUPPORT') {
         // R5: Allow final postMessage to flush before exiting
         setTimeout(() => process.exit(1), 100);
@@ -309,3 +309,4 @@ main().catch((err) => {
   // R5: Allow final postMessage to flush before exiting
   setTimeout(() => process.exit(1), 100);
 });
+
