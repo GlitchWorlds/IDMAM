@@ -16,7 +16,12 @@ Proyek IDMM terbagi menjadi 3 komponen utama:
 - `/app/` : Logika inti backend (`downloader.js`, `sqlite.js`, `server.js`). Berjalan di background.
 - `/electron/` : File utama Electron (`main.js`, `preload.js`). Menjembatani OS dengan UI.
 - `/electron/ui/` : Kode React untuk antarmuka pengguna.
-- `/extension/` : Ekstensi peramban (Chrome/Edge) untuk menangkap unduhan.
+- `/extension/` : Ekstensi peramban (Chrome/Edge) untuk menangkap unduhan. 
+ 
+### Database & Endpoint Internal (API Lokal)
+- **SQLite Database (`idmm.db`):** Menyimpan *state* unduhan, daftar *chunk* (bagian unduhan), dan preferensi pengaturan.
+- **REST API (`http://127.0.0.1:9977`):** Menangani *start, pause, resume, cancel, delete*, serta mengembalikan daftar *history* dan *stats*.
+- **WebSocket (`ws://127.0.0.1:9977/ws`):** Mengirim *real-time progress* dan status kecepatan ke UI/Frontend.
 
 ---
 
