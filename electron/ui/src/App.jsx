@@ -18,7 +18,7 @@ export default function App() {
   const [speedHistory, setSpeedHistory] = useState([]);
   // Theming state
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('idmm_theme') || 'dark-green';
+    return localStorage.getItem('idmm_theme') || 'dark';
   });
 
   useEffect(() => {

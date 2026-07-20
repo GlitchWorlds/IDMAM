@@ -81,9 +81,8 @@ export default function Settings({ onBack, theme, onThemeChange }) {
             onChange={(e) => onThemeChange(e.target.value)}
             className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all"
           >
-            <option value="dark-green">Dark Green (Default)</option>
-            <option value="dark-blue">Dark Blue</option>
-            <option value="light">Light</option>
+            <option value="dark">Dark Theme (Default)</option>
+            <option value="light">Light Theme</option>
           </select>
         </div>
 
