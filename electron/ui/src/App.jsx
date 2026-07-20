@@ -93,8 +93,6 @@ export default function App() {
           filter={filter}
           onFilterChange={setFilter}
           onSettingsClick={() => setShowSettings(false)}
-          speedHistory={speedHistory}
-          stats={stats}
         />
         <div className="flex-1 overflow-y-auto">
           <Settings onBack={() => setShowSettings(false)} theme={theme} onThemeChange={setTheme} />
@@ -109,8 +107,6 @@ export default function App() {
         filter={filter}
         onFilterChange={setFilter}
         onSettingsClick={() => setShowSettings(true)}
-        speedHistory={speedHistory}
-        stats={stats}
         style={{ WebkitAppRegion: 'no-drag' }}
       />
       <div className="flex-1 flex flex-col overflow-hidden" style={{ WebkitAppRegion: 'no-drag' }}>

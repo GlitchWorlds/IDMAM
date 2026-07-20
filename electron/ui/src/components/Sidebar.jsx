@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   { key: 'queue', label: 'Queue', icon: 'M12 8v4l3 3' },
 ];
 
-function Sidebar({ filter, onFilterChange, onSettingsClick, speedHistory, stats, style }) {
+function Sidebar({ filter, onFilterChange, onSettingsClick, style }) {
   return (
     <aside className="w-64 bg-slate-950 border-r border-slate-800 flex flex-col h-full shrink-0" style={{ ...style, WebkitAppRegion: 'drag' }}>
       {/* Logo */}
