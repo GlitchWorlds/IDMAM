@@ -281,6 +281,9 @@ class DownloadManager {
     }
     state.workers = [];
 
+    // Force progress flush again just in case threads updated slightly before termination
+    this._flushChunkState(state);
+
     state.status = 'paused';
     this.db.updateDownload(downloadId, { status: 'paused' });
     this.resume.saveState(state);
@@ -296,9 +299,15 @@ class DownloadManager {
    * @returns {Promise<Object>}
    */
   async resumeDownload(downloadId) {
+    const activeState = this.active.get(downloadId);
+    
     // F3: Guard against resuming an already-active download
-    if (this.active.has(downloadId)) {
+    if (activeState && activeState.status === 'downloading') {
       throw new Error('Download already active');
+    }
+    
+    if (activeState && activeState.status === 'pausing') {
+      throw new Error('Download is currently pausing. Please wait.');
     }
 
     // Load state from DB
@@ -386,6 +395,7 @@ class DownloadManager {
     const state = this.active.get(downloadId);
 
     if (state) {
+      state.status = 'canceled';
       // Mark workers as intentionally terminated before terminating
       // (same as pauseDownload  prevents exit handler from marking chunks as failed)
       for (const worker of state.workers) {
