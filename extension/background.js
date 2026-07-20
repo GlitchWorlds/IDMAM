@@ -182,15 +182,16 @@ chrome.downloads.onDeterminingFilename.addListener(async (item, suggest) => {
   });
 
   if (sent) {
-    // Mark as intercepted first
-    interceptedIds.add(item.id);
+    // Intercept successful!
+    // We MUST call cancel asynchronously to prevent Chrome from 
+    // resuming the default browser download when we call suggest.
+    setTimeout(() => {
+      chrome.downloads.cancel(item.id, () => {
+        chrome.downloads.erase({ id: item.id }, () => {});
+      });
+    }, 100);
     
-    // Attempt Chrome download cancellation
-    chrome.downloads.cancel(item.id, () => {
-      chrome.downloads.erase({ id: item.id }, () => {});
-    });
-    
-    // You MUST still call suggest or the request hangs
+    // Call suggest now to unblock Chrome's download pipeline
     suggest();
     return;
   }
