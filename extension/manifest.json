@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "IDMM  Download Manager Max",
   "short_name": "IDMM",
-  "version": "1.2.0",
+  "version": "1.2.4",
   "description": "Free, open-source download manager with multi-threaded acceleration. Intercepts downloads and sends them to IDMM for maximum speed.",
 
   "permissions": [
@@ -44,6 +44,13 @@
   },
 
   "minimum_chrome_version": "109",
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "idmm-extension@glitchworlds",
+      "strict_min_version": "109.0"
+    }
+  },
 
   "content_security_policy": {
     "extension_pages": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src http://127.0.0.1:9977 ws://127.0.0.1:9977; img-src 'self' data:"

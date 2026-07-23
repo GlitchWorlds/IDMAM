@@ -1,6 +1,6 @@
 # Dokumentasi Produksi IDMM (Internet Download Manager Max)
 
-**Versi Terkini:** v1.2.4
+**Versi Terkini:** v1.2.5
 **Tujuan Dokumen:** *Single Source of Truth* (SSOT) untuk arsitektur, fitur, dan pedoman pengembangan proyek IDMM dan ekstensinya. Segala modifikasi di masa depan harus merujuk dan memperbarui dokumen ini.
 
 ---
@@ -51,6 +51,12 @@ Proyek IDMM terbagi menjadi 3 komponen utama:
 
 ### C. Ekstensi Browser
 - **Headless (Tanpa UI):** Ekstensi murni beroperasi di latar belakang (Background Service Worker). File HTML, CSS, popup, dan options telah dihapus. Pengaturan ekstensi sepenuhnya mengikuti pengaturan *software* utama.
+- **Auto-Install:** Installer IDMM otomatis mendeteksi dan menginstall extension ke browser yang terinstall:
+  - **Chrome:** Registry policy `HKCU\Software\Google\Chrome\Extensions\idmm-extension` + desktop shortcut
+  - **Edge:** Registry policy `HKCU\Software\Microsoft\Edge\Extensions\idmm-extension` + desktop shortcut
+  - **Firefox:** Registry policy `HKCU\Software\Mozilla\Firefox\Extensions` + `.xpi` copy ke profiles
+  - **Brave/Opera/Vivaldi:** Desktop shortcut dengan `--load-extension` flag (registry policy tidak didukung)
+  - **Build XPI:** `node scripts/build-xpi.js` mengkonversi `extension/` folder ke `.xpi` untuk Firefox
 - **Intersepsi (Interception):** Menangkap event `chrome.downloads.onDeterminingFilename`. Jika unduhan tertangkap, ekstensi akan melakukan:
   1. *Cancel* unduhan bawaan browser secara sinkron.
   2. Meneruskan fungsi `suggest()` agar browser tidak *hang*.
@@ -69,6 +75,8 @@ Proyek IDMM terbagi menjadi 3 komponen utama:
 | v1.2.2 | Select folder dialog (OS picker) di Add Download dan Settings |
 | v1.2.3 | Worker health tracking, DB error propagation (17 guard clauses), server health endpoint, WebSocket heartbeat |
 | v1.2.4 | Integration tests (7 tests), ResumeManager visibility, content script comms, community labels, queue priority (HIGH/NORMAL/LOW) |
+| v1.2.5 | Auto-install extension: Chrome, Edge, Brave, Opera, Vivaldi, Firefox (registry + shortcuts + .xpi) |
+| v1.2.5 | Auto-install extension: Chrome, Edge, Brave, Opera, Vivaldi, Firefox (registry + shortcuts + .xpi) |
 
 ---
 
