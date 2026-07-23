@@ -79,6 +79,10 @@ async function main() {
 
   // 2. Load settings
   const settings = db.getAllSettings();
+  if (!settings || settings.ok === false) {
+    console.error('[IDMM] Failed to load settings:', settings && settings.error);
+    process.exit(1);
+  }
   console.log(`[IDMM] Settings loaded (${Object.keys(settings).length} keys)`);
 
   // 3. Initialize download manager
@@ -101,7 +105,9 @@ async function main() {
   // 4. Auto-resume paused downloads if requested
   if (autoResume) {
     const resumable = db.getResumableDownloads();
-    if (resumable.length > 0) {
+    if (!Array.isArray(resumable)) {
+      console.error('[IDMM] Failed to get resumable downloads:', resumable && resumable.error);
+    } else if (resumable.length > 0) {
       console.log(`[IDMM] Found ${resumable.length} resumable download(s)`);
       for (const dl of resumable) {
         try {

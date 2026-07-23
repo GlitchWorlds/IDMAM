@@ -58,9 +58,22 @@ class IDMMDatabase {
   }
 
   /**
+   * Check whether the underlying sql.js Database instance is still usable.
+   * Returns true if db reference exists, false otherwise.
+   */
+  isConnected() {
+    try {
+      return this.db !== null && this.db !== undefined;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
    * Persist database to disk.
    */
   save() {
+    if (!this.isConnected()) return;
     try {
       const data = this.db.export();
       fs.writeFileSync(this.dbPath, Buffer.from(data));
@@ -203,205 +216,300 @@ class IDMMDatabase {
     }
   }
 
+  //  Gap 2: Safe error message (no internal path leak)
+
+  _safeError(err) {
+    if (!err) return 'Unknown database error';
+    const msg = err.message || String(err);
+    // Strip absolute paths to avoid leaking internal structure
+    return msg.replace(/\\[^\\]+\\/g, '.../').replace(/\/[^\/]+\//g, '.../');
+  }
+
   //  Download Operations 
 
   createDownload(download) {
-    this._run(
-      `INSERT INTO downloads (id, url, filename, save_to, total_size, threads, mime_type, category, cookies, referrer, headers, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        download.id,
-        download.url,
-        download.filename,
-        download.saveTo,
-        download.totalSize || 0,
-        download.threads || 8,
-        download.mimeType || null,
-        download.category || 'Others',
-        download.cookies || null,
-        download.referrer || null,
-        download.headers ? JSON.stringify(download.headers) : null,
-        download.status || 'pending',
-      ]
-    );
-
-    return this.getDownload(download.id);
+    try {
+      this._run(
+        `INSERT INTO downloads (id, url, filename, save_to, total_size, threads, mime_type, category, cookies, referrer, headers, status)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          download.id,
+          download.url,
+          download.filename,
+          download.saveTo,
+          download.totalSize || 0,
+          download.threads || 8,
+          download.mimeType || null,
+          download.category || 'Others',
+          download.cookies || null,
+          download.referrer || null,
+          download.headers ? JSON.stringify(download.headers) : null,
+          download.status || 'pending',
+        ]
+      );
+      return this.getDownload(download.id);
+    } catch (err) {
+      console.error('[DB] createDownload error:', err.message);
+      return { ok: false, error: 'Failed to create download record' };
+    }
   }
 
   getDownload(id) {
-    const row = this._queryOne('SELECT * FROM downloads WHERE id = ?', [id]);
-    if (row) {
-      row.headers = row.headers ? JSON.parse(row.headers) : null;
+    try {
+      const row = this._queryOne('SELECT * FROM downloads WHERE id = ?', [id]);
+      if (row) {
+        row.headers = row.headers ? JSON.parse(row.headers) : null;
+      }
+      return row;
+    } catch (err) {
+      console.error('[DB] getDownload error:', err.message);
+      return { ok: false, error: 'Failed to retrieve download' };
     }
-    return row;
   }
 
   listDownloads(status) {
-    let rows;
-    if (status) {
-      rows = this._query(
-        "SELECT * FROM downloads WHERE status = ? ORDER BY created_at DESC",
-        [status]
-      );
-    } else {
-      rows = this._query('SELECT * FROM downloads ORDER BY created_at DESC');
+    try {
+      let rows;
+      if (status) {
+        rows = this._query(
+          "SELECT * FROM downloads WHERE status = ? ORDER BY created_at DESC",
+          [status]
+        );
+      } else {
+        rows = this._query('SELECT * FROM downloads ORDER BY created_at DESC');
+      }
+      return rows.map(row => {
+        row.headers = row.headers ? JSON.parse(row.headers) : null;
+        return row;
+      });
+    } catch (err) {
+      console.error('[DB] listDownloads error:', err.message);
+      return { ok: false, error: 'Failed to list downloads' };
     }
-    return rows.map(row => {
-      row.headers = row.headers ? JSON.parse(row.headers) : null;
-      return row;
-    });
   }
 
   updateDownload(id, fields) {
-    const allowed = [
-      'filename', 'total_size', 'downloaded', 'status', 'speed', 'eta',
-      'mime_type', 'category', 'error', 'checksum', 'completed_at', 'threads'
-    ];
+    try {
+      const allowed = [
+        'filename', 'total_size', 'downloaded', 'status', 'speed', 'eta',
+        'mime_type', 'category', 'error', 'checksum', 'completed_at', 'threads'
+      ];
 
-    const updates = [];
-    const values = [];
+      const updates = [];
+      const values = [];
 
-    for (const [key, value] of Object.entries(fields)) {
-      const dbKey = key === 'totalSize' ? 'total_size' :
-                    key === 'mimeType' ? 'mime_type' :
-                    key === 'completedAt' ? 'completed_at' : key;
+      for (const [key, value] of Object.entries(fields)) {
+        const dbKey = key === 'totalSize' ? 'total_size' :
+                      key === 'mimeType' ? 'mime_type' :
+                      key === 'completedAt' ? 'completed_at' : key;
 
-      if (allowed.includes(dbKey)) {
-        updates.push(`${dbKey} = ?`);
-        values.push(value);
+        if (allowed.includes(dbKey)) {
+          updates.push(`${dbKey} = ?`);
+          values.push(value);
+        }
       }
+
+      if (updates.length === 0) return;
+
+      updates.push("updated_at = datetime('now')");
+      values.push(id);
+
+      this._run(`UPDATE downloads SET ${updates.join(', ')} WHERE id = ?`, values);
+    } catch (err) {
+      console.error('[DB] updateDownload error:', err.message);
+      return { ok: false, error: 'Failed to update download' };
     }
-
-    if (updates.length === 0) return;
-
-    updates.push("updated_at = datetime('now')");
-    values.push(id);
-
-    this._run(`UPDATE downloads SET ${updates.join(', ')} WHERE id = ?`, values);
   }
 
   deleteDownload(id) {
-    // Delete chunks first (foreign key)
-    this._run('DELETE FROM chunks WHERE download_id = ?', [id]);
-    this._run('DELETE FROM downloads WHERE id = ?', [id]);
+    try {
+      // Delete chunks first (foreign key)
+      this._run('DELETE FROM chunks WHERE download_id = ?', [id]);
+      this._run('DELETE FROM downloads WHERE id = ?', [id]);
+    } catch (err) {
+      console.error('[DB] deleteDownload error:', err.message);
+      return { ok: false, error: 'Failed to delete download' };
+    }
   }
 
   //  Chunk Operations 
 
   createChunks(downloadId, chunks) {
-    for (const chunk of chunks) {
-      this._run(
-        `INSERT INTO chunks (download_id, chunk_index, start_byte, end_byte, status)
-         VALUES (?, ?, ?, ?, 'pending')`,
-        [downloadId, chunk.index, chunk.start, chunk.end]
-      );
+    try {
+      for (const chunk of chunks) {
+        this._run(
+          `INSERT INTO chunks (download_id, chunk_index, start_byte, end_byte, status)
+           VALUES (?, ?, ?, ?, 'pending')`,
+          [downloadId, chunk.index, chunk.start, chunk.end]
+        );
+      }
+    } catch (err) {
+      console.error('[DB] createChunks error:', err.message);
+      return { ok: false, error: 'Failed to create chunk records' };
     }
   }
 
   getChunks(downloadId) {
-    return this._query(
-      'SELECT * FROM chunks WHERE download_id = ? ORDER BY chunk_index ASC',
-      [downloadId]
-    );
+    try {
+      return this._query(
+        'SELECT * FROM chunks WHERE download_id = ? ORDER BY chunk_index ASC',
+        [downloadId]
+      );
+    } catch (err) {
+      console.error('[DB] getChunks error:', err.message);
+      return { ok: false, error: 'Failed to retrieve chunks' };
+    }
   }
 
   updateChunk(chunkId, fields) {
-    const allowed = ['downloaded_bytes', 'status', 'error', 'retries'];
-    const updates = [];
-    const values = [];
+    try {
+      const allowed = ['downloaded_bytes', 'status', 'error', 'retries'];
+      const updates = [];
+      const values = [];
 
-    for (const [key, value] of Object.entries(fields)) {
-      const dbKey = key === 'downloadedBytes' ? 'downloaded_bytes' : key;
-      if (allowed.includes(dbKey)) {
-        updates.push(`${dbKey} = ?`);
-        values.push(value);
+      for (const [key, value] of Object.entries(fields)) {
+        const dbKey = key === 'downloadedBytes' ? 'downloaded_bytes' : key;
+        if (allowed.includes(dbKey)) {
+          updates.push(`${dbKey} = ?`);
+          values.push(value);
+        }
       }
+
+      if (updates.length === 0) return;
+
+      values.push(chunkId);
+      this._run(`UPDATE chunks SET ${updates.join(', ')} WHERE id = ?`, values);
+    } catch (err) {
+      console.error('[DB] updateChunk error:', err.message);
+      return { ok: false, error: 'Failed to update chunk' };
     }
-
-    if (updates.length === 0) return;
-
-    values.push(chunkId);
-    this._run(`UPDATE chunks SET ${updates.join(', ')} WHERE id = ?`, values);
   }
 
   getDownloadWithChunks(id) {
-    const download = this.getDownload(id);
-    if (!download) return null;
-    download.chunks = this.getChunks(id);
-    return download;
+    try {
+      const download = this.getDownload(id);
+      if (!download) return null;
+      // If getDownload returned an error object, propagate it
+      if (download.ok === false) return download;
+      download.chunks = this.getChunks(id);
+      return download;
+    } catch (err) {
+      console.error('[DB] getDownloadWithChunks error:', err.message);
+      return { ok: false, error: 'Failed to retrieve download with chunks' };
+    }
   }
 
   //  Settings Operations 
 
   getSetting(key) {
-    const row = this._queryOne('SELECT value FROM settings WHERE key = ?', [key]);
-    return row ? row.value : null;
+    try {
+      const row = this._queryOne('SELECT value FROM settings WHERE key = ?', [key]);
+      return row ? row.value : null;
+    } catch (err) {
+      console.error('[DB] getSetting error:', err.message);
+      return { ok: false, error: 'Failed to retrieve setting' };
+    }
   }
 
   getSettingInt(key, defaultValue = 0) {
-    const val = this.getSetting(key);
-    return val !== null ? parseInt(val, 10) : defaultValue;
+    try {
+      const val = this.getSetting(key);
+      if (val && val.ok === false) return defaultValue;
+      return val !== null ? parseInt(val, 10) : defaultValue;
+    } catch (err) {
+      console.error('[DB] getSettingInt error:', err.message);
+      return defaultValue;
+    }
   }
 
   getAllSettings() {
-    const rows = this._query('SELECT key, value FROM settings');
-    const settings = {};
-    for (const row of rows) {
-      settings[row.key] = row.value;
+    try {
+      const rows = this._query('SELECT key, value FROM settings');
+      const settings = {};
+      for (const row of rows) {
+        settings[row.key] = row.value;
+      }
+      return settings;
+    } catch (err) {
+      console.error('[DB] getAllSettings error:', err.message);
+      return { ok: false, error: 'Failed to retrieve settings' };
     }
-    return settings;
   }
 
   setSetting(key, value) {
-    this._run(
-      "INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES (?, ?, datetime('now'))",
-      [key, String(value)]
-    );
+    try {
+      this._run(
+        "INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES (?, ?, datetime('now'))",
+        [key, String(value)]
+      );
+    } catch (err) {
+      console.error('[DB] setSetting error:', err.message);
+      return { ok: false, error: 'Failed to save setting' };
+    }
   }
 
   updateSettings(settings) {
-    for (const [key, value] of Object.entries(settings)) {
-      this.setSetting(key, value);
+    try {
+      for (const [key, value] of Object.entries(settings)) {
+        this.setSetting(key, value);
+      }
+    } catch (err) {
+      console.error('[DB] updateSettings error:', err.message);
+      return { ok: false, error: 'Failed to update settings' };
     }
   }
 
   //  Statistics 
 
   getStats() {
-    const total = this._queryOne('SELECT COUNT(*) as count FROM downloads');
-    const completed = this._queryOne("SELECT COUNT(*) as count FROM downloads WHERE status = 'completed'");
-    const active = this._queryOne("SELECT COUNT(*) as count FROM downloads WHERE status = 'downloading'");
-    const paused = this._queryOne("SELECT COUNT(*) as count FROM downloads WHERE status = 'paused'");
-    const failed = this._queryOne("SELECT COUNT(*) as count FROM downloads WHERE status = 'failed'");
-    const totalBytes = this._queryOne('SELECT COALESCE(SUM(downloaded), 0) as total FROM downloads');
+    try {
+      const total = this._queryOne('SELECT COUNT(*) as count FROM downloads');
+      const completed = this._queryOne("SELECT COUNT(*) as count FROM downloads WHERE status = 'completed'");
+      const active = this._queryOne("SELECT COUNT(*) as count FROM downloads WHERE status = 'downloading'");
+      const paused = this._queryOne("SELECT COUNT(*) as count FROM downloads WHERE status = 'paused'");
+      const failed = this._queryOne("SELECT COUNT(*) as count FROM downloads WHERE status = 'failed'");
+      const totalBytes = this._queryOne('SELECT COALESCE(SUM(downloaded), 0) as total FROM downloads');
 
-    return {
-      total_downloads: total ? total.count : 0,
-      completed: completed ? completed.count : 0,
-      active: active ? active.count : 0,
-      paused: paused ? paused.count : 0,
-      failed: failed ? failed.count : 0,
-      total_bytes_downloaded: totalBytes ? totalBytes.total : 0,
-    };
+      return {
+        total_downloads: total ? total.count : 0,
+        completed: completed ? completed.count : 0,
+        active: active ? active.count : 0,
+        paused: paused ? paused.count : 0,
+        failed: failed ? failed.count : 0,
+        total_bytes_downloaded: totalBytes ? totalBytes.total : 0,
+      };
+    } catch (err) {
+      console.error('[DB] getStats error:', err.message);
+      return { ok: false, error: 'Failed to retrieve statistics' };
+    }
   }
 
   getResumableDownloads() {
-    const rows = this._query(
-      "SELECT * FROM downloads WHERE status IN ('downloading', 'paused', 'pending')"
-    );
-    return rows.map(row => {
-      row.headers = row.headers ? JSON.parse(row.headers) : null;
-      row.chunks = this.getChunks(row.id);
-      return row;
-    });
+    try {
+      const rows = this._query(
+        "SELECT * FROM downloads WHERE status IN ('downloading', 'paused', 'pending')"
+      );
+      return rows.map(row => {
+        row.headers = row.headers ? JSON.parse(row.headers) : null;
+        row.chunks = this.getChunks(row.id);
+        return row;
+      });
+    } catch (err) {
+      console.error('[DB] getResumableDownloads error:', err.message);
+      return { ok: false, error: 'Failed to retrieve resumable downloads' };
+    }
   }
 
   close() {
-    if (this._saveInterval) {
-      clearInterval(this._saveInterval);
+    try {
+      if (this._saveInterval) {
+        clearInterval(this._saveInterval);
+      }
+      this.save();
+      this.db.close();
+    } catch (err) {
+      console.error('[DB] close error:', err.message);
     }
-    this.save();
-    this.db.close();
   }
 }
 

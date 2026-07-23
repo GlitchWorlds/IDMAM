@@ -67,6 +67,10 @@ class DownloadManager {
 
     // Rolling speed tracking: Map<downloadId, Array<{time, bytes}>>
     this.speedSamples = new Map();
+
+    // Gap 1: Worker health tracking  global worker registry
+    this.activeWorkers = new Map();
+    this._workerIdCounter = 0;
   }
 
   //  Public API 
@@ -248,7 +252,7 @@ class DownloadManager {
     if (!state) {
       // F4: Check DB status for a more specific message
       const dbDownload = this.db.getDownload(downloadId);
-      if (!dbDownload) {
+      if (!dbDownload || dbDownload.ok === false) {
         throw new Error('Download not found');
       }
       if (dbDownload.status === 'paused') {
@@ -312,7 +316,7 @@ class DownloadManager {
 
     // Load state from DB
     const dbDownload = this.db.getDownloadWithChunks(downloadId);
-    if (!dbDownload) throw new Error('Download not found');
+    if (!dbDownload || dbDownload.ok === false) throw new Error('Download not found');
     if (dbDownload.status === 'completed') throw new Error('Download already completed');
 
     // Also try loading from resume state file
@@ -355,8 +359,10 @@ class DownloadManager {
     // F8: Cache chunk DB IDs for resume path
     state.chunkDbIds = {};
     const resumeDbChunks = this.db.getChunks(downloadId);
-    for (const dbc of resumeDbChunks) {
-      state.chunkDbIds[dbc.chunk_index] = dbc.id;
+    if (Array.isArray(resumeDbChunks)) {
+      for (const dbc of resumeDbChunks) {
+        state.chunkDbIds[dbc.chunk_index] = dbc.id;
+      }
     }
 
     this.db.updateDownload(downloadId, { status: 'downloading' });
@@ -432,7 +438,9 @@ class DownloadManager {
     }
 
     const download = this.db.getDownload(downloadId);
-    if (download && deleteFile) {
+    if (download && download.ok === false) {
+      // DB error on getDownload — skip file deletion
+    } else if (download && deleteFile) {
       // Delete the output file if it exists
       const outputPath = path.join(download.save_to, download.filename);
       try {
@@ -467,7 +475,7 @@ class DownloadManager {
 
     // Fall back to DB
     const dbDownload = this.db.getDownloadWithChunks(downloadId);
-    if (!dbDownload) return null;
+    if (!dbDownload || dbDownload.ok === false) return null;
 
     return {
       id: dbDownload.id,
@@ -518,6 +526,27 @@ class DownloadManager {
    */
   getActiveCount() {
     return this.active.size;
+  }
+
+  // Gap 1: Get active worker count across all downloads
+  getActiveWorkerCount() {
+    return this.activeWorkers.size;
+  }
+
+  // Gap 1: Get health snapshot of all tracked workers
+  getWorkerHealth() {
+    const health = [];
+    const now = Date.now();
+    for (const [id, info] of this.activeWorkers) {
+      health.push({
+        workerId: id,
+        downloadId: info.downloadId,
+        chunkIndex: info.chunkIndex,
+        uptimeMs: now - info.startTime,
+        alive: true,
+      });
+    }
+    return health;
   }
 
   //  Internal: Auto Thread Detection 
@@ -670,8 +699,10 @@ class DownloadManager {
     // F8: Cache chunk DB IDs to avoid repeated getChunks() calls on every progress update
     state.chunkDbIds = {};
     const dbChunks = this.db.getChunks(state.id);
-    for (const dbc of dbChunks) {
-      state.chunkDbIds[dbc.chunk_index] = dbc.id;
+    if (Array.isArray(dbChunks)) {
+      for (const dbc of dbChunks) {
+        state.chunkDbIds[dbc.chunk_index] = dbc.id;
+      }
     }
 
     this.resume.saveState(state);
@@ -745,6 +776,15 @@ class DownloadManager {
       },
     });
 
+    // Gap 1: Assign worker ID and register in global health Map
+    const workerId = ++this._workerIdCounter;
+    this.activeWorkers.set(workerId, {
+      worker,
+      downloadId: state.id,
+      chunkIndex: chunk.index,
+      startTime: Date.now(),
+    });
+
     state.workers.push(worker);
 
     worker.on('message', (msg) => {
@@ -755,11 +795,16 @@ class DownloadManager {
       // Worker crashed (not just a download error)
       console.error(`[IDMM] Worker error for chunk ${chunk.index}: ${err.message}`);
       chunk.status = 'failed';
+      // Gap 1: Deregister from global health tracking
+      this.activeWorkers.delete(workerId);
       this._checkCompletion(state);
     });
 
     worker.on('exit', (code) => {
       _globalWorkerSemaphore.release(); // F11: Release global slot
+
+      // Gap 1: Deregister from global health tracking
+      this.activeWorkers.delete(workerId);
 
       // Remove from workers list
       const idx = state.workers.indexOf(worker);
@@ -1071,7 +1116,8 @@ class DownloadManager {
       }];
 
       // Save to DB and resume file
-      if (this.db.getChunks(state.id).length === 0) {
+      const existingChunks = this.db.getChunks(state.id);
+      if (!Array.isArray(existingChunks) || existingChunks.length === 0) {
         this.db.createChunks(state.id, [{
           index: 0,
           start: 0,
@@ -1083,8 +1129,10 @@ class DownloadManager {
       if (!state.chunkDbIds) {
         state.chunkDbIds = {};
         const dbChunks = this.db.getChunks(state.id);
-        for (const dbc of dbChunks) {
-          state.chunkDbIds[dbc.chunk_index] = dbc.id;
+        if (Array.isArray(dbChunks)) {
+          for (const dbc of dbChunks) {
+            state.chunkDbIds[dbc.chunk_index] = dbc.id;
+          }
         }
       }
 

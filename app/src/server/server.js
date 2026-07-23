@@ -57,6 +57,7 @@ class IDMMServer {
     this.server = null;
     this.wss = null;
     this.wsClients = new Set();
+    this.extensionClients = new Map(); // Gap 3: Track extension WS clients with metadata
     this.broadcastTimer = null;
     this._heartbeatTimer = null;
     this.activeUrls = new Set(); // F10: Track URLs currently being downloaded
@@ -155,7 +156,16 @@ class IDMMServer {
         const pkg = require(path.join(__dirname, '..', '..', 'package.json'));
         serverVersion = pkg.version || serverVersion;
       } catch { /* use fallback */ }
-      res.json({ status: 'ok', version: serverVersion, uptime: process.uptime() });
+
+      // Gap 3: Include connected clients count in health response
+      const connectedClients = this.extensionClients.size;
+
+      res.json({
+        status: 'ok',
+        version: serverVersion,
+        uptime: process.uptime(),
+        connected_clients: connectedClients,
+      });
     });
 
     // POST /api/download  Start a new download
@@ -196,7 +206,8 @@ class IDMMServer {
 
         // F1: Path traversal protection  validate save_to against allowed roots
         {
-          const defaultSavePath = this.db.getSetting('default_save_path') || '';
+          const defaultSavePathSetting = this.db.getSetting('default_save_path');
+          const defaultSavePath = defaultSavePathSetting && defaultSavePathSetting.ok === false ? '' : (defaultSavePathSetting || '');
           const allowedRoots = new Set();
           if (defaultSavePath) allowedRoots.add(path.resolve(defaultSavePath));
           try {
@@ -220,7 +231,8 @@ class IDMMServer {
         }
 
         // Check concurrent download limit
-        const maxConcurrent = parseInt(this.db.getSetting('max_concurrent_downloads') || '5', 10);
+        const maxSetting = this.db.getSetting('max_concurrent_downloads');
+        const maxConcurrent = parseInt(maxSetting && maxSetting.ok === false ? '5' : (maxSetting || '5'), 10);
         if (this.downloader.getActiveCount() >= maxConcurrent) {
           return res.status(429).json({
             error: `Maximum concurrent downloads reached (${maxConcurrent})`,
@@ -261,6 +273,9 @@ class IDMMServer {
       try {
         const { status } = req.query;
         const downloads = this.db.listDownloads(status);
+        if (!Array.isArray(downloads)) {
+          return res.status(500).json({ error: downloads.error || 'Failed to list downloads' });
+        }
 
         // Enrich active downloads with real-time state
         const enriched = downloads.map(d => {
@@ -362,6 +377,9 @@ class IDMMServer {
     this.app.get('/api/settings', (req, res) => {
       try {
         const settings = this.db.getAllSettings();
+        if (!settings.ok) {
+          return res.status(500).json({ error: settings.error || 'Failed to load settings' });
+        }
         res.json(settings);
       } catch (err) {
         res.status(500).json({ error: sanitizeError(err) });
@@ -400,9 +418,10 @@ class IDMMServer {
 
         // Broadcast settings change to all connected clients (extension sync)
         if (Object.keys(filtered).length > 0) {
+          const broadcastSettings = this.db.getAllSettings();
           this.broadcast({
             type: 'SETTINGS_CHANGED',
-            settings: this.db.getAllSettings(),
+            settings: broadcastSettings && broadcastSettings.ok === false ? {} : broadcastSettings,
           });
         }
 
@@ -451,6 +470,9 @@ class IDMMServer {
     this.app.get('/api/stats', (req, res) => {
       try {
         const stats = this.db.getStats();
+        if (!stats.ok) {
+          return res.status(500).json({ error: stats.error || 'Failed to load stats' });
+        }
         res.json(stats);
       } catch (err) {
         res.status(500).json({ error: sanitizeError(err) });
@@ -464,18 +486,35 @@ class IDMMServer {
     // F6: Set maxPayload to prevent memory abuse from huge messages
     this.wss = new WebSocketServer({ server: this.server, path: '/ws', maxPayload: 64 * 1024 });
 
-    // F7: Heartbeat  terminate dead connections every 30s
+    // Gap 3: Heartbeat every 15s, drop clients unresponsive for 10s+ (no pong response)
     this._heartbeatTimer = setInterval(() => {
-      for (const ws of this.wsClients) {
+      const now = Date.now();
+      for (const [ws, info] of this.extensionClients) {
+        // If we marked isAlive=false on previous ping and still no pong, drop
         if (ws.isAlive === false) {
+          this.extensionClients.delete(ws);
           this.wsClients.delete(ws);
           ws.terminate();
+          debugLog(`[WS] Client dropped (no pong) (total: ${this.extensionClients.size})`);
           continue;
         }
         ws.isAlive = false;
         ws.ping();
       }
-    }, 30000);
+
+      // Also clean stale entries from wsClients Set that may not be in extensionClients
+      for (const ws of this.wsClients) {
+        if (!this.extensionClients.has(ws)) {
+          if (ws.isAlive === false) {
+            this.wsClients.delete(ws);
+            ws.terminate();
+            continue;
+          }
+          ws.isAlive = false;
+          ws.ping();
+        }
+      }
+    }, 15000);
 
     this.wss.on('connection', (ws, req) => {
       // Verify origin
@@ -485,18 +524,26 @@ class IDMMServer {
         return;
       }
 
-      ws.isAlive = true; // F7: Mark alive on connect
-      ws.on('pong', () => { ws.isAlive = true; }); // F7: Refresh on pong
+      // Gap 3: Register with timestamp in extensionClients Map
+      const clientInfo = { connectedAt: Date.now(), lastActivity: Date.now() };
+      ws.isAlive = true;
+      ws.on('pong', () => {
+        ws.isAlive = true;
+        clientInfo.lastActivity = Date.now();
+      });
 
       this.wsClients.add(ws);
-      debugLog(`[WS] Client connected (total: ${this.wsClients.size})`);
+      this.extensionClients.set(ws, clientInfo);
+      debugLog(`[WS] Client connected (total: ${this.extensionClients.size})`);
 
       ws.on('close', () => {
+        this.extensionClients.delete(ws);
         this.wsClients.delete(ws);
-        debugLog(`[WS] Client disconnected (total: ${this.wsClients.size})`);
+        debugLog(`[WS] Client disconnected (total: ${this.extensionClients.size})`);
       });
 
       ws.on('error', () => {
+        this.extensionClients.delete(ws);
         this.wsClients.delete(ws);
       });
 
