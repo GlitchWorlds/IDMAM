@@ -17,6 +17,16 @@ const DEBUG = process.env.IDMM_DEBUG === '1' || process.env.DEBUG === 'idmm';
 const debugLog = DEBUG ? console.log.bind(console) : () => {};
 
 /**
+ * Download priority levels.
+ * Lower numeric value = higher priority.
+ */
+const Priority = Object.freeze({
+  HIGH: 1,
+  NORMAL: 2,
+  LOW: 3,
+});
+
+/**
  * IDMM Core Download Manager.
  *
  * Orchestrates multi-threaded chunk downloads via worker threads.
@@ -71,6 +81,9 @@ class DownloadManager {
     // Gap 1: Worker health tracking  global worker registry
     this.activeWorkers = new Map();
     this._workerIdCounter = 0;
+
+    // Gap 5: Download queue with priority system
+    this.queue = []; // [{ id, priority, addedAt }]
   }
 
   //  Public API 
@@ -98,6 +111,7 @@ class DownloadManager {
       cookies,
       referrer,
       headers: extraHeaders = {},
+      priority: requestedPriority,
     } = params;
 
     if (!url) throw new Error('URL is required');
@@ -178,6 +192,10 @@ class DownloadManager {
 
     this.db.createDownload(download);
 
+    // Gap 5: Add to priority queue
+    const priority = (requestedPriority in Priority) ? requestedPriority : Priority.NORMAL;
+    this.queue.push({ id: downloadId, priority, addedAt: Date.now() });
+
     // Step 4: Set up temp directory for chunks
     const downloadTempDir = this.resume.getDownloadTempDir(downloadId);
     if (!fs.existsSync(downloadTempDir)) {
@@ -208,6 +226,7 @@ class DownloadManager {
       noRangeSupport: false,
       speedLimit: (parseInt(this.settings.speed_limit_global, 10) || 0) * 1024, // KB/s  bytes/s
       _throttleCount: 0, // Track consecutive 429/ECONNRESET events
+      priority, // Gap 5: Queue priority
     };
 
     this.active.set(downloadId, state);
@@ -422,6 +441,7 @@ class DownloadManager {
 
     // Update DB status
     this.db.updateDownload(downloadId, { status: 'cancelled' });
+    this._dequeue(downloadId); // Gap 5: Remove from priority queue
 
     return { id: downloadId, status: 'cancelled' };
   }
@@ -457,6 +477,7 @@ class DownloadManager {
 
     // Remove from DB
     this.db.deleteDownload(downloadId);
+    this._dequeue(downloadId); // Gap 5: Remove from priority queue
 
     return { id: downloadId, deleted: true, fileDeleted: deleteFile };
   }
@@ -547,6 +568,50 @@ class DownloadManager {
       });
     }
     return health;
+  }
+
+  // Gap 5: Priority Queue Methods
+
+  /**
+   * Set priority for a download. Affects queue ordering for next spawns.
+   * @param {string} downloadId
+   * @param {number} priority - One of Priority.HIGH (1), Priority.NORMAL (2), Priority.LOW (3)
+   */
+  setPriority(downloadId, priority) {
+    if (!(priority in Priority)) {
+      throw new Error(`Invalid priority: ${priority}. Use Priority.HIGH, Priority.NORMAL, or Priority.LOW.`);
+    }
+    const entry = this.queue.find(e => e.id === downloadId);
+    if (entry) {
+      entry.priority = priority;
+    }
+    // Update in-memory state if active
+    const state = this.active.get(downloadId);
+    if (state) {
+      state.priority = priority;
+    }
+  }
+
+  /**
+   * Get the download queue sorted by priority (HIGH first, then NORMAL, then LOW).
+   * Within same priority, oldest first (FIFO).
+   * @returns {Array<{id: string, priority: number, addedAt: number}>}
+   */
+  getQueue() {
+    return [...this.queue].sort((a, b) => {
+      if (a.priority !== b.priority) return a.priority - b.priority;
+      return a.addedAt - b.addedAt;
+    });
+  }
+
+  /**
+   * Remove a download from the priority queue.
+   * @param {string} downloadId
+   * @private
+   */
+  _dequeue(downloadId) {
+    const idx = this.queue.findIndex(e => e.id === downloadId);
+    if (idx !== -1) this.queue.splice(idx, 1);
   }
 
   //  Internal: Auto Thread Detection 
@@ -715,8 +780,10 @@ class DownloadManager {
    * Spawn worker threads for each pending/incomplete chunk.
    */
   _spawnWorkers(state, opts) {
-    for (const chunk of state.chunks) {
-      if (chunk.status === 'done' || chunk.status === 'completed') continue;
+    // Gap 5: Sort chunks by priority (this download's queue position)
+    const pendingChunks = state.chunks.filter(c => c.status !== 'done' && c.status !== 'completed');
+
+    for (const chunk of pendingChunks) {
 
       const chunkPath = this.resume.getChunkPath(state.id, chunk.index);
 
@@ -1441,6 +1508,7 @@ class DownloadManager {
       thread_mode: state.threadMode || null,
       throttle_count: state._throttleCount || 0,
       active_threads: state.workers.filter(w => w && !w.exited).length,
+      priority: state.priority || Priority.NORMAL, // Gap 5
       chunks: state.chunks.map(c => ({
         index: c.index,
         progress: c.end > c.start
@@ -1457,4 +1525,6 @@ class DownloadManager {
 }
 
 module.exports = DownloadManager;
+module.exports.Priority = Priority;
+module.exports.DownloadManager = DownloadManager;
 

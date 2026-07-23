@@ -27,3 +27,32 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   return true; // Keep message channel open for async response
 });
 
+// --- Gap 3: Proactive content → background communication ---
+// Send page metadata to background.js so it can detect downloadable content.
+(function _reportPageMetadata() {
+  try {
+    const metadata = {
+      type: 'PAGE_METADATA',
+      pageTitle: document.title || '',
+      pageUrl: window.location.href || '',
+      contentLength: document.documentElement?.innerHTML?.length || 0,
+      // Collect all <a> hrefs that look like direct download links
+      downloadLinks: Array.from(document.querySelectorAll('a[href]'))
+        .map(a => ({ url: a.href, text: (a.textContent || '').trim() }))
+        .filter(l => l.url.startsWith('http'))
+        .slice(0, 50), // Cap at 50 to avoid huge payloads
+      // Collect media elements (video/audio src)
+      mediaUrls: [
+        ...Array.from(document.querySelectorAll('video[src], video source[src]'))
+          .map(el => el.src),
+        ...Array.from(document.querySelectorAll('audio[src], audio source[src]'))
+          .map(el => el.src),
+      ].filter(u => u && u.startsWith('http')),
+    };
+
+    chrome.runtime.sendMessage(metadata);
+  } catch {
+    // Content script context may be invalidated on navigation
+  }
+})();
+

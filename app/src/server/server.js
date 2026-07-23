@@ -549,12 +549,10 @@ class IDMMServer {
 
       // Send initial state
       const states = this.downloader.getActiveStates();
-      if (states.length > 0) {
-        ws.send(JSON.stringify({
-          type: 'init',
-          downloads: states,
-        }));
-      }
+      ws.send(JSON.stringify({
+        type: 'init',
+        downloads: states,
+      }));
     });
 
     // Broadcast progress every 500ms

@@ -294,6 +294,30 @@ async function pollDownloads() {
 //  Message Handlers (popup & options communication) 
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  // Gap 3: Handle messages from content scripts (PAGE_METADATA)
+  if (message && message.type === 'PAGE_METADATA') {
+    // Log page metadata from content script
+    console.log(
+      `[IDMM] Content script metadata: ${message.pageTitle}`,
+      `(${message.downloadLinks?.length || 0} links, ${message.mediaUrls?.length || 0} media)`
+    );
+
+    // If the page has media URLs, log them for potential interception
+    if (message.mediaUrls && message.mediaUrls.length > 0) {
+      console.log('[IDMM] Media URLs detected:', message.mediaUrls);
+    }
+
+    // If the server is online and there are download links, we could
+    // optionally surface them (future: auto-intercept on page load)
+    if (serverOnline && message.downloadLinks && message.downloadLinks.length > 0) {
+      console.log(`[IDMM] ${message.downloadLinks.length} download link(s) available on page`);
+    }
+
+    // ACK to content script (no response needed but clean protocol)
+    sendResponse({ ok: true });
+    return;
+  }
+
   // Handle async  return true to keep message channel open
   (async () => {
     switch (message.type) {

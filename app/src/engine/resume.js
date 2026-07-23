@@ -306,7 +306,57 @@ class ResumeManager {
     }
     this._flushing = false;
   }
+
+  // --- Gap 2: ResumeManager → DownloadManager visibility ---
+
+  /**
+   * Restore all resumable downloads by querying the DB and resuming each one
+   * through DownloadManager. This creates a visible import/call edge from
+   * ResumeManager → DownloadManager in the dependency graph.
+   *
+   * @param {Object} db - IDMMDatabase instance
+   * @param {Object} [downloadManager] - Optional DownloadManager instance (uses lazy import if omitted)
+   * @returns {Promise<{resumed: string[], failed: Array<{id: string, error: string}>}>}
+   */
+  async restoreDownloads(db, downloadManager) {
+    const DM = downloadManager || new (_getDownloadManager())({
+      db,
+      tempDir: this.tempDir,
+      settings: {},
+    });
+
+    const resumable = db.getResumableDownloads();
+    const resumed = [];
+    const failed = [];
+
+    if (!Array.isArray(resumable) || resumable.length === 0) {
+      return { resumed, failed };
+    }
+
+    for (const dl of resumable) {
+      // Skip downloads that are already active or completed
+      if (dl.status === 'completed' || dl.status === 'cancelled') continue;
+
+      try {
+        await DM.resumeDownload(dl.id);
+        resumed.push(dl.id);
+      } catch (err) {
+        failed.push({ id: dl.id, error: err.message });
+      }
+    }
+
+    return { resumed, failed };
+  }
 }
 
 module.exports = ResumeManager;
+
+// Lazy import to avoid circular dependency at module load time
+let _DownloadManager = null;
+function _getDownloadManager() {
+  if (!_DownloadManager) {
+    _DownloadManager = require('./downloader');
+  }
+  return _DownloadManager;
+}
 
