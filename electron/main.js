@@ -62,6 +62,22 @@ async function startServer() {
   });
   server = new IDMMServer({ db, downloader });
   await server.start();
+
+  // WP-5: Wire onComplete callback — same pattern as app/main.js
+  // Save server's handler (set in server.start()), then chain our logging + broadcast
+  const serverOnComplete = downloader.onComplete;
+  const formatBytes = (bytes) => {
+    if (!bytes || bytes === 0) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${units[i]}`;
+  };
+  downloader.onComplete = (downloadId, result) => {
+    console.log(`[IDMM] ✓ Download completed: ${result.filename} (${formatBytes(result.total_size)} in ${result.duration}s)`);
+    serverOnComplete(downloadId, result);
+    server.broadcast({ type: 'status', id: downloadId, status: 'completed' });
+  };
+
   console.log('[IDMM] Server ready on http://127.0.0.1:9977');
 }
 

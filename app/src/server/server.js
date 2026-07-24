@@ -317,9 +317,9 @@ class IDMMServer {
     });
 
     // POST /api/download/:id/pause  Pause download
-    this.app.post('/api/download/:id/pause', (req, res) => {
+    this.app.post('/api/download/:id/pause', async (req, res) => {
       try {
-        const result = this.downloader.pauseDownload(req.params.id);
+        const result = await this.downloader.pauseDownload(req.params.id);
         this.broadcast({ type: 'status', id: req.params.id, status: 'paused' });
         res.json(result);
       } catch (err) {
@@ -343,11 +343,11 @@ class IDMMServer {
     });
 
     // POST /api/download/:id/cancel  Cancel download
-    this.app.post('/api/download/:id/cancel', (req, res) => {
+    this.app.post('/api/download/:id/cancel', async (req, res) => {
       try {
-        const result = this.downloader.cancelDownload(req.params.id);
+        const result = await this.downloader.cancelDownload(req.params.id);
         this._removeActiveUrl(req.params.id);
-        this.broadcast({ type: 'status', id: req.params.id, status: 'failed' });
+        this.broadcast({ type: 'status', id: req.params.id, status: 'cancelled' });
         res.json(result);
       } catch (err) {
         res.status(500).json({ error: sanitizeError(err) });
@@ -355,10 +355,10 @@ class IDMMServer {
     });
 
     // DELETE /api/download/:id  Delete download (and optionally file)
-    this.app.delete('/api/download/:id', (req, res) => {
+    this.app.delete('/api/download/:id', async (req, res) => {
       try {
         const deleteFile = req.query.delete_file === 'true';
-        const result = this.downloader.deleteDownload(req.params.id, deleteFile);
+        const result = await this.downloader.deleteDownload(req.params.id, deleteFile);
         this._removeActiveUrl(req.params.id);
         this.broadcast({ type: 'removed', id: req.params.id });
         res.json(result);
@@ -655,28 +655,25 @@ class IDMMServer {
       }));
     });
 
-    // Broadcast progress every 500ms
+    // Broadcast progress every 500ms — batch all active states into ONE message
     this.broadcastTimer = setInterval(() => {
       if (this.wsClients.size === 0) return;
 
       const states = this.downloader.getActiveStates();
       if (states.length === 0) return;
 
-      // Send individual progress per download (matches desktop UI format)
-      for (const state of states) {
-        const message = JSON.stringify({
-          type: 'progress',
-          id: state.id,
-          data: state,
-        });
+      // WP-8 + E-4: Serialize once, send raw string to all clients
+      const msg = JSON.stringify({
+        type: 'progress',
+        downloads: states,
+      });
 
-        for (const client of this.wsClients) {
-          if (client.readyState === 1) {
-            try {
-              client.send(message);
-            } catch {
-              this.wsClients.delete(client);
-            }
+      for (const client of this.wsClients) {
+        if (client.readyState === 1) {
+          try {
+            client.send(msg);
+          } catch {
+            this.wsClients.delete(client);
           }
         }
       }

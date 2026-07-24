@@ -34,16 +34,28 @@ export default function App() {
 
   const handleWsMessage = useCallback((msg) => {
     if (msg.type === 'progress') {
-      setDownloads((prev) =>
-        prev.map((d) =>
-          d.id === msg.id ? { ...d, ...msg.data } : d
-        )
-      );
-      setSpeedHistory((prev) => {
-        const now = Date.now();
-        const next = [...prev, { time: now, speed: msg.data.speed || 0 }];
-        return next.slice(-60);
-      });
+      // WP-8: Batched format — { type: 'progress', downloads: [...] }
+      if (msg.downloads && Array.isArray(msg.downloads)) {
+        setDownloads((prev) => {
+          const updates = new Map(msg.downloads.map((d) => [d.id, d]));
+          const updated = prev.map((d) =>
+            updates.has(d.id) ? { ...d, ...updates.get(d.id) } : d
+          );
+          // Add any new downloads not yet in state
+          const existingIds = new Set(prev.map((d) => d.id));
+          for (const d of msg.downloads) {
+            if (!existingIds.has(d.id)) updated.push(d);
+          }
+          return updated;
+        });
+        // Update speed history from the batch
+        setSpeedHistory((prev) => {
+          const now = Date.now();
+          const totalSpeed = msg.downloads.reduce((sum, d) => sum + (d.speed || 0), 0);
+          const next = [...prev, { time: now, speed: totalSpeed }];
+          return next.slice(-60);
+        });
+      }
     } else if (msg.type === 'status') {
       setDownloads((prev) =>
         prev.map((d) =>
@@ -57,17 +69,24 @@ export default function App() {
     }
   }, []);
 
-  useWebSocket(handleWsMessage);
+  const { connected } = useWebSocket(handleWsMessage);
 
+  // E-5: WebSocket is authoritative. Poll only as fallback every 10s when WS disconnected.
   useEffect(() => {
+    // Initial load always fetches
     getDownloads().then(setDownloads).catch(console.error);
     getStats().then(setStats).catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    if (connected) return; // WS connected — no polling needed
+
     const interval = setInterval(() => {
       getDownloads().then(setDownloads).catch(() => {});
       getStats().then(setStats).catch(() => {});
-    }, 3000);
+    }, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [connected]);
 
   const filtered = downloads.filter((d) => {
     if (search && !d.filename?.toLowerCase().includes(search.toLowerCase()) &&
