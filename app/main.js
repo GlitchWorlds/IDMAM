@@ -130,9 +130,13 @@ async function main() {
 
   // Wire up completion broadcast  must be AFTER server.start() because
   // server.start() overrides downloader.onComplete with its own handler.
-  const origOnComplete = downloader.onComplete;
+  const serverOnComplete = downloader.onComplete;
+  const mainOnComplete = (downloadId, result) => {
+    console.log(`[IDMM]  Download completed: ${result.filename} (${formatBytes(result.total_size)} in ${result.duration}s)`);
+  };
   downloader.onComplete = (downloadId, result) => {
-    origOnComplete(downloadId, result);
+    mainOnComplete(downloadId, result);
+    serverOnComplete(downloadId, result);
     server.broadcast({ type: 'status', id: downloadId, status: 'completed' });
   };
 

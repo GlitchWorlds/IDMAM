@@ -47,32 +47,8 @@ function hashString(data) {
   return crypto.createHash('sha256').update(data).digest('hex');
 }
 
-/**
- * Compute SHA-256 hash of a buffer.
- * @param {Buffer} buffer - Input buffer
- * @returns {string} Hex-encoded SHA-256 hash
- */
-function hashBuffer(buffer) {
-  return crypto.createHash('sha256').update(buffer).digest('hex');
-}
-
-/**
- * Create a streaming hash calculator.
- * Returns an object with update() and digest() methods.
- * @returns {{ update: (chunk: Buffer) => void, digest: () => string }}
- */
-function createHasher() {
-  const hash = crypto.createHash('sha256');
-  return {
-    update: (chunk) => hash.update(chunk),
-    digest: () => hash.digest('hex'),
-  };
-}
-
 module.exports = {
   hashFile,
   verifyFile,
   hashString,
-  hashBuffer,
-  createHasher,
 };

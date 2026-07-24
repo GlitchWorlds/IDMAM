@@ -11,10 +11,10 @@ const ResumeManager = require('./resume');
 const SpeedTracker = require('./speed-tracker');
 const WorkerPool = require('./worker-pool');
 const DownloadQueue = require('./download-queue');
-const { mergeAndVerify, cleanupChunks } = require('./merge');
+const { mergeAndVerify } = require('./merge');
 const { resolveFilename, ensureUniqueFilename } = require('../utils/filename');
 const { detectMime, resolveCategory } = require('../utils/mime');
-const { hashString } = require('../utils/hash');
+
 const { validateRedirect, validateDnsResolution } = require('../utils/ssrf');
 
 const DEBUG = process.env.IDMM_DEBUG === '1' || process.env.DEBUG === 'idmm';
@@ -510,12 +510,12 @@ class DownloadManager {
       status: dbDownload.data.status,
       total_size: dbDownload.data.total_size,
       downloaded: dbDownload.data.downloaded,
-      progress: dbDownload.total_size > 0
-        ? Math.round((dbDownload.downloaded / dbDownload.total_size) * 10000) / 100
+      progress: dbDownload.data.total_size > 0
+        ? Math.round((dbDownload.data.downloaded / dbDownload.data.total_size) * 10000) / 100
         : 0,
       speed: 0,
       eta: 0,
-      threads: dbDownload.threads,
+      threads: dbDownload.data.threads,
       active_threads: 0,
       chunks: (dbDownload.data.chunks || []).map(c => ({
         index: c.chunk_index,
@@ -583,7 +583,8 @@ class DownloadManager {
   }
 
   /**
-   * Fix #7: Process the download queue. Start next pending if slots available.
+   * Process the download queue. Start next pending download if slots available.
+   * Called after download completion/cancellation to pick up queued items.
    * @private
    */
   _processQueue() {
@@ -592,8 +593,10 @@ class DownloadManager {
       const entry = this.queue.next();
       if (!entry) break;
       if (this.active.has(entry.id)) continue;
-      // Download was already started by startDownload() if under limit.
-      // _processQueue is a safety net for edge cases.
+      // Start the queued download that wasn't yet activated
+      this.resumeDownload(entry.id).catch(err => {
+        console.error(`[IDMM] Queue processing failed for ${entry.id}: ${err.message}`);
+      });
     }
   }
 

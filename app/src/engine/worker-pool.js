@@ -1,8 +1,5 @@
 'use strict';
 
-const { Worker } = require('node:worker_threads');
-const path = require('node:path');
-
 /**
  * WorkerPool — Global worker concurrency management with health tracking.
  * Extracted from DownloadManager (Fix #1: Decomposition).
@@ -49,66 +46,10 @@ class WorkerPool {
     }
   }
 
-  /**
-   * Spawn a worker thread for a chunk download.
-   * @param {Object} state — Download state
-   * @param {Object} chunk — Chunk descriptor
-   * @param {string} chunkPath — Path to .part file
-   * @param {Object} opts — { requestHeaders, timeoutMs, retryCount, speedLimit }
-   * @param {string} workerScript — Path to chunk-worker.js
-   * @returns {Object} The spawned Worker instance
-   */
-  spawnWorker(state, chunk, chunkPath, opts, workerScript) {
-    const worker = new Worker(workerScript, {
-      workerData: {
-        url: state.url,
-        start: chunk.start,
-        end: chunk.end,
-        filePath: chunkPath,
-        headers: opts.requestHeaders,
-        timeout: opts.timeoutMs,
-        maxRetries: opts.retryCount,
-        chunkIndex: chunk.index,
-        downloadId: state.id,
-        speedLimit: opts.speedLimit || 0,
-      },
-    });
-
-    const workerId = ++this._workerIdCounter;
-    this.activeWorkers.set(workerId, {
-      worker,
-      downloadId: state.id,
-      chunkIndex: chunk.index,
-      startTime: Date.now(),
-    });
-
-    worker._workerId = workerId;
-    state.workers.push(worker);
-    return worker;
-  }
-
-  /**
-   * Terminate all workers for a download.
-   * @param {Object} state — Download state
-   */
-  cancelAll(state) {
-    for (const worker of state.workers) {
-      if (worker && !worker.exited) {
-        worker.terminate();
-      }
-    }
-    state.workers = [];
-  }
-
-  /**
-   * Deregister a worker from the health map.
-   * @param {Object} worker
-   */
-  deregister(worker) {
-    if (worker._workerId) {
-      this.activeWorkers.delete(worker._workerId);
-    }
-  }
+  // spawnWorker, cancelAll, deregister removed 2025-01 (dead code).
+  // DownloadManager handles worker spawning/termination directly via
+  // _spawnWorkerAsync and _cancelAllWorkers. WorkerPool now only tracks
+  // health and active count.
 
   /**
    * Get health snapshot of all active workers.

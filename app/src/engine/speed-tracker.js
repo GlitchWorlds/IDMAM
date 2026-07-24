@@ -13,6 +13,7 @@ class SpeedTracker {
 
   /**
    * Add a speed sample for a download.
+   * Called by DownloadManager._handleWorkerMessage and _doSingleStream.
    * @param {string} downloadId
    * @param {number} bytes — bytes received in this sample
    */
@@ -38,27 +39,6 @@ class SpeedTracker {
     const totalBytes = samples.reduce((sum, s) => sum + s.bytes, 0);
     const timeSpan = (samples[samples.length - 1].time - samples[0].time) / 1000;
     return timeSpan > 0 ? totalBytes / timeSpan : 0;
-  }
-
-  /**
-   * Recalculate speed + ETA on a download state object.
-   * @param {Object} state — Download state (mutated in-place)
-   */
-  _recalc(state) {
-    const samples = this.samples.get(state.id) || [];
-    if (samples.length >= 2) {
-      const totalBytes = samples.reduce((sum, s) => sum + s.bytes, 0);
-      const timeSpan = (samples[samples.length - 1].time - samples[0].time) / 1000;
-      if (timeSpan > 0) {
-        state.speed = totalBytes / timeSpan;
-      }
-    }
-
-    // ETA
-    if (state.speed > 0 && state.totalSize > 0) {
-      const remaining = state.totalSize - state.downloaded;
-      state.eta = Math.ceil(remaining / state.speed);
-    }
   }
 
   /**

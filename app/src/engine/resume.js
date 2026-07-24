@@ -294,42 +294,11 @@ class ResumeManager {
     this._flushing = false;
   }
 
-  // ── Gap 2: ResumeManager → DownloadManager visibility ──
-
-  /**
-   * Restore all resumable downloads by querying the DB and resuming each one
-   * through DownloadManager. This creates a visible import/call edge from
-   * ResumeManager → DownloadManager in the dependency graph.
-   *
-   * @param {Object} db - IDMMDatabase instance
-   * @param {Object} downloadManager - DownloadManager instance (REQUIRED)
-   * @returns {Promise<{resumed: string[], failed: Array<{id: string, error: string}>}>}
-   */
-  async restoreDownloads(db, downloadManager) {
-    if (!downloadManager) throw new Error('downloadManager is required');
-
-    const resumableResult = db.getResumableDownloads();
-    if (!resumableResult.ok) {
-      return { resumed: [], failed: [{ id: 'N/A', error: resumableResult.error }] };
-    }
-
-    const resumable = resumableResult.data || [];
-    const resumed = [];
-    const failed = [];
-
-    for (const dl of resumable) {
-      if (dl.status === 'completed' || dl.status === 'cancelled') continue;
-
-      try {
-        await downloadManager.resumeDownload(dl.id);
-        resumed.push(dl.id);
-      } catch (err) {
-        failed.push({ id: dl.id, error: err.message });
-      }
-    }
-
-    return { resumed, failed };
-  }
+  // restoreDownloads() removed 2025-01. Auto-resume is handled inline in main.js
+  // because the inline approach has direct access to the downloader instance
+  // and settings without circular dependency injection.
+  // Previous implementation required passing downloadManager into ResumeManager
+  // which created a tight coupling. Use main.js auto-resume logic instead.
 }
 
 module.exports = ResumeManager;
